@@ -1,0 +1,67 @@
+# Packaged Skills
+*.zip
+
+# Personal Configuration
+.claude/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Environment Variables
+.env
+.env.local
+
+# Temporary Files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Coverage Reports
+.coverage
+htmlcov/
+*.cover
+
+# Distribution / Build
+dist/
+build/
+*.egg
+
+# Editor Backup Files
+*.bak
+*.orig
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Documentation Build
+docs/_build/
+site/

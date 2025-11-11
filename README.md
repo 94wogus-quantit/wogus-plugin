@@ -53,16 +53,18 @@
 
 **주요 기능:**
 - TodoList 자동 생성 및 진행 추적
-- 8단계 체계적 실행 프로세스 (로드 → 검증 → 실행 → 테스트 → 문서화 → README 업데이트 → 파일 정리 → 요약)
+- 7단계 체계적 실행 프로세스 (로드 → TodoList 설정 → 실행 → 테스트 → 문서화 → 검증/정리 → 요약)
 - 자동 테스트 실행 및 검증
-- 프로젝트 README 자동 업데이트
+- 코드 문서화 및 Serena 메모리 저장
 - 계획/리포트 파일 자동 정리
 
 **사용 시점:**
 - 승인된 `*_PLAN.md` 파일 실행 시
 - 체계적인 진행 추적이 필요할 때
 - 모든 성공 기준 검증이 필요할 때
-- 자동 문서화 및 정리가 필요할 때
+- 코드 구현에 집중하고 싶을 때
+
+**Note**: README 업데이트는 `document` 스킬에서 처리합니다.
 
 **설치:**
 ```bash
@@ -76,16 +78,17 @@
 
 **주요 기능:**
 - 8단계 체계적 문서화 프로세스
-- README, CHANGELOG, CLAUDE 문서 자동 업데이트
+- **README, CHANGELOG, CLAUDE 문서 자동 업데이트**
 - Serena 메모리에 기술 인사이트 저장
 - 워크플로우 아티팩트 아카이브/정리
 - Keep a Changelog 형식 준수
 
 **사용 시점:**
-- `execute-plan` 완료 후 추가 문서화가 필요한 경우
-- CHANGELOG 업데이트가 필요한 경우
+- **`execute-plan` 완료 후 반드시 실행** (README/CHANGELOG 업데이트)
+- 프로젝트 문서화가 필요한 경우
 - 아키텍처 결정사항 문서화 시
 - 마이그레이션 가이드 생성 시
+- git commit 전 최종 문서화
 
 **설치:**
 ```bash
@@ -99,10 +102,10 @@ analyze-issue
   → *_REPORT.md 생성
   → plan-builder (자동 반복 검토)
     └─> *_PLAN.md (승인된 계획)
-  → execute-plan (자동 실행 및 기본 문서화)
-    └─> README 업데이트, 파일 정리
-  → document (선택적: 추가 문서화)
-    └─> CHANGELOG, CLAUDE 문서, Serena 메모리
+  → execute-plan (코드 구현 및 테스트)
+    └─> 구현 완료, 코드 문서화, 파일 정리
+  → document (필수: 프로젝트 문서화)
+    └─> README, CHANGELOG, CLAUDE 문서, Serena 메모리
 ```
 
 ## 🔧 Custom Commands
@@ -154,14 +157,15 @@ analyze-issue
 
 3. execute-plan [PLAN]
    └─> TodoList 생성 및 실행
-   └─> 자동 테스트 및 검증
-   └─> README 자동 업데이트
+   └─> 코드 구현 및 테스트
+   └─> 코드 문서화 (inline comments, JSDoc 등)
    └─> 계획/리포트 파일 자동 정리
 
-4. document (선택적)
-   └─> CHANGELOG 업데이트
-   └─> CLAUDE 문서 업데이트
-   └─> Serena 메모리 저장
+4. document (필수)
+   └─> README 업데이트 (기능, API, 설정 등)
+   └─> CHANGELOG 업데이트 (변경 이력)
+   └─> CLAUDE 문서 업데이트 (아키텍처 결정사항)
+   └─> Serena 메모리 저장 (기술 인사이트)
    └─> 추가 문서 생성 (마이그레이션 가이드 등)
 ```
 
@@ -188,6 +192,8 @@ analyze-issue
 ```
 
 **권장**: Skills를 사용하는 기본 워크플로우가 더 자동화되어 있고 고품질을 보장합니다.
+
+**중요**: `execute-plan`은 코드 구현에, `document`는 문서화에 집중하도록 역할이 분리되어 있습니다. 둘 다 실행해야 완전한 워크플로우가 완성됩니다.
 
 ## 🚀 Getting Started
 

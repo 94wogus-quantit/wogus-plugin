@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: Systematically execute approved implementation plans by managing task flow, tracking progress with TodoList, running tests, and ensuring all success criteria are met. Automatically updates project documentation and cleans up plan/report files after verification. Use this skill when you have an approved plan file (e.g., *_PLAN.md) and need to implement it step-by-step with comprehensive tracking and verification.
+description: Systematically execute approved implementation plans by managing task flow, tracking progress with TodoList, running tests, and ensuring all success criteria are met. Cleans up plan/report files after verification. Use this skill when you have an approved plan file (e.g., *_PLAN.md) and need to implement it step-by-step with comprehensive tracking and verification. README updates are handled by the 'document' skill.
 ---
 
 # Execute Plan
@@ -13,7 +13,6 @@ Use this skill when:
 - Need to systematically implement multiple related tasks
 - Want automatic progress tracking with TodoList
 - Need to ensure all success criteria and tests are verified
-- Want project documentation automatically updated after implementation
 
 **Typical Workflow Position**:
 ```
@@ -22,20 +21,21 @@ analyze-issue → plan-builder → **execute-plan** → document
 
 ## Overview
 
-This skill executes approved implementation plans through an 8-phase systematic process:
+This skill executes approved implementation plans through a 7-phase systematic process:
 
 1. **Plan Loading & Validation**: Load plan file, parse tasks, verify prerequisites
 2. **TodoList Setup**: Create comprehensive TodoList from all plan tasks
 3. **Task Execution**: Execute tasks sequentially, respecting dependencies
 4. **Testing & Verification**: Run tests and verify success criteria
 5. **Documentation**: Update code documentation and save learnings
-6. **README Update**: **Automatically update project README** with changes
-7. **Verification & Cleanup**: Verify information transfer, clean up plan/report files
-8. **Summary**: Present comprehensive execution report
+6. **Verification & Cleanup**: Verify plan completion, clean up plan/report files
+7. **Summary**: Present comprehensive execution report
+
+**Note**: README updates are handled by the `document` skill, not this skill.
 
 ---
 
-## Workflow: 8-Phase Execution Process
+## Workflow: 7-Phase Execution Process
 
 ### Phase 1: Plan Loading and Validation
 
@@ -316,16 +316,18 @@ Task A (completed) → Task B (in_progress) → Task D (pending, blocked by B)
 
 ---
 
-### Phase 6: Documentation Updates
+### Phase 5: Documentation Updates
 
-**Objective**: Update documentation and capture learnings.
+**Objective**: Update code documentation and capture learnings.
 
-#### 6A. Code Documentation
+**Note**: Project-level documentation (README, CHANGELOG) is handled by the 'document' skill.
+
+#### 5A. Code Documentation
 - Add/update inline comments
 - Update function/class documentation
 - Add README sections if new modules created
 
-#### 6B. Capture Learnings
+#### 5B. Capture Learnings
 
 ```typescript
 // Save key insights to Serena memory
@@ -353,7 +355,7 @@ mcp__serena__write_memory({
 })
 ```
 
-#### 6C. Update Project Management
+#### 5C. Update Project Management
 
 ```typescript
 // Update JIRA issue
@@ -380,7 +382,7 @@ mcp__atlassian__addCommentToJiraIssue({
 })
 ```
 
-#### 6D. Final Review
+#### 5D. Final Review
 
 ```typescript
 // Verify everything is done
@@ -394,205 +396,43 @@ mcp__serena__think_about_whether_you_are_done()
 - Documentation updated ✅
 - Learnings captured ✅
 
----
+### Phase 6: Verify and Cleanup Plan/Report Files
 
-### Phase 7: Update Project README (CRITICAL)
-
-**Objective**: **ALWAYS** update the project's README to reflect implemented changes.
-
-**⚠️ IMPORTANT**: This phase is MANDATORY. Do not skip or defer.
-
-#### 7A. Locate Project README
-
-```typescript
-// Find README file
-mcp__serena__find_file({file_mask: "README*", relative_path: "."})
-// Common locations: README.md, README.rst, readme.md, docs/README.md
-```
-
-#### 7B. Analyze Current README
-
-```typescript
-// Read existing README
-Read({file_path: "/path/to/README.md"})
-
-// Identify sections to update:
-// - Features
-// - Installation/Setup
-// - Usage/Examples
-// - API Documentation
-// - Configuration
-// - Dependencies
-// - Changelog/Version History
-```
-
-#### 7C. Prepare Update Content
-
-From the executed plan, extract:
-- **New Features**: What functionality was added
-- **New APIs**: Endpoints, methods, functions
-- **Configuration**: New environment variables, config options
-- **Dependencies**: New libraries or services
-- **Breaking Changes**: Any incompatible changes
-- **Usage Examples**: How to use new features
-- **Migration Steps**: If applicable
-
-#### 7D. Update README
-
-```typescript
-// Update relevant sections
-Edit({
-  file_path: "/path/to/README.md",
-  old_string: "## Features\n[old feature list]",
-  new_string: `## Features
-
-### Authentication (NEW)
-- ✨ OAuth2 integration with Google, GitHub, Facebook
-- 🔐 JWT-based session management
-- 👤 User profile management
-- 🔑 Remember me functionality
-
-[old feature list]`
-})
-```
-
-**Example Updates**:
-
-```markdown
-## Features
-- ✨ **User Authentication**: OAuth2 integration, JWT sessions, profile management
-- 🔧 **Enhanced API**: New `/auth/login`, `/auth/logout`, `/auth/profile` endpoints
-
-## Installation
-
-### New Dependencies
-```bash
-npm install passport passport-oauth2 jsonwebtoken bcrypt
-```
-
-## Configuration
-
-### Environment Variables
-```bash
-# Authentication (NEW)
-JWT_SECRET=your-secret-key
-JWT_EXPIRY=24h
-OAUTH_GOOGLE_CLIENT_ID=your-google-client-id
-OAUTH_GOOGLE_CLIENT_SECRET=your-google-client-secret
-```
-
-## Usage
-
-### Authentication Example
-```typescript
-// Login with OAuth
-import { AuthService } from './auth/service';
-
-const authService = new AuthService();
-const token = await authService.login({
-  provider: 'google',
-  code: authCode
-});
-```
-
-## API Reference
-
-### Authentication Endpoints (NEW)
-
-#### POST /auth/login
-Authenticate user with OAuth provider.
-
-**Request**:
-```json
-{
-  "provider": "google",
-  "code": "auth_code"
-}
-```
-
-**Response**:
-```json
-{
-  "token": "jwt_token",
-  "user": {
-    "id": "user_id",
-    "email": "user@example.com"
-  }
-}
-```
-```
-
-#### 7E. Verify README Updates
-
-**Verification Checklist**:
-```
-- ✓ Project README located and updated
-- ✓ New features documented
-- ✓ Usage examples added
-- ✓ API endpoints documented
-- ✓ Configuration options documented
-- ✓ New dependencies listed
-- ✓ Breaking changes noted (if any)
-- ✓ Migration guide included (if applicable)
-- ✓ README formatting consistent
-- ✓ All links and examples verified
-```
-
----
-
-### Phase 8: Verify and Cleanup Plan/Report Files
-
-**Objective**: Verify all plan information is captured in README, then clean up temporary files.
+**Objective**: Verify plan completion, then clean up temporary plan and report files.
 
 **⚠️ CRITICAL**: Do NOT skip this phase. Plan and report files must be cleaned up after verification.
 
-#### 8A. Verification Process
+#### 6A. Verification Process
 
 1. **Re-read Plan File**
    ```typescript
    Read({file_path: planFilePath})
    ```
 
-2. **Re-read Updated README**
-   ```typescript
-   Read({file_path: "README.md"})
-   ```
-
-3. **Create Comparison Checklist**
+2. **Verify Plan Completion**
    For each major item in the plan:
    ```
-   Plan Item: [Feature/Change from plan]
-   - [ ] Documented in README?
-   - [ ] Sufficient detail?
-   - [ ] Accurate?
-   - [ ] Usage examples provided?
+   Plan Item: [Feature/Task from plan]
+   - [ ] Implemented?
+   - [ ] Tests passing?
+   - [ ] Code reviewed?
+   - [ ] Acceptance criteria met?
    ```
 
-4. **Identify Gaps**
-   - List information from plan NOT in README
-   - Note discrepancies between plan and implementation
-   - Identify missing configuration details or usage examples
-
-5. **Fill Gaps (If Any)**
-   If gaps found:
-   - Update README with missing information
-   - Add missing usage examples
-   - Document any deviations from plan
-   - Re-verify README after updates
-
-6. **Final Verification Checklist**
+3. **Final Verification Checklist**
    ```
-   - [ ] All features documented in README
-   - [ ] All APIs/endpoints documented
-   - [ ] All configuration options documented
-   - [ ] Breaking changes noted (if any)
-   - [ ] Usage examples for key features
-   - [ ] New dependencies listed
-   - [ ] Migration guide (if applicable)
-   - [ ] No critical information lost from plan
+   - [ ] All tasks completed
+   - [ ] All tests passing
+   - [ ] All success criteria met
+   - [ ] Code documentation updated
+   - [ ] Learnings captured in Serena memory
+   - [ ] JIRA issues updated (if applicable)
+   - [ ] No unresolved issues remain
    ```
 
-#### 8B. Find Related Report Files
+**Note**: README updates will be handled by the `document` skill.
+
+#### 6B. Find Related Report Files
 
 ```typescript
 // Search for analysis report files
@@ -605,7 +445,7 @@ mcp__serena__list_dir({relative_path: ".", recursive: false})
 // - Files referenced in the plan's "Based On" field
 ```
 
-#### 8C. Verify Report Information (If Reports Found)
+#### 6C. Verify Report Information (If Reports Found)
 
 ```typescript
 // Read report file
@@ -619,7 +459,7 @@ Read({file_path: reportFilePath})
 - [ ] Related areas reviewed
 ```
 
-#### 8D. Delete Plan and Report Files
+#### 6D. Delete Plan and Report Files
 
 **Only after ALL verification passes**:
 
@@ -627,12 +467,13 @@ Read({file_path: reportFilePath})
    ```
    "✅ Verification Complete
 
-   I've verified that all important information from [PLAN_FILE] has been documented in the project README.
+   Plan execution complete. All tasks have been implemented and verified.
 
-   Key items captured in README:
-   - [Feature 1]: Fully documented with usage examples
-   - [Feature 2]: API endpoints and configuration documented
-   - [Configuration changes]: All new environment variables documented
+   Implementation summary:
+   - ✅ All tasks completed
+   - ✅ All tests passing
+   - ✅ Code documentation updated
+   - ✅ Learnings captured
 
    Related analysis reports found:
    - [REPORT_FILE]: Root cause addressed, all fixes implemented ✅
@@ -640,6 +481,8 @@ Read({file_path: reportFilePath})
    May I proceed to delete these temporary files?
    - Plan file: [PLAN_FILE]
    - Report file(s): [REPORT_FILE(s)]
+
+   Note: README updates will be handled by the 'document' skill.
 
    (Type 'yes' to confirm deletion)"
    ```
@@ -666,10 +509,12 @@ Read({file_path: reportFilePath})
    - ❌ [REPORT_FILE(s)] (removed)
 
    All implementation details have been preserved in:
-   - ✅ Project README.md (updated with all features and documentation)
-   - ✅ Serena memory (learnings captured)
    - ✅ Source code (implementation complete)
-   - ✅ JIRA (issue updated)
+   - ✅ Code documentation (inline comments and docs updated)
+   - ✅ Serena memory (learnings captured)
+   - ✅ JIRA (issue updated, if applicable)
+
+   Run the 'document' skill to update project documentation (README, CHANGELOG, etc.)
    "
    ```
 
@@ -677,7 +522,7 @@ Read({file_path: reportFilePath})
 - ❌ Do not delete if verification fails
 - ❌ Do not delete if user doesn't confirm
 - ❌ Do not delete if unresolved issues remain
-- ❌ Do not delete if README updates incomplete
+- ❌ Do not delete if tests are not passing
 - ❌ Do not delete reports if fixes not fully implemented
 
 ---
@@ -876,20 +721,14 @@ Read({file_path: reportFilePath})
 ### Code Documentation
 - ✅ Inline comments added
 - ✅ Function/class documentation updated
-- ✅ Module READMEs updated (if applicable)
-
-### Project README
-- ✅ **Features section**: Added [new features]
-- ✅ **Usage examples**: Added [count] examples
-- ✅ **API documentation**: Documented [count] endpoints/methods
-- ✅ **Configuration**: Documented [count] new config options
-- ✅ **Dependencies**: Listed [count] new dependencies
-- ✅ **Breaking changes**: Documented (if any)
+- ✅ Module documentation updated (if applicable)
 
 ### Serena Memory
 - ✅ Key learnings saved to: [memory file name]
 - ✅ Best practices documented
 - ✅ Challenges and solutions captured
+
+**Note**: Project-level documentation (README, CHANGELOG) updates are handled by the 'document' skill
 
 ---
 
@@ -898,7 +737,7 @@ Read({file_path: reportFilePath})
 ### Verification
 - ✅ Plan file reviewed: [PLAN_FILE]
 - ✅ Report file(s) reviewed: [REPORT_FILE(s)] (if applicable)
-- ✅ All information transferred to README
+- ✅ All tasks completed successfully
 - ✅ Root cause addressed (if from report)
 - ✅ Recommended fixes implemented (if from report)
 
@@ -906,6 +745,8 @@ Read({file_path: reportFilePath})
 - ✅ Plan file deleted: [PLAN_FILE] ❌ (removed)
 - ✅ Report file(s) deleted: [REPORT_FILE(s)] ❌ (removed, if applicable)
 - ✅ Deletion confirmed: Files no longer exist
+
+**Note**: Run the 'document' skill after this to update project documentation
 
 ---
 

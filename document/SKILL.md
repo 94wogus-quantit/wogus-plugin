@@ -10,7 +10,9 @@ description: 워크플로우 아티팩트(분석 리포트, 계획서, 구현 �
 Use this skill when:
 - Implementation work is complete and needs documentation
 - User requests "문서화해줘", "document this", "update documentation"
-- After `/execute-plan` completes successfully
+- **After `execute-plan` completes** (mandatory for README/CHANGELOG updates)
+- Need to update project README with new features
+- Need to add CHANGELOG entries
 - Multiple workflow artifacts need consolidation
 - Before committing final changes to git
 - As part of release preparation
@@ -21,7 +23,7 @@ analyze-issue → plan-builder → execute-plan → **document**
 ```
 
 **⚠️ Important Note**:
-`execute-plan` 스킬이 이미 README 업데이트와 계획/리포트 파일 정리를 수행하므로, 이 스킬은 **추가 문서화가 필요한 경우**에만 사용합니다.
+`execute-plan` 스킬은 코드 구현과 테스트만 수행합니다. 이 스킬은 **프로젝트 문서화 (README, CHANGELOG 등)를 담당**합니다. `execute-plan` 완료 후 이 스킬을 실행하여 모든 문서를 업데이트하세요.
 
 ---
 

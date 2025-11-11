@@ -17,7 +17,8 @@
       "skills": [
         "./analyze-issue",
         "./plan-builder",
-        "./execute-plan"
+        "./execute-plan",
+        "./document"
       ]
     }
   ]

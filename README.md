@@ -166,6 +166,22 @@ analyze-issue
 
 ### Skills 설치
 
+**방법 1: Marketplace 사용 (권장)**
+
+1. Claude Code에서 marketplace 추가:
+   ```
+   /marketplace add git@github.com:94wogus-quantit/skills.git
+   ```
+
+2. 원하는 스킬 설치:
+   ```
+   /plugin install analyze-issue
+   /plugin install plan-builder
+   /plugin install execute-plan
+   ```
+
+**방법 2: 로컬 패키징**
+
 1. 스킬을 패키징하여 `.zip` 파일 생성:
    ```bash
    python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scripts/package_skill.py analyze-issue
@@ -186,13 +202,16 @@ analyze-issue
 
 ```
 skills/
-├── analyze-issue/           # 이슈 분석 스킬
-│   ├── SKILL.md            # 스킬 설명 및 가이드
-│   └── references/         # 참조 문서
+├── .claude-plugin/         # Marketplace 설정
+│   └── marketplace.json    # 스킬 목록 및 메타데이터
+│
+├── analyze-issue/          # 이슈 분석 스킬
+│   ├── SKILL.md           # 스킬 설명 및 가이드
+│   └── references/        # 참조 문서
 │       ├── report_template.md
 │       └── common_bug_patterns.md
 │
-├── plan-builder/           # 계획 생성 스킬
+├── plan-builder/          # 계획 생성 스킬
 │   ├── SKILL.md
 │   └── references/
 │       ├── plan_template.md
@@ -200,11 +219,12 @@ skills/
 │       ├── testing_strategy_guide.md
 │       └── task_independence_guide.md
 │
-├── execute-plan/           # 계획 실행 스킬
+├── execute-plan/          # 계획 실행 스킬
 │   └── SKILL.md
 │
-├── CLAUDE.md              # Claude Code 가이드
-└── README.md              # 이 파일
+├── .gitignore            # Git 제외 설정
+├── CLAUDE.md             # Claude Code 가이드
+└── README.md             # 이 파일
 ```
 
 ## 🛠 Development

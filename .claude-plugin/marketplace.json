@@ -1,0 +1,29 @@
+{
+  "name": "Personal Skills Collection",
+  "description": "개인적으로 사용할 Claude Code skills 모음 - 이슈 분석, 계획 수립, 체계적 실행",
+  "author": "94wogus-quantit",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "analyze-issue",
+      "description": "버그와 이슈의 근본 원인을 체계적으로 분석하는 스킬",
+      "version": "1.0.0",
+      "path": "analyze-issue",
+      "type": "skill"
+    },
+    {
+      "name": "plan-builder",
+      "description": "자동 반복 검토를 통해 고품질 구현 계획을 생성하는 스킬",
+      "version": "1.0.0",
+      "path": "plan-builder",
+      "type": "skill"
+    },
+    {
+      "name": "execute-plan",
+      "description": "승인된 구현 계획을 체계적으로 실행하는 스킬",
+      "version": "1.0.0",
+      "path": "execute-plan",
+      "type": "skill"
+    }
+  ]
+}

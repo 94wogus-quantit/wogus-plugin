@@ -83,6 +83,33 @@
 /plugin install execute-plan.zip
 ```
 
+### frontend-designer
+
+차별화된 프로덕션급 프론트엔드 인터페이스를 생성하는 스킬입니다.
+
+**주요 기능:**
+- **Tailwind CSS v4+ 최신 문법** (CSS-first configuration)
+- 대담하고 기억에 남는 디자인 결정
+- Anthropic 디자인 철학 기반 (generic AI 디자인 지양)
+- 2단계 워크플로우 (디자인 방향 설정 → 구현)
+- Typography, Color, Motion, Spatial Composition 가이드
+
+**사용 시점:**
+- **Proactive**: UI 컴포넌트/페이지 구현 시 자동 적용
+- React/Vue/Next.js 컴포넌트 빌드 시
+- 기존 UI 개선이 필요할 때
+- 폼, 대시보드, 랜딩 페이지 스타일링 시
+
+**통합:**
+- `plan-builder` 이후 프론트엔드 작업이 있을 때
+- `execute-plan` 중 UI 태스크 실행 시
+
+**설치:**
+```bash
+# Claude Code에 스킬 설치
+/plugin install frontend-designer.zip
+```
+
 ### document
 
 워크플로우 아티팩트를 수집하여 프로젝트 문서를 종합적으로 업데이트하는 스킬입니다.
@@ -170,6 +197,7 @@ analyze-issue
 3. execute-plan [PLAN]
    └─> TodoList 생성 및 실행
    └─> 코드 구현 및 테스트
+   └─> (프론트엔드 작업 시) frontend-designer 자동 적용
    └─> 코드 문서화 (inline comments, JSDoc 등)
 
 4. document (필수)
@@ -223,6 +251,7 @@ analyze-issue
    /plugin install analyze-issue
    /plugin install plan-builder
    /plugin install execute-plan
+   /plugin install frontend-designer
    /plugin install document
    ```
 
@@ -267,6 +296,13 @@ skills/
 │
 ├── execute-plan/          # 계획 실행 스킬
 │   └── SKILL.md
+│
+├── frontend-designer/     # 프론트엔드 디자인 스킬
+│   ├── SKILL.md
+│   └── references/
+│       ├── tailwind-v4-features.md
+│       ├── modern-css-patterns.md
+│       └── component-examples.md
 │
 ├── document/              # 문서화 스킬
 │   └── SKILL.md

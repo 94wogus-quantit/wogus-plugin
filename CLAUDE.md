@@ -35,6 +35,14 @@ Systematic root cause analysis for bugs and issues.
 **Output**: `[ISSUE_ID]_REPORT.md` with root cause, affected code, and recommendations
 **Integration**: First step in `/analyze-issue → /plan → /execute-plan → /document` workflow
 
+### frontend-designer
+
+Proactively create distinctive, production-grade frontend interfaces.
+
+**When to use**: UI component/page implementation, design improvements, React/Vue/Next.js components
+**Technology**: Tailwind CSS v4+ (CSS-first configuration), bold aesthetics, avoiding generic AI designs
+**Integration**: Used AFTER plan-builder or DURING execute-plan for frontend tasks
+
 ## Skill Development Workflow
 
 ### Creating New Skills

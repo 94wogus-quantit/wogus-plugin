@@ -5,19 +5,20 @@
     "email": "94wogus@quantit.io"
   },
   "metadata": {
-    "description": "개인적으로 사용할 Claude Code skills 모음 - 이슈 분석, 계획 수립, 체계적 실행, 종합 문서화 (한국어 기본)",
-    "version": "1.4.0"
+    "description": "개인적으로 사용할 Claude Code skills 모음 - 이슈 분석, 계획 수립, 체계적 실행, 프론트엔드 디자인, 종합 문서화 (한국어 기본)",
+    "version": "1.5.0"
   },
   "plugins": [
     {
       "name": "workflow-skills",
-      "description": "체계적인 개발 워크플로우를 위한 스킬 모음 - 이슈 분석, 계획 수립, 실행, 문서화",
+      "description": "체계적인 개발 워크플로우를 위한 스킬 모음 - 이슈 분석, 계획 수립, 실행, 프론트엔드 디자인, 문서화",
       "source": "./",
       "strict": false,
       "skills": [
         "./analyze-issue",
         "./plan-builder",
         "./execute-plan",
+        "./frontend-designer",
         "./document"
       ]
     }

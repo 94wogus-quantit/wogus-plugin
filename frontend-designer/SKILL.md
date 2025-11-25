@@ -1,6 +1,6 @@
 ---
 name: frontend-designer
-description: Proactively create distinctive, production-grade frontend interfaces with high design quality. Use when user requests web components, pages, or applications - or when existing UI needs design improvements. Focuses on Tailwind CSS latest syntax, bold aesthetics, and avoiding generic 'AI slop' designs.
+description: Proactively create distinctive, production-grade frontend interfaces with high design quality. ALWAYS check Storybook MCP first for UI development guidelines. Use when user requests web components, pages, or applications - or when existing UI needs design improvements. Focuses on Tailwind CSS v4+ latest syntax, bold aesthetics, and avoiding generic 'AI slop' designs.
 ---
 
 # Frontend Designer
@@ -24,6 +24,7 @@ ALL outputs, documentation, explanations, and communications MUST be in **KOREAN
 
 This skill enables creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. It emphasizes:
 
+- **Storybook-first development** when available (ALWAYS check MCP first!)
 - **Bold, memorable design decisions** rather than safe, generic patterns
 - **Tailwind CSS latest syntax** (v4+) with modern utilities and CSS-first configuration
 - **Real, functional code** with meticulous attention to design details
@@ -48,6 +49,39 @@ This skill enables creation of distinctive, production-grade frontend interfaces
 - Complement code implementation with design excellence
 
 ## Design Workflow
+
+### Phase 0: Storybook Integration Check (CRITICAL - Always First!)
+
+⚠️ **UI 개발 시작 전 반드시 Storybook MCP 확인!**
+
+```typescript
+// 1. Storybook MCP 사용 가능 여부 확인
+// 2. 사용 가능하면 UI 개발 가이드라인 받기
+mcp__storybook-mcp__get-ui-building-instructions()
+```
+
+**Storybook MCP가 있는 경우:**
+- ✅ **MUST USE**: UI 개발 전 가이드라인 호출 필수
+- ✅ Storybook 기반 컴포넌트 개발 워크플로우 따르기
+- ✅ 스토리 작성 Best Practice 적용
+- ✅ 컴포넌트 개발 후 스토리 URL 확인:
+  ```typescript
+  mcp__storybook-mcp__get-story-urls({
+    absoluteStoryPath: "src/components/Button/Button.stories.tsx",
+    exportName: "Primary"
+  })
+  ```
+
+**Storybook MCP가 없는 경우:**
+- 일반 워크플로우로 진행 (Phase 1부터 시작)
+
+**Why Storybook?**
+- 컴포넌트 격리 개발 및 테스트
+- 디자인 시스템 일관성 유지
+- Visual regression testing
+- 팀원과 디자인 리뷰 공유
+
+---
 
 ### Phase 1: Design Thinking (Before Coding)
 
@@ -79,10 +113,54 @@ This skill enables creation of distinctive, production-grade frontend interfaces
 ### Phase 2: Implementation (Coding)
 
 #### 핵심 원칙
-1. **기능성**: 모든 코드가 실제로 작동해야 함
-2. **시각적 임팩트**: 첫인상에서 차별화
-3. **일관성**: 선택한 미학과 완벽히 일치
-4. **디테일**: 모든 세부사항에 주의
+1. **Storybook 우선**: Storybook MCP가 있으면 가이드라인 준수
+2. **기능성**: 모든 코드가 실제로 작동해야 함
+3. **시각적 임팩트**: 첫인상에서 차별화
+4. **일관성**: 선택한 미학과 완벽히 일치
+5. **디테일**: 모든 세부사항에 주의
+
+#### Storybook Integration (if available)
+
+```typescript
+// 컴포넌트 작성 후 스토리 파일도 함께 작성
+// Example: Button.tsx + Button.stories.tsx
+
+// Button.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './Button';
+
+const meta: Meta<typeof Button> = {
+  title: 'Components/Button',
+  component: Button,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+};
+
+export default meta;
+type Story = StoryObj<typeof Button>;
+
+export const Primary: Story = {
+  args: {
+    variant: 'primary',
+    children: 'Click me',
+  },
+};
+
+export const Secondary: Story = {
+  args: {
+    variant: 'secondary',
+    children: 'Click me',
+  },
+};
+```
+
+**스토리 작성 Best Practices:**
+- 모든 variant와 state 커버
+- Interactive controls 추가
+- Accessibility 체크
+- Dark mode 지원 확인
 
 ## 🎨 Tailwind CSS Guidelines
 

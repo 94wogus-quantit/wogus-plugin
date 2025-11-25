@@ -88,10 +88,11 @@
 차별화된 프로덕션급 프론트엔드 인터페이스를 생성하는 스킬입니다.
 
 **주요 기능:**
+- **Storybook MCP 우선 통합** (UI 개발 전 자동 확인 및 가이드라인 적용)
 - **Tailwind CSS v4+ 최신 문법** (CSS-first configuration)
 - 대담하고 기억에 남는 디자인 결정
 - Anthropic 디자인 철학 기반 (generic AI 디자인 지양)
-- 2단계 워크플로우 (디자인 방향 설정 → 구현)
+- 3단계 워크플로우 (Storybook 확인 → 디자인 방향 설정 → 구현)
 - Typography, Color, Motion, Spatial Composition 가이드
 
 **사용 시점:**

@@ -23,17 +23,32 @@ ALL outputs, documentation, plans, and communications MUST be in **KOREAN** unle
 
 ---
 
+## ⛔ MANDATORY: Feedback Loop Until Perfect
+
+> **NEVER stop after just one feedback cycle.**
+>
+> After reviewing the plan, if there are any changes needed:
+> 1. Apply feedback
+> 2. Review again
+> 3. Still have changes? → Go back to step 1
+> 4. **Only exit when there are ZERO remaining issues**
+>
+> It is NORMAL to iterate **at least 2-3 times**.
+> If the first review gives "Approve", the review was too lenient.
+
+---
+
 ## Overview
 
 Create production-ready implementation plans through systematic refinement cycles. This skill combines plan creation, critical review, and feedback application in an automated loop, continuously improving the plan until it achieves high quality standards.
 
-**Process**: Plan → Review → Apply Feedback → Review Again → ... → Final Approved Plan
+**Process**: Plan → Review → Apply Feedback → Review Again → Apply Feedback → Review Again → ... → Final Approved Plan
 
 **Output**:
 - `[FEATURE]_PLAN.md` - Thoroughly reviewed, production-ready implementation plan
 - Intermediate review artifacts automatically cleaned up
 
-**Key Feature**: Iterates automatically until the plan receives approval from the review process.
+**Key Feature**: Iterates automatically until **zero issues remain** in the review process. NOT just once, but repeatedly until perfect.
 
 ## When to Use This Skill
 
@@ -103,17 +118,41 @@ Reference the template in `references/plan_template.md` for complete structure.
 
 ### Phase 2: Iterative Review & Refinement
 
+⚠️ **This phase does NOT end after one cycle. Repeat until ZERO changes remain.**
+
 Automatically enter review-refinement loop until plan meets quality standards.
 
 **Review Loop Process:**
 
 ```
-Loop until plan is approved:
-  1. Review Plan (Phase 2A)
-  2. Check Review Assessment (Phase 2B)
-  3. If "Approve": Exit loop → Phase 3
-  4. If "Needs Changes": Apply feedback (Phase 2C) → Repeat loop
+┌─────────────────────────────────────────────────────────┐
+│  ⚠️ This loop repeats until 0 issues remain             │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌──────────────────┐                                   │
+│  │ 1. Review Plan   │ ← Phase 2A                        │
+│  └────────┬─────────┘                                   │
+│           ▼                                             │
+│  ┌──────────────────┐                                   │
+│  │ 2. Check Result  │ ← Phase 2B                        │
+│  └────────┬─────────┘                                   │
+│           │                                             │
+│     ┌─────┴─────┐                                       │
+│     ▼           ▼                                       │
+│  Changes?    No Changes?                                │
+│     │           │                                       │
+│     ▼           ▼                                       │
+│  ┌──────────┐  ┌──────────┐                             │
+│  │ Apply    │  │ Phase 3  │                             │
+│  │ Feedback │  │ Done!    │                             │
+│  └────┬─────┘  └──────────┘                             │
+│       │                                                 │
+│       └────────────► Back to Step 1 (Review Again!)     │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
+
+**⛔ FORBIDDEN**: Going straight to Phase 3 after the first review
 
 #### Phase 2A: Critical Plan Review
 
@@ -204,18 +243,23 @@ For each task, check:
 
 Analyze the review recommendation:
 
-**Approval Criteria:**
-- Overall Assessment: "Strong" or "Good"
-- Recommendation: "Approve" or "Approve with Changes" (minor only)
-- No Required Changes (🔴) remaining
+**⛔ STRICT Approval Criteria (ALL must be true):**
+- Overall Assessment: "Strong" only (NOT "Good" - that needs more work)
+- Recommendation: "Approve" only (NOT "Approve with Changes")
+- Required Changes (🔴): ZERO
+- Suggested Improvements (🟡): ZERO or trivial only
+- No open questions remaining
 
-**If Approved:**
-- Announce: "✅ Plan has been approved by review!"
+**If ANY issues remain → Apply feedback and review again!**
+
+**If Approved (truly ZERO issues):**
+- Announce: "✅ Plan approved after [N] iterations - ZERO remaining issues!"
 - Proceed to Phase 3 (Finalization)
 
-**If Changes Needed:**
+**If Changes Needed (even minor ones):**
 - Announce: "🔄 Applying review feedback (Iteration N)..."
 - Proceed to Phase 2C (Apply Feedback)
+- **Then return to Phase 2A for another review**
 
 #### Phase 2C: Apply Review Feedback
 
@@ -271,8 +315,11 @@ Use `mcp__sequential-thinking__sequentialthinking` to verify:
 **7. Update and Clean Up**
 
 - Save updated `[FEATURE]_PLAN.md`
-- Delete `[FEATURE]_PLAN_REVIEW.md` (no longer current)
-- Loop back to Phase 2A for new review
+- **Delete `[FEATURE]_PLAN_REVIEW.md` immediately** (outdated after applying feedback)
+- **⚠️ MANDATORY: Loop back to Phase 2A for another review**
+  - Do NOT skip this step
+  - The new review will check if applied changes are correct
+  - Continue until review finds ZERO issues
 
 ### Phase 3: Finalization
 
@@ -332,11 +379,14 @@ Run: `/execute-plan [FEATURE]_PLAN.md`
 - Verify changes after applying
 - Maintain plan consistency
 
-**Iteration:**
-- Quality over speed
-- Typical plans need 1-3 iterations
-- Complex plans may need 4-5 iterations
+**Iteration (⚠️ CRITICAL):**
+- **NEVER stop after just 1 iteration** - this is almost always wrong
+- Minimum 2-3 iterations is NORMAL and expected
+- Complex plans may need 4-5+ iterations
 - Each iteration should show improvement
+- Only stop when review shows **ZERO remaining issues**
+- Delete review file after each feedback application
+- Quality over speed - rushing leads to bad plans
 
 **When to Ask User:**
 - Clarifying ambiguous requirements
@@ -365,10 +415,21 @@ Run: `/execute-plan [FEATURE]_PLAN.md`
 
 ## Common Iteration Patterns
 
-**Iteration 1:** Missing testing strategies, vague acceptance criteria
-**Iteration 2:** Task coupling, missing edge cases
-**Iteration 3:** Polish, minor improvements
-**Iteration 4+:** Rare, for complex edge cases
+**Why Multiple Iterations Are Necessary:**
+- First draft ALWAYS has issues - that's normal
+- Each review catches different problems
+- Fixing one issue often reveals others
+- Quality compounds with each iteration
+
+**Typical Pattern:**
+| Iteration | Common Issues Found | Action |
+|-----------|---------------------|--------|
+| 1 | Missing testing strategies, vague acceptance criteria | Apply feedback → Review again |
+| 2 | Task coupling, missing edge cases, incomplete error handling | Apply feedback → Review again |
+| 3 | Minor polish, edge cases, documentation gaps | Apply feedback → Review again |
+| 4+ | Complex edge cases (if any remain) | Continue until ZERO issues |
+
+**⚠️ Red Flag**: If iteration 1 shows "Approve" → Review was too lenient, be more critical!
 
 ## Resources
 

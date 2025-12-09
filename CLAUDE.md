@@ -197,6 +197,71 @@ git push
 **Validate skill structure:**
 The packaging script automatically validates before creating the zip file.
 
+## 아키텍처 결정사항
+
+### 2025-12-09 - plan-builder 피드백 루프 강제력 확보
+
+**컨텍스트**:
+plan-builder 스킬의 핵심 원칙인 "계획서 생성 → 리뷰 → 수정 → 리뷰 → ... → ZERO 이슈까지 반복"이 제대로 작동하지 않는 문제가 발견되었습니다. Claude가 1-2회 반복 후 "충분하다"고 판단하여 조기 종료하는 현상이 발생했습니다.
+
+**근본 원인**:
+- **절차적 지침의 강제력 부족**: "Loop back to Phase 2A"와 같은 서술적 지침은 Claude에게 권장사항으로 해석되어 실제 강제되지 않음
+- **승인 기준 불일치**: SKILL.md는 "Approve only"를 요구하지만, review_checklist.md는 "Approve with Changes" 옵션을 제공하여 모호성 발생
+- **선형 구조로 오해**: Phase 1 → 2 → 3 구조가 "한 번씩만 실행"으로 해석 가능
+
+**결정**: WHILE 루프 구조 + Binary Decision 채택
+
+1. **명시적 WHILE 루프 구조**:
+   ```markdown
+   WHILE (total_issues > 0 OR Overall Assessment != "Strong") DO:
+     Step A: Review
+     Step B: Count Issues
+     Step C: Decision Gate
+     Step D: Apply Feedback → LOOP BACK TO STEP A
+   END WHILE
+   ```
+   - 서술적 지침 → 명시적 제어 흐름
+   - Phase 개념 → Step 개념 (순환 구조 명확화)
+   - "Loop back" 권장 → "MANDATORY: Loop back" 강제
+
+2. **Binary Decision Model**:
+   - 이전: Approve / **Approve with Changes** / Major Revision
+   - 현재: ✅ **Approve** / 🔄 **Needs Iteration**
+   - "Approve with Changes"의 모호함 제거
+   - ZERO 이슈일 때만 Approve 가능
+
+3. **버전 추적 메커니즘**:
+   - 리뷰 파일을 `*_PLAN_REVIEW_v[N].md` 형식으로 저장
+   - 각 iteration 히스토리 보존 (audit trail)
+   - Phase 3에서 아카이브/삭제 옵션 제공
+
+**영향**:
+- **plan-builder 스킬**: 모든 실행에서 최소 2-3회 이상 반복 보장
+- **사용자 경험**: 계획 생성 시간 증가 (품질 향상의 trade-off)
+- **Breaking Change**: v1.5.1 → v1.6.0 (Major version bump)
+
+**대안**:
+1. ~~"Approve with Changes" 유지 + 더 명확한 정의~~ → 근본적 해결 불가, 모호성 여전히 존재
+2. ~~Iteration 최소 횟수 하드코딩 (예: 3회 강제)~~ → 유연성 부족, 품질 기준과 무관
+3. ✅ **WHILE 루프 + Binary Decision** → 채택 (명확하고 강제력 있음)
+
+**패턴**: 문서 강제력 확보 패턴
+- 서술적 지침 ("you should", "it's recommended") → 약한 강제력
+- 명시적 구조 ("WHILE", "IF/ELSE", "MANDATORY") → 강한 강제력
+- 이 패턴은 다른 스킬에서도 적용 가능 (예: execute-plan의 TodoList 강제 사용)
+
+**관련 파일**:
+- [plan-builder/SKILL.md:119-427](plan-builder/SKILL.md#L119-L427) - Phase 2 LOOP 구조
+- [plan-builder/references/review_checklist.md:479-548](plan-builder/references/review_checklist.md#L479-L548) - Binary 승인 기준
+- [plan-builder/tests/loop_verification.md](plan-builder/tests/loop_verification.md) - 테스트 시나리오
+
+**재발 방지**:
+- 새 스킬 작성 시 서술적 지침 대신 명시적 구조 사용
+- 중요한 반복 로직은 WHILE/FOR 스타일로 표현
+- 승인/결정 로직은 Binary decision으로 설계 (3단계 이상 지양)
+
+---
+
 ## Notes
 
 - Skills use MCP servers (serena, atlassian, sentry, github, context7, sequential-thinking)

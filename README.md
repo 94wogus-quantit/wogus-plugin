@@ -117,11 +117,22 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 
 자동 반복 검토를 통해 고품질 구현 계획을 생성하는 스킬입니다.
 
+⚠️ **v1.6.0 Breaking Change**: 피드백 루프가 더 엄격해졌습니다. 이제 **최소 2-3회 이상 반복**하며, **ZERO 이슈**가 될 때까지 강제로 반복합니다.
+
 **주요 기능:**
-- 계획 생성 → 검토 → 피드백 반영 자동 반복
+- **명시적 WHILE 루프**: 계획 생성 → 검토 → 피드백 반영 무한 반복 (ZERO 이슈까지)
+- **엄격한 품질 기준**: "Approve"는 ZERO 이슈일 때만 가능 (Good ≠ Strong)
+- **버전 추적**: 각 반복마다 `*_PLAN_REVIEW_v[N].md` 파일 생성 및 보존
+- **Iteration Status Report**: 각 반복 후 이슈 카운트 및 결정 사항 출력
 - 모든 태스크에 테스팅 전략 필수 포함
 - 태스크 독립성 검증
-- 승인될 때까지 자동 개선
+
+**v1.6.0 변경사항 (2025-12-09)**:
+- ✅ Phase 2를 WHILE 루프 구조로 완전 재작성
+- ✅ "Approve with Changes" 제거 → Binary decision (Approve / Needs Iteration)
+- ✅ 리뷰 파일 버전 추적 메커니즘 추가
+- ✅ Loop 다이어그램 및 테스트 시나리오 추가
+- ⚠️ 이전보다 더 많은 반복이 발생할 수 있으나, 계획 품질이 크게 향상됨
 
 **사용 시점:**
 - `*_REPORT.md`에서 구현 계획 생성 시
@@ -252,7 +263,7 @@ mr-code-review [Branch/MR URL]
   },
   "metadata": {
     "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화 (한국어 기본)",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"

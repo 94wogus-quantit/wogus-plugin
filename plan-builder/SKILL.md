@@ -116,210 +116,315 @@ Reference the template in `references/plan_template.md` for complete structure.
 - Use UPPERCASE for feature name
 - Examples: `USER_AUTH_PLAN.md`, `API_REFACTOR_PLAN.md`
 
-### Phase 2: Iterative Review & Refinement
+### Phase 2: ITERATIVE REVIEW LOOP
 
-⚠️ **This phase does NOT end after one cycle. Repeat until ZERO changes remain.**
+⚠️ **CRITICAL**: This is a LOOP, not a single pass-through phase!
 
-Automatically enter review-refinement loop until plan meets quality standards.
+This phase implements an explicit WHILE-style loop that repeats until ZERO issues remain.
 
-**Review Loop Process:**
+### Loop Entry Condition
+- Initial plan exists: `[FEATURE]_PLAN.md`
+- Iteration counter: N = 1
+
+### Loop Body (REPEAT these steps until exit condition met):
+
+#### Step A: Review (Iteration #N)
+
+1. **Read Current Plan**
+   - Load `[FEATURE]_PLAN.md` using Read tool
+   - Review all sections comprehensively
+
+2. **Perform Critical Review**
+   - Use `mcp__sequential-thinking__sequentialthinking` to analyze
+   - Apply `references/review_checklist.md` systematically
+
+   **Review Focus Areas:**
+   - **GitHub Repository Validation** (if applicable)
+     - Code style alignment
+     - Architecture compatibility
+     - Dependency conflicts
+     - Test coverage impact
+
+   - **Completeness Analysis**
+     - Missing components or steps
+     - Overlooked edge cases
+     - Error handling
+     - Rollback procedures
+     - Data migration needs
+     - Backward compatibility
+
+   - **Task Independence Review** (CRITICAL)
+     - See `references/task_independence_guide.md`
+     - Verify each task can be implemented independently
+     - Check dependencies are explicit and clear
+     - Ensure isolated test scope
+     - Confirm success measurable without other tasks
+
+   - **Testing Strategy Verification** (CRITICAL)
+     - See `references/testing_strategy_guide.md`
+     - Verify Testing Strategy section exists for each task
+     - Check test type appropriate
+     - Ensure test cases specific and concrete
+     - Confirm acceptance criteria measurable
+     - Verify test commands provided
+     - Check coverage of happy path AND edge cases
+
+   - **Feasibility Assessment**
+     - Technical viability
+     - Resource requirements
+     - Time estimates
+     - Required skills
+
+   - **Risk Analysis**
+     - Critical risks identified
+     - Likelihood and impact assessed
+     - Mitigation strategies present
+
+   - **Quality & Best Practices**
+     - Code quality standards
+     - Security considerations
+     - Performance implications
+     - Maintainability
+
+3. **Save Review with Version Number**
+   - Save as: `[FEATURE]_PLAN_REVIEW_v[N].md` (keep version number!)
+   - Use this structure:
+
+   ```markdown
+   # Plan Review: [Plan Name] (Iteration [N])
+
+   ## Executive Summary
+   - **Overall Assessment**: Strong / Good / Needs Improvement / Major Concerns
+   - **Recommendation**: Approve / Needs Iteration
+
+   ## Critical Findings
+
+   ### Required Changes (Must Fix) 🔴
+   1. [Critical issue that must be fixed]
+
+   ### Suggested Improvements (Should Fix) 🟡
+   1. [Important improvement]
+
+   ### Optional Enhancements (Nice to Have) 🟢
+   1. [Enhancement]
+
+   ### Questions for Clarification ❓
+   1. [Ambiguous aspect]
+   ```
+
+4. **Output Iteration Status** (see template in Loop Exit Condition section)
+
+#### Step B: Count Issues
+
+Parse `[FEATURE]_PLAN_REVIEW_v[N].md` and count:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  ⚠️ This loop repeats until 0 issues remain             │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  ┌──────────────────┐                                   │
-│  │ 1. Review Plan   │ ← Phase 2A                        │
-│  └────────┬─────────┘                                   │
-│           ▼                                             │
-│  ┌──────────────────┐                                   │
-│  │ 2. Check Result  │ ← Phase 2B                        │
-│  └────────┬─────────┘                                   │
-│           │                                             │
-│     ┌─────┴─────┐                                       │
-│     ▼           ▼                                       │
-│  Changes?    No Changes?                                │
-│     │           │                                       │
-│     ▼           ▼                                       │
-│  ┌──────────┐  ┌──────────┐                             │
-│  │ Apply    │  │ Phase 3  │                             │
-│  │ Feedback │  │ Done!    │                             │
-│  └────┬─────┘  └──────────┘                             │
-│       │                                                 │
-│       └────────────► Back to Step 1 (Review Again!)     │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+required_changes_count = count of 🔴 Required Changes
+suggested_improvements_count = count of 🟡 Suggested Improvements
+total_issues = required_changes_count + suggested_improvements_count
 ```
 
-**⛔ FORBIDDEN**: Going straight to Phase 3 after the first review
+Extract from review:
+- Overall Assessment value
+- Recommendation value
 
-#### Phase 2A: Critical Plan Review
+#### Step C: Decision Gate (STRICT)
 
-Perform comprehensive plan review using `references/review_checklist.md`.
-
-**Use `mcp__sequential-thinking__sequentialthinking` to analyze:**
-
-**1. GitHub Repository Validation** (if applicable)
-- Code style alignment
-- Architecture compatibility
-- Dependency conflicts
-- Test coverage impact
-
-**2. Completeness Analysis**
-- Missing components or steps
-- Overlooked edge cases
-- Error handling
-- Rollback procedures
-- Data migration needs
-- Backward compatibility
-
-**3. Task Independence Review** (CRITICAL)
-
-See `references/task_independence_guide.md` for detailed guidance.
-
-For each task, verify:
-- ✅ Can be implemented independently
-- ✅ Dependencies explicit and clear
-- ✅ Has isolated test scope
-- ✅ Success measurable without other tasks
-
-**4. Testing Strategy Verification** (CRITICAL)
-
-See `references/testing_strategy_guide.md` for detailed guidance.
-
-For each task, check:
-- ✅ Testing Strategy section exists
-- ✅ Test type appropriate
-- ✅ Test cases specific and concrete
-- ✅ Acceptance criteria measurable
-- ✅ Test commands provided
-- ✅ Covers happy path AND edge cases
-
-**5. Feasibility Assessment**
-- Technical viability
-- Resource requirements
-- Time estimates
-- Required skills
-
-**6. Risk Analysis**
-- Critical risks identified
-- Likelihood and impact assessed
-- Mitigation strategies present
-
-**7. Quality & Best Practices**
-- Code quality standards
-- Security considerations
-- Performance implications
-- Maintainability
-
-**Review Output Structure:**
-
-```markdown
-# Plan Review: [Plan Name]
-
-## Executive Summary
-- **Overall Assessment**: Strong / Good / Needs Improvement / Major Concerns
-- **Recommendation**: Approve / Approve with Changes / Major Revision Needed
-
-## Critical Findings
-
-### Required Changes (Must Fix) 🔴
-1. [Critical issue that must be fixed]
-
-### Suggested Improvements (Should Fix) 🟡
-1. [Important improvement]
-
-### Optional Enhancements (Nice to Have) 🟢
-1. [Enhancement]
-
-### Questions for Clarification ❓
-1. [Ambiguous aspect]
 ```
+IF (total_issues == 0 AND
+    Overall Assessment == "Strong" AND
+    Recommendation == "Approve"):
 
-**Save review as**: `[FEATURE]_PLAN_REVIEW.md`
+    ✅ EXIT LOOP → Go to Phase 3 (Finalization)
 
-#### Phase 2B: Assessment Decision
-
-Analyze the review recommendation:
+ELSE:
+    ❌ CONTINUE LOOP → Go to Step D (Apply Feedback)
+```
 
 **⛔ STRICT Approval Criteria (ALL must be true):**
 - Overall Assessment: "Strong" only (NOT "Good" - that needs more work)
-- Recommendation: "Approve" only (NOT "Approve with Changes")
-- Required Changes (🔴): ZERO
+- Recommendation: "Approve" only (NOT "Needs Iteration")
+- Required Changes (🔴): ZERO (not "minor", not "a few" - ZERO!)
 - Suggested Improvements (🟡): ZERO or trivial only
 - No open questions remaining
 
-**If ANY issues remain → Apply feedback and review again!**
+**If ANY issues remain → Continue to Step D!**
 
-**If Approved (truly ZERO issues):**
-- Announce: "✅ Plan approved after [N] iterations - ZERO remaining issues!"
-- Proceed to Phase 3 (Finalization)
+#### Step D: Apply Feedback
 
-**If Changes Needed (even minor ones):**
-- Announce: "🔄 Applying review feedback (Iteration N)..."
-- Proceed to Phase 2C (Apply Feedback)
-- **Then return to Phase 2A for another review**
+1. **Parse Review Feedback**
 
-#### Phase 2C: Apply Review Feedback
+   Extract and categorize from `[FEATURE]_PLAN_REVIEW_v[N].md`:
+   - Required Changes (Must Fix) - Priority 1
+   - Testing Strategy Issues - Priority 1
+   - Task Independence Issues - Priority 1
+   - Suggested Improvements - Priority 2
+   - Optional Enhancements - Priority 3
 
-Systematically apply all review feedback to improve the plan.
+2. **Address Required Changes**
 
-**1. Parse Review Feedback**
+   For each required change:
+   - Locate section in plan using Read tool
+   - Apply recommended change using Edit tool
+   - Verify change addresses feedback
+   - Ensure consistency with rest of plan
 
-Extract and categorize:
-- Required Changes (Must Fix) - Priority 1
-- Testing Strategy Issues - Priority 1
-- Task Independence Issues - Priority 1
-- Suggested Improvements - Priority 2
-- Optional Enhancements - Priority 3
+3. **Fix Testing Strategies**
 
-**2. Address Required Changes**
+   For tasks missing or having inadequate testing:
+   - Refer to `references/testing_strategy_guide.md` for examples
+   - Add: Test type, specific test cases, measurable acceptance criteria, runnable test commands
+   - Ensure coverage of happy path AND edge cases
 
-For each required change:
-1. Locate section in plan using Read tool
-2. Apply recommended change using Edit tool
-3. Verify change addresses feedback
-4. Ensure consistency with rest of plan
+4. **Resolve Task Independence Issues**
 
-**3. Fix Testing Strategies**
+   Refer to `references/task_independence_guide.md` for guidance on:
+   - Splitting tightly coupled tasks
+   - Defining clear interfaces
+   - Extracting shared functionality
+   - Making tasks independently testable
 
-For tasks missing or having inadequate testing, refer to `references/testing_strategy_guide.md` for examples and add:
+5. **Apply Suggested Improvements**
 
-- Test type (Unit/Integration/Manual/E2E)
-- Specific, concrete test cases
-- Measurable acceptance criteria
-- Runnable test commands
+   Evaluate and apply improvements that add value while maintaining plan consistency.
 
-**4. Resolve Task Independence Issues**
+6. **Verification After Changes**
 
-Refer to `references/task_independence_guide.md` for guidance on:
-- Splitting tightly coupled tasks
-- Defining clear interfaces
-- Extracting shared functionality
-- Making tasks independently testable
+   Use `mcp__sequential-thinking__sequentialthinking` to verify:
+   - [ ] All required changes applied
+   - [ ] All testing strategies complete
+   - [ ] All task independence issues resolved
+   - [ ] Plan structure maintained
+   - [ ] Dependencies still correct
 
-**5. Apply Suggested Improvements**
+7. **Update and Track Iteration**
 
-Evaluate and apply improvements that add value while maintaining plan consistency.
+   - Save updated `[FEATURE]_PLAN.md`
+   - **KEEP review file `[FEATURE]_PLAN_REVIEW_v[N].md`** (do NOT delete yet!)
+   - Increment iteration counter: N = N + 1
+   - Output iteration transition message (see template below)
 
-**6. Verification After Changes**
+8. **MANDATORY: Loop Back to Step A**
 
-Use `mcp__sequential-thinking__sequentialthinking` to verify:
-- [ ] All required changes applied
-- [ ] All testing strategies complete
-- [ ] All task independence issues resolved
-- [ ] Plan structure maintained
-- [ ] Dependencies still correct
+   - **Do NOT skip this step!**
+   - Go back to Step A with new iteration number (N+1)
+   - Perform another review to verify applied changes
+   - Continue loop until review finds ZERO issues
 
-**7. Update and Clean Up**
+**Iteration Transition Message Template:**
 
-- Save updated `[FEATURE]_PLAN.md`
-- **Delete `[FEATURE]_PLAN_REVIEW.md` immediately** (outdated after applying feedback)
-- **⚠️ MANDATORY: Loop back to Phase 2A for another review**
-  - Do NOT skip this step
-  - The new review will check if applied changes are correct
-  - Continue until review finds ZERO issues
+```
+🔄 Iteration Transition
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Completed: Iteration [N]
+  - Applied: [X] Required Changes
+  - Applied: [Y] Suggested Improvements
+  - Review file saved: [FEATURE]_PLAN_REVIEW_v[N].md
+
+Next: Iteration [N+1]
+  → Proceeding to Step A (Review updated plan)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Iteration Status Template (MUST output after each Step B)
+
+```
+📊 Iteration Status Report
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Iteration Number: [N]
+Review File: [FEATURE]_PLAN_REVIEW_v[N].md
+
+Issues Found:
+  🔴 Required Changes: [X]
+  🟡 Suggested Improvements: [Y]
+  📊 Total Issues: [X + Y]
+
+Overall Assessment: [Strong / Good / Needs Improvement / Major Concerns]
+Recommendation: [Approve / Needs Iteration]
+
+Decision:
+  [❌ NOT READY - Proceeding to Step D, then Iteration [N+1]]
+  [OR]
+  [✅ READY - ZERO issues found, exiting loop to Phase 3]
+
+Next Action:
+  [→ Step D: Apply feedback, then loop back to Step A for Iteration [N+1]]
+  [OR]
+  [→ Exit to Phase 3 (Finalization)]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Loop Exit Condition (ALL must be true)
+
+- ✅ total_issues == 0
+- ✅ Overall Assessment == "Strong" (NOT "Good")
+- ✅ Recommendation == "Approve" (NOT "Needs Iteration")
+- ✅ required_changes_count == 0
+- ✅ suggested_improvements_count == 0 OR only trivial ones
+
+⛔ **FORBIDDEN**: Exiting loop if ANY issue remains!
+
+### Loop Visualization
+
+```
+WHILE (total_issues > 0 OR Overall Assessment != "Strong") DO:
+
+  ┌─────────────────────────────────────────────────────────┐
+  │  Step A: Review Plan (Iteration #N)                     │
+  │  - Read current plan                                    │
+  │  - Perform critical review                              │
+  │  - Save as [FEATURE]_PLAN_REVIEW_v[N].md                │
+  │  - Output iteration status                              │
+  └────────────────────┬────────────────────────────────────┘
+                       ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Step B: Count Issues                                   │
+  │  - required_changes_count = count of 🔴                 │
+  │  - suggested_improvements_count = count of 🟡           │
+  │  - total_issues = sum                                   │
+  │  - Extract Overall Assessment                           │
+  │  - Extract Recommendation                               │
+  └────────────────────┬────────────────────────────────────┘
+                       ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Step C: Check Exit Condition                           │
+  │                                                          │
+  │  IF (total_issues == 0 AND                              │
+  │      Overall Assessment == "Strong" AND                 │
+  │      Recommendation == "Approve"):                      │
+  │                                                          │
+  │      ✅ EXIT LOOP → Go to Phase 3                       │
+  │                                                          │
+  │  ELSE:                                                  │
+  │      ❌ CONTINUE → Go to Step D                         │
+  └────────────────────┬────────────────────────────────────┘
+                       ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Step D: Apply Feedback                                 │
+  │  - Parse review feedback                                │
+  │  - Address required changes                             │
+  │  - Fix testing strategies                               │
+  │  - Resolve task independence issues                     │
+  │  - Apply suggested improvements                         │
+  │  - Verify all changes                                   │
+  │  - Save updated plan                                    │
+  │  - KEEP review file (do NOT delete)                     │
+  │  - Increment N: N = N + 1                               │
+  │  - Output iteration transition message                  │
+  │  - **MANDATORY: LOOP BACK TO STEP A**                   │
+  └────────────────────┬────────────────────────────────────┘
+                       │
+                       └──────► LOOP BACK TO STEP A (Iteration N+1)
+
+END WHILE
+
+✅ Exit to Phase 3: Finalization
+```
+
+**⚠️ Red Flags to Watch:**
+- If iteration 1 shows "Approve" → Review was too lenient, be more critical!
+- If iteration > 5 → Plan may need fundamental restructuring
+- If same issues reappear → Changes not addressing root cause
 
 ### Phase 3: Finalization
 
@@ -331,12 +436,65 @@ Verify approved plan meets all standards using checklist in `references/review_c
 
 **2. Clean Up Review Artifacts**
 
+After loop completion, clean up iteration review files:
+
+**Option A: Archive Review History** (Recommended for audit trail)
+
 ```bash
-# Delete any remaining review files
-rm [FEATURE]_PLAN_REVIEW.md
+# Rename final approved review
+mv [FEATURE]_PLAN_REVIEW_v[N].md [FEATURE]_PLAN_REVIEW_FINAL.md
+
+# Create archive directory
+mkdir -p .archive
+
+# Move intermediate review versions to archive
+mv [FEATURE]_PLAN_REVIEW_v*.md .archive/
+
+# Result: Only FINAL review visible, history preserved in .archive/
 ```
 
-**3. Final Output Summary**
+**Option B: Delete Intermediate Reviews** (Clean workspace)
+
+```bash
+# Keep only final approved review
+mv [FEATURE]_PLAN_REVIEW_v[N].md [FEATURE]_PLAN_REVIEW_FINAL.md
+
+# Delete all intermediate versions
+rm [FEATURE]_PLAN_REVIEW_v[1-9].md [FEATURE]_PLAN_REVIEW_v[0-9][0-9].md
+
+# Result: Only FINAL review remains
+```
+
+**Why preserve review history?**
+- Audit trail of iterative improvements
+- Learning resource for future planning
+- Evidence of thorough review process
+- Debugging if issues arise during execution
+
+**3. Document Iteration History**
+
+Include review iteration summary in final output:
+
+```markdown
+## Review Iterations History
+
+### Iteration 1
+- **Review File**: [FEATURE]_PLAN_REVIEW_v1.md
+- **Issues Found**: [X] Required Changes, [Y] Suggested Improvements
+- **Key Changes Applied**: [Summary]
+
+### Iteration 2
+- **Review File**: [FEATURE]_PLAN_REVIEW_v2.md
+- **Issues Found**: [X] Required Changes, [Y] Suggested Improvements
+- **Key Changes Applied**: [Summary]
+
+### Iteration N (Final)
+- **Review File**: [FEATURE]_PLAN_REVIEW_FINAL.md
+- **Issues Found**: ZERO ✅
+- **Result**: Approved - Ready for execution
+```
+
+**4. Final Output Summary**
 
 ```markdown
 # ✅ Plan Creation Complete

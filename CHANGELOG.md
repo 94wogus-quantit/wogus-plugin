@@ -5,7 +5,101 @@
 이 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 기반으로 하며,
 이 프로젝트는 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
-## [Unreleased] - 2025-12-09
+## [Unreleased]
+
+---
+
+## [1.6.0] - 2025-12-09
+
+### ⚠️ Breaking Changes
+
+- **plan-builder skill**: 피드백 루프가 더 엄격해졌습니다
+  - 이전: 1-2회 반복 후 "Good" 평가로 조기 종료 가능
+  - 현재: **최소 2-3회 이상 반복**, **ZERO 이슈**가 될 때까지 강제 반복
+  - 영향: 계획 생성에 더 많은 시간이 소요되지만 품질이 크게 향상됨
+  - 업그레이드 시 주의사항: 더 엄격한 품질 기준을 기대하세요
+
+### Changed
+
+- **plan-builder skill**: Phase 2를 명시적 WHILE 루프 구조로 완전 재작성
+  - Phase 2A → Step A (Review), Phase 2B → Step B (Count Issues)
+  - Phase 2C → Step C (Decision Gate), Step D (Apply Feedback + Loop Back)
+  - Loop Entry Condition, Loop Body, Loop Exit Condition 명확히 정의
+  - Iteration Status Report 템플릿 추가 (각 반복 후 출력 강제)
+
+- **plan-builder skill**: "Approve with Changes" 옵션 제거
+  - 이전: Approve / **Approve with Changes** / Major Revision
+  - 현재: ✅ **Approve** / 🔄 **Needs Iteration** (Binary decision)
+  - SKILL.md와 review_checklist.md 승인 기준 통일
+  - 모호한 "minor changes" 개념 제거
+
+### Added
+
+- **plan-builder skill**: 반복 추적 메커니즘
+  - 리뷰 파일 버전 번호 추적: `*_PLAN_REVIEW_v[N].md`
+  - 이전: 즉시 삭제 → 현재: 버전별 보존
+  - Phase 3에서 아카이브/삭제 옵션 제공
+  - Iteration Transition Message 템플릿 추가
+
+- **plan-builder skill**: Phase 3 리뷰 파일 정리 로직
+  - Option A: Archive (audit trail 보존)
+  - Option B: Delete (clean workspace)
+  - Review Iterations History 템플릿 추가
+
+- **plan-builder skill**: WHILE 루프 시각화 다이어그램
+  - ASCII 다이어그램으로 루프 구조 명확화
+  - Step A, B, C, D 순환 흐름 표시
+  - "LOOP BACK TO STEP A" 명시적 표현
+
+- **plan-builder skill**: 테스트 시나리오 문서
+  - `plan-builder/tests/loop_verification.md` 생성
+  - 5개 테스트 케이스: Minimum Iterations, Issue Counting, Loop Continuation, Proper Exit, Version Tracking
+  - Given/Expected/Fail Condition 형식 준수
+
+### Fixed
+
+- **plan-builder skill**: 피드백 루프 조기 종료 문제 해결
+  - 근본 원인: 절차적 지침의 강제력 부족
+  - 해결: 명시적 WHILE 루프 구조 + Binary decision
+  - 결과: ZERO 이슈까지 강제 반복 보장
+
+- **plan-builder skill**: SKILL.md와 review_checklist.md 승인 기준 불일치 해결
+  - 이전: "Approve" (SKILL.md) vs "Approve with Changes" (review_checklist.md)
+  - 현재: 양쪽 모두 "Approve / Needs Iteration" 통일
+  - 관련 파일: [plan-builder/SKILL.md](plan-builder/SKILL.md), [plan-builder/references/review_checklist.md](plan-builder/references/review_checklist.md)
+
+### Technical Details
+
+- **버전 업데이트**: v1.5.1 → v1.6.0 (Breaking Change)
+- **수정된 파일**:
+  - `plan-builder/SKILL.md`: Phase 2 완전 재작성 (~300 lines)
+  - `plan-builder/references/review_checklist.md`: 승인 기준 섹션 재작성 (~70 lines)
+  - `plan-builder/tests/loop_verification.md`: 새 파일 생성 (6.4KB)
+  - `.claude-plugin/marketplace.json`: 버전 1.5.1 → 1.6.0
+- **검증 지표**:
+  - LOOP 키워드: 13개 (≥ 5 요구사항 충족)
+  - "Approve with Changes" 완전 제거 (REMOVED 섹션만 남음)
+  - 반복 추적: "KEEP" 2회, "MANDATORY" 1회
+  - 테스트 케이스: 5개 작성 완료
+
+### Development Process
+
+이 기능은 다음 워크플로우로 개발되었습니다:
+
+1. **analyze-issue**: 피드백 루프 미작동 원인 분석 (`PLAN_BUILDER_FEEDBACK_LOOP_REPORT.md`)
+2. **plan-builder**: 수정 계획 수립 (`PLAN_BUILDER_FEEDBACK_LOOP_FIX_PLAN.md`, 2차 검토 완료)
+3. **execute-plan**: 계획 실행 (8개 태스크 완료, 100% 성공)
+4. **document**: 문서화 (현재 단계)
+
+### Related Files
+
+- 분석 리포트: `PLAN_BUILDER_FEEDBACK_LOOP_REPORT.md`
+- 구현 계획: `PLAN_BUILDER_FEEDBACK_LOOP_FIX_PLAN.md`
+- 테스트 시나리오: `plan-builder/tests/loop_verification.md`
+
+---
+
+## [1.5.1] - 2025-12-XX
 
 ### Added
 

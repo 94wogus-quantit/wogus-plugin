@@ -18,7 +18,7 @@ Comprehensive checklist for reviewing implementation plans. Use this to ensure t
 
 ### Step 3: Assessment & Recommendation
 - [ ] Assign overall assessment (Strong / Good / Needs Improvement / Major Concerns)
-- [ ] Make recommendation (Approve / Approve with Changes / Major Revision)
+- [ ] Make recommendation (Approve / Needs Iteration)
 - [ ] List all findings in priority order
 
 ---
@@ -315,7 +315,8 @@ When plan references a GitHub repository:
 ## Executive Summary
 - **Overall Assessment**: [Strong / Good / Needs Improvement / Major Concerns]
 - **Confidence Level**: [High / Medium / Low]
-- **Recommendation**: [Approve / Approve with Changes / Major Revision Needed]
+- **Recommendation**: [Approve / Needs Iteration]
+- **Loop Decision**: [✅ Exit Loop / 🔄 Continue Loop]
 - **GitHub Repository Alignment**: [If applicable]
 
 ---
@@ -435,12 +436,15 @@ When plan references a GitHub repository:
 
 ## Recommendation
 
-**Final Recommendation**: [Approve / Approve with Changes / Major Revision Needed]
+**Final Recommendation**: [Approve / Needs Iteration]
+
+**Loop Decision**: [✅ Exit Loop (if Approve) / 🔄 Continue Loop (if Needs Iteration)]
 
 **Reasoning**: [Brief explanation of the recommendation]
 
 **Next Steps**:
-- If approved: Proceed to execution
+- If Approve: Exit loop → Proceed to Phase 3 (Finalization)
+- If Needs Iteration: Apply feedback → Review again (new iteration)
 - If changes needed: Apply feedback and re-review
 - If major revision: Re-plan with different approach
 ```
@@ -478,24 +482,71 @@ When plan references a GitHub repository:
 
 ## Approval Criteria
 
-**Approve**:
-- Overall Assessment: "Strong"
-- All critical sections score ✅
-- No Required Changes (🔴)
-- Minor improvements can be deferred
+⚠️ **IMPORTANT**: plan-builder skill uses STRICT binary approval!
 
-**Approve with Changes**:
-- Overall Assessment: "Good"
-- Most sections score ✅ or ⚠️
-- Only minor Required Changes
-- Can be fixed in one quick iteration
+이 체크리스트는 **iterative loop** 내에서 사용됩니다.
+"Approve with Changes" 같은 모호한 옵션은 없습니다.
+계획이 준비되었거나(Approve), 또 다른 반복이 필요하거나(Needs Iteration) 둘 중 하나입니다.
 
-**Major Revision Needed**:
-- Overall Assessment: "Needs Improvement" or "Major Concerns"
-- Multiple sections score ❌
-- Critical Required Changes
-- Fundamental issues with approach
+### ✅ Approve (Ready for Execution)
+
+**Use this ONLY when ALL of the following are true:**
+- Overall Assessment: "Strong" (NOT "Good" - Good means needs more work!)
+- All critical sections (1-8) score ✅ (green checkmark)
+- Required Changes (🔴): **ZERO** (not "minor", not "a few" - ZERO!)
+- Suggested Improvements (🟡): **ZERO or only trivial ones** (e.g., minor wording tweaks)
+- No open questions remaining (❓ section empty)
+
+**Result**: Exit the review loop → Proceed to Phase 3 (Finalization)
+
+### 🔄 Needs Iteration (Apply Feedback and Review Again)
+
+**Use this when ANY of the following are true:**
+- Overall Assessment: "Good", "Needs Improvement", or "Major Concerns"
+- Any critical section scores ⚠️ or ❌
+- Required Changes (🔴): ANY (even ONE Required Change means Needs Iteration!)
+- Suggested Improvements (🟡): ANY significant improvements needed
+- Open questions (❓): ANY questions that need clarification
+
+**Result**: Continue loop → Phase 2D (Apply Feedback) → Phase 2A (Review Again)
 
 ---
 
-Remember: The goal is to ensure the plan is ready for successful execution, not to achieve perfection. Focus on eliminating blockers and critical issues first.
+### ⛔ REMOVED: "Approve with Changes"
+
+**이 옵션은 제거되었습니다.**
+
+**이유**:
+- 모호한 기준으로 인해 피드백 루프가 조기 종료되는 문제 발생
+- "minor changes"의 정의가 불명확하여 일관성 없는 적용
+- 변경사항이 있다면 적용하고 다시 리뷰해야 함 (루프 원칙 위반 방지)
+
+**대체 방법**:
+- 변경사항이 있으면 → "🔄 Needs Iteration" 선택
+- 변경사항을 적용한 후 → 다시 리뷰 (새로운 iteration)
+- ZERO 이슈가 될 때까지 반복 → 그때 "✅ Approve"
+
+---
+
+### Review Recommendation Format
+
+Use this exact format in your review:
+
+```markdown
+## Executive Summary
+- **Overall Assessment**: [Strong / Good / Needs Improvement / Major Concerns]
+- **Recommendation**: [Approve / Needs Iteration]
+- **Loop Decision**: [✅ Exit Loop / 🔄 Continue Loop]
+
+## Summary
+[Brief summary of assessment]
+
+**If Needs Iteration:**
+- 🔴 Required Changes: [count]
+- 🟡 Suggested Improvements: [count]
+- Total Issues: [count]
+```
+
+---
+
+**Remember**: The goal is to ensure the plan is production-ready, not to rush to approval. The iterative loop exists to systematically eliminate ALL issues before execution.

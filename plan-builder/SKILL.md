@@ -130,13 +130,29 @@ This phase implements an explicit WHILE-style loop that repeats until ZERO issue
 
 #### Step A: Review (Iteration #N)
 
-1. **Read Current Plan**
+1. **Read Previous Review (if N > 1)**
+   - **Try** to load `[FEATURE]_PLAN_REVIEW_v[N-1].md` using Read tool
+   - **If file not found** (may have been deleted):
+     - Output warning: "⚠️ Previous review file not found (v[N-1]). Treating as first iteration."
+     - Proceed as if N=1 (all issues will be tagged as [NEW])
+     - Skip to Step 2
+   - **If file found**:
+     - Note what issues were identified last iteration
+     - ⚠️ **CRITICAL**: This context helps verify fixes, NOT to limit current review scope
+     - Purpose: Track progress and ensure previous Required Changes were addressed
+
+2. **Read Current Plan**
    - Load `[FEATURE]_PLAN.md` using Read tool
    - Review all sections comprehensively
 
-2. **Perform Critical Review**
+3. **Perform FULL FRESH Critical Review** ⚠️ MANDATORY
    - Use `mcp__sequential-thinking__sequentialthinking` to analyze
-   - Apply `references/review_checklist.md` systematically
+   - Apply **ENTIRE** `references/review_checklist.md` systematically
+
+   **⛔ CRITICAL INSTRUCTION**:
+   - **DO NOT assume** sections are OK just because previous review didn't flag them
+   - **APPLY FULL CHECKLIST FROM SCRATCH** every time - not just previous issue categories
+   - **LOOK FOR NEW PROBLEMS** - each iteration should discover different types of issues
 
    **Review Focus Areas:**
    - **GitHub Repository Validation** (if applicable)
@@ -186,9 +202,44 @@ This phase implements an explicit WHILE-style loop that repeats until ZERO issue
      - Performance implications
      - Maintainability
 
-3. **Save Review with Version Number**
+4. **Categorize Findings**
+
+   For each issue found, mark its origin:
+   - **[CARRYOVER]** - Also found in previous review (not fixed or insufficiently fixed)
+   - **[NEW]** - Newly discovered in this iteration
+
+   **How to determine**:
+   - If N=1 (first iteration): All issues are [NEW]
+   - If N>1: Compare with previous review file
+     - Issue mentioned in previous review → [CARRYOVER]
+     - Issue NOT mentioned in previous review → [NEW]
+
+   **Purpose of tracking**:
+   - **Progress verification**: Are fixes working? (CARRYOVER count should decrease)
+   - **Continuous improvement**: Are we finding new problems? (NEW count should be >0 in early iterations)
+   - **Audit trail**: What improved each iteration?
+
+   **Example**:
+   ```markdown
+   ### Required Changes (Must Fix) 🔴
+
+   #### Testing Strategy Issues (CRITICAL)
+   1. [CARRYOVER] **Task A**: Test cases still too generic - need specific Given/When/Then
+   2. [NEW] **Task C**: Missing edge case testing for null inputs
+   3. [NEW] **Task D**: No test commands provided
+   ```
+
+5. **Save Review with Version Number**
    - Save as: `[FEATURE]_PLAN_REVIEW_v[N].md` (keep version number!)
-   - Use this structure:
+   - **Include both CARRYOVER and NEW issues in findings**
+   - Maintain the structure below
+
+   **Required format for findings**:
+   - Each issue must have [CARRYOVER] or [NEW] prefix
+   - Group by category (Testing Strategy, Task Independence, etc.)
+   - Clear task reference (Task ID or name)
+
+   Example structure:
 
    ```markdown
    # Plan Review: [Plan Name] (Iteration [N])
@@ -200,10 +251,14 @@ This phase implements an explicit WHILE-style loop that repeats until ZERO issue
    ## Critical Findings
 
    ### Required Changes (Must Fix) 🔴
-   1. [Critical issue that must be fixed]
+
+   #### Testing Strategy Issues
+   1. [CARRYOVER] **Task A**: Test cases still too generic - need specific Given/When/Then
+   2. [NEW] **Task C**: Missing edge case testing for null inputs
 
    ### Suggested Improvements (Should Fix) 🟡
-   1. [Important improvement]
+   1. [CARRYOVER] **Task B**: Consider adding integration tests
+   2. [NEW] **Task D**: Enhance error messages
 
    ### Optional Enhancements (Nice to Have) 🟢
    1. [Enhancement]
@@ -212,7 +267,7 @@ This phase implements an explicit WHILE-style loop that repeats until ZERO issue
    1. [Ambiguous aspect]
    ```
 
-4. **Output Iteration Status** (see template in Loop Exit Condition section)
+6. **Output Iteration Status** (see template in Loop Exit Condition section)
 
 #### Step B: Count Issues
 
@@ -329,9 +384,17 @@ ELSE:
 8. **MANDATORY: Loop Back to Step A**
 
    - **Do NOT skip this step!**
+   - **Do NOT ask user for approval** - automatic iteration is the core principle
    - Go back to Step A with new iteration number (N+1)
    - Perform another review to verify applied changes
    - Continue loop until review finds ZERO issues
+
+   **⚠️ CRITICAL**: This is an **automatic** loop. Do NOT:
+   - Ask "Should I continue to next iteration?"
+   - Wait for user confirmation
+   - Stop mid-iteration
+
+   **ONLY exit when**: Step C Decision Gate determines "total_issues == 0"
 
 **Iteration Transition Message Template:**
 

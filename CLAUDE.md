@@ -474,6 +474,135 @@ v1.6.0까지 workflow-skills는 Skills만으로 구성되어 있었습니다. Sk
 
 ---
 
+### 2025-12-09 - v2.1.0 requirement-validator Agent 및 AC Traceability
+
+**컨텍스트**:
+v2.0.0에서 Agents 시스템을 도입했지만, JIRA Acceptance Criteria (AC)와 코드 간 자동 매핑 및 추적 기능이 부족했습니다. AC 구현 여부를 수동으로 확인해야 했고, 미구현 AC가 merge 전 감지되지 않는 문제가 있었습니다.
+
+**문제점**:
+- **AC 추적 부재**: "AC#1이 어디에 구현되었는가?" 수동 탐색 필요
+- **품질 게이트 부재**: 미구현 AC 자동 탐지 불가 → 불완전한 기능 merge 위험
+- **Skill 간 AC 정보 전달 부족**: analyze-issue, plan-builder, execute-plan 간 AC 연계 미흡
+
+**결정**: requirement-validator Agent 추가 + 4개 Skill 통합
+
+1. **requirement-validator Agent (5번째 Agent)**:
+   - **Mode 1 (Reverse)**: 코드에서 AC 역추적 (analyze-issue Phase 3E)
+   - **Mode 2 (Pre-validation)**: 계획서 AC 완전성 검증 (plan-builder Phase 2 Step C-2)
+   - **Mode 3 (Post-validation)**: 구현 후 AC 달성 검증 (execute-plan Phase 6)
+   - **Mode 4 (Final)**: MR 자동 AC 매핑 (mr-code-review Phase 2-4)
+
+2. **plan-builder에 Step C-2 추가** ⚠️ **CRITICAL**:
+   ```markdown
+   Step C-2: AC Coverage Check (NEW - JIRA 이슈 있을 때만)
+
+   IF (JIRA 이슈 연결됨):
+       1. requirement-validator agent 호출 (Mode 2: Pre-validation)
+       2. AC Completeness 확인:
+          IF (AC Completeness < 100%):
+              → 리뷰 파일에 Required Change 추가
+              → Recommendation: "Needs Iteration"
+          ELSE:
+              → AC Completeness: 100% ✅
+              → EXIT LOOP → Go to Phase 3
+   ```
+
+3. **4개 Skill 통합**:
+   - `analyze-issue`: Phase 3E 추가 (AC 역추적)
+   - `plan-builder`: Phase 2 Step C-2 강화 (AC completeness 검증)
+   - `execute-plan`: Phase 6 추가 (AC 달성 보고)
+   - `mr-code-review`: Phase 2-4 개선 (자동 매핑 강화)
+
+**영향**:
+- **Breaking Change**: 없음 (완전 하위 호환, 선택적 실행)
+- **품질 향상**: AC 누락 자동 탐지 → merge 전 차단
+- **추적성**: 전체 워크플로우에서 AC 중심 축 확립
+- **자동화**: 수동 AC 확인 → 자동 매핑/검증
+
+**대안**:
+1. ~~Manual AC Tracking (수동 체크리스트)~~ → 확장성 부족, 누락 위험
+2. ~~External Tool Integration (JIRA plugin)~~ → MCP 통합 필요, 일관성 부족
+3. ✅ **requirement-validator Agent + Skill 통합** → 채택 (자동화 + 워크플로우 일관성)
+
+**관련 파일**:
+- [agents/requirement-validator.md](agents/requirement-validator.md) - Agent 정의
+- [plan-builder/SKILL.md:244-264](plan-builder/SKILL.md#L244-L264) - Step C-2 구현
+- [REQUIREMENT_VALIDATOR_AGENT_PLAN.md](REQUIREMENT_VALIDATOR_AGENT_PLAN.md) - 구현 계획
+
+**재발 방지**:
+- 새로운 품질 게이트 추가 시 Agent로 분리 (Skill 비대화 방지)
+- AC 같은 핵심 개념은 모든 Skill에서 일관되게 처리
+- 선택적 실행 설계 (JIRA 없어도 동작 보장)
+
+**버전**: v2.0.0 → v2.1.0
+
+---
+
+### 2025-12-10 - v2.2.0 plan-builder 리뷰 iteration의 새로운 탐색 강제
+
+**컨텍스트**:
+plan-builder 스킬의 "iterative review loop"에서 각 iteration이 이전 리뷰 포인트만 재확인하고 새로운 문제를 놓칠 위험이 발견되었습니다.
+
+**근본 원인**:
+- **이전 리뷰 맥락 부재**: Step A가 이전 리뷰 파일을 읽지 않아 피드백 적용 확인 불가능
+- **"새로운 탐색" 명령 부재**: "FULL checklist 재적용" 지시가 없어 이전에 확인 안 한 카테고리를 skip 가능
+- **진행 추적 메커니즘 부재**: CARRYOVER vs NEW 구분이 없어 개선 여부 불명확
+
+**결정**: Incremental Review with Strong Mandates + CARRYOVER/NEW Tracking
+
+1. **Step A에 5단계 프로세스 도입**:
+   - Step 1: Read Previous Review (if N > 1) - 피드백 적용 확인
+   - Step 2: Read Current Plan - 기존 유지
+   - Step 3: Perform FULL FRESH Critical Review (MANDATORY) - 전체 재적용 강제
+   - Step 4: Categorize Findings (CARRYOVER/NEW) - 진행 추적
+   - Step 5: Save Review with Tags - 태그 포함 저장
+
+2. **CRITICAL INSTRUCTION 블록**:
+   - "DO NOT assume sections are OK" - 명시적 금지
+   - "LOOK FOR NEW PROBLEMS" - 명시적 지시
+   - "APPLY FULL CHECKLIST FROM SCRATCH" - 강제 명령
+   - "Each iteration should discover different types" - 기대 행동 명시
+
+3. **CARRYOVER/NEW 태깅 시스템**:
+   - 각 이슈에 [CARRYOVER] 또는 [NEW] 태그 추가
+   - 진행 추적: CARRYOVER ↓ (수정 효과), NEW > 0 (새 탐색 증거)
+   - Audit trail: 각 iteration의 기여 가시화
+
+4. **자동 Iteration 강제** (Step D Step 8):
+   - "Do NOT ask user for approval" 명시
+   - 자동 loop back → ZERO 이슈까지 반복
+   - 사용자 개입 불필요
+
+**영향**:
+- **plan-builder 스킬**: 모든 리뷰 iteration에서 새로운 문제 탐색 보장
+- **계획 품질**: 더 많은 문제를 사전 발견하여 최종 계획 품질 향상
+- **사용자 경험**: 리뷰 시간 약간 증가하지만 실행 단계에서 재작업 감소
+- **Breaking Change**: 없음 (기존 로직 확장, 호환성 유지)
+
+**대안**:
+1. ~~Two-Stage Review (A1: 피드백 확인 + A2: 새 탐색)~~ → 너무 복잡, 리뷰 시간 과다 증가
+2. ~~Fresh Review Only (이전 리뷰 무시)~~ → 피드백 적용 확인 불가, 비효율
+3. ✅ **Incremental Review with Strong Mandates** → 채택 (단순하면서 효과적)
+
+**패턴**: 문서 강제력 확보 패턴 (확장)
+- 기존: 서술적 지침 → 명시적 구조 (WHILE, IF/ELSE)
+- 추가: **암묵적 기대 → 구체적 명령** (MANDATORY, DO NOT, LOOK FOR)
+- 추가: **단일 목적 → 명시적 다중 목적** (확인 + 탐색)
+
+**관련 파일**:
+- [plan-builder/SKILL.md:131-270](plan-builder/SKILL.md#L131-L270) - Step A 전면 개선
+- [plan-builder/references/review_checklist.md:14-29](plan-builder/references/review_checklist.md#L14-L29) - Step 2 강화
+- [plan-builder/tests/review_iteration_fresh_exploration.md](plan-builder/tests/review_iteration_fresh_exploration.md) - 테스트 시나리오
+
+**재발 방지**:
+- 중요한 반복 로직은 명시적 구조 + 구체적 명령으로 표현
+- "should", "recommended" 같은 약한 표현 지양
+- 암묵적 기대를 명시적 지시로 변환 (예: "review comprehensively" → "APPLY FULL CHECKLIST FROM SCRATCH")
+
+**버전**: v2.1.0 → v2.2.0
+
+---
+
 ### 2025-12-09 - plan-builder 피드백 루프 강제력 확보
 
 **컨텍스트**:

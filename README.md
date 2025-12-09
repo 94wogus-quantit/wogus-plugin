@@ -118,15 +118,27 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 
 자동 반복 검토를 통해 고품질 구현 계획을 생성하는 스킬입니다.
 
-⚠️ **v1.6.0 Breaking Change**: 피드백 루프가 더 엄격해졌습니다. 이제 **최소 2-3회 이상 반복**하며, **ZERO 이슈**가 될 때까지 강제로 반복합니다.
+⚠️ **v2.2.0 주요 개선**: 각 리뷰 iteration마다 **새로운 문제를 탐색**하여 계획 품질을 극대화합니다.
 
 **주요 기능:**
 - **명시적 WHILE 루프**: 계획 생성 → 검토 → 피드백 반영 무한 반복 (ZERO 이슈까지)
 - **엄격한 품질 기준**: "Approve"는 ZERO 이슈일 때만 가능 (Good ≠ Strong)
 - **버전 추적**: 각 반복마다 `*_PLAN_REVIEW_v[N].md` 파일 생성 및 보존
-- **Iteration Status Report**: 각 반복 후 이슈 카운트 및 결정 사항 출력
+- **CARRYOVER/NEW 태깅**: 이전 이슈 추적 + 새로 발견한 이슈 구분
+- **Fresh Exploration**: 매 iteration마다 전체 체크리스트를 처음부터 재적용
+- **자동 Iteration**: 사용자 개입 없이 ZERO 이슈까지 자동 반복
 - 모든 태스크에 테스팅 전략 필수 포함
 - 태스크 독립성 검증
+
+**v2.2.0 변경사항 (2025-12-10)**:
+- ✅ **Step A (Review) 6단계 프로세스로 강화**:
+  - Step 1: 이전 리뷰 읽기 (피드백 적용 확인)
+  - Step 3: FULL FRESH Critical Review (MANDATORY - 전체 체크리스트 재적용)
+  - Step 4: CARRYOVER/NEW 이슈 태깅 (진행 추적)
+- ✅ **review_checklist.md 강화**: "MANDATORY: Apply FULL checklist EVERY TIME" 명시
+- ✅ **자동 iteration 강제**: Step D에서 사용자 확인 없이 자동으로 다음 iteration 실행
+- ✅ **CRITICAL INSTRUCTION 블록**: "DO NOT assume", "LOOK FOR NEW PROBLEMS" 명시적 지시
+- 🎯 **결과**: 각 iteration에서 새로운 유형의 문제 발견 보장 (Testing Strategy → Task Independence → Edge Cases...)
 
 **v1.6.0 변경사항 (2025-12-09)**:
 - ✅ Phase 2를 WHILE 루프 구조로 완전 재작성
@@ -425,7 +437,7 @@ mr-code-review [Branch/MR URL]
   },
   "metadata": {
     "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화 + Agents (한국어 기본)",
-    "version": "2.0.0",
+    "version": "2.2.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"

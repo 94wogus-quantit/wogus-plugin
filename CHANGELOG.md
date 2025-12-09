@@ -9,6 +9,143 @@
 
 ---
 
+## [2.2.0] - 2025-12-10
+
+### Enhanced
+
+- **plan-builder skill**: 리뷰 iteration에서 "새로운 문제 탐색" 강제 기능 추가
+  - **Step A (Review) 6단계 프로세스로 강화**:
+    - **Step 1**: 이전 리뷰 읽기 (피드백 적용 확인)
+    - **Step 2**: 현재 계획 읽기
+    - **Step 3**: FULL FRESH Critical Review (MANDATORY - 전체 체크리스트 재적용)
+    - **Step 4**: CARRYOVER/NEW 이슈 태깅 (진행 추적)
+    - **Step 5**: 버전별 리뷰 파일 저장
+    - **Step 6**: Iteration Status 출력
+  - **CRITICAL INSTRUCTION 블록 추가**:
+    - "DO NOT assume sections are OK just because previous review didn't flag them"
+    - "APPLY FULL CHECKLIST FROM SCRATCH every time"
+    - "LOOK FOR NEW PROBLEMS - each iteration should discover different types of issues"
+  - **CARRYOVER/NEW 태깅 시스템**:
+    - [CARRYOVER]: 이전 리뷰에서도 발견된 이슈 (미수정 또는 불충분한 수정)
+    - [NEW]: 이번 iteration에서 처음 발견한 이슈
+    - 진행 상황 가시화 (CARRYOVER 감소 추세 = 피드백 적용 성공)
+  - **자동 iteration 강제**:
+    - Step D Step 8에 "Do NOT ask user for approval" 명시
+    - 사용자 개입 없이 ZERO 이슈까지 자동 반복
+  - 위치: `plan-builder/SKILL.md:131-427`
+
+- **review_checklist.md**: Step 2 (Systematic Evaluation) 강화
+  - "⚠️ MANDATORY: Apply the FULL checklist EVERY TIME" 지시사항 추가
+  - **Critical Requirements**:
+    - "Work through **ALL sections** of this checklist (1-10)"
+    - "Do not skip sections even if previous review was clean"
+    - "Look for NEW problems, not just CARRYOVER issues from previous reviews"
+    - "Each iteration should catch different types of issues"
+  - **Why this matters** 섹션 추가:
+    - "Early iterations catch obvious problems (missing sections, unclear criteria)"
+    - "Later iterations catch subtle problems (coupling, edge cases, performance)"
+    - "Skipping sections means missing potential issues"
+  - 위치: `plan-builder/references/review_checklist.md:8-30`
+
+### Added
+
+- **plan-builder 테스트 문서**: Fresh Exploration 검증 시나리오
+  - `plan-builder/tests/review_iteration_fresh_exploration.md` 생성
+  - **Test Case 1**: 새로운 문제 탐색 확인
+    - Iteration 2에서 [NEW] 태그 1개 이상 존재 검증
+    - 검증 명령: `grep -c "\[NEW\]" *_PLAN_REVIEW_v2.md` → 결과 1 이상
+  - **Test Case 2**: 전체 체크리스트 재적용 확인
+    - 이전 iteration에서 확인 안 한 섹션도 재검토 증거
+  - **실패 시나리오**: Scenario A (새 탐색 실패), Scenario B (CARRYOVER 태깅 오류)
+
+### Changed
+
+- **marketplace.json**: v2.1.0 → v2.2.0
+  - `metadata.version` 업데이트
+  - 위치: `.claude-plugin/marketplace.json`
+
+- **CLAUDE.md**: 아키텍처 결정사항 추가
+  - "2025-12-10 - v2.2.0 plan-builder 리뷰 iteration의 새로운 탐색 강제" 섹션
+  - **컨텍스트**: 이전 리뷰 포인트만 재확인하고 새로운 문제를 놓칠 위험 발견
+  - **근본 원인**: 이전 리뷰 맥락 부재, "새로운 탐색" 명령 부재, 진행 추적 메커니즘 부재
+  - **결정**: Incremental Review with Strong Mandates + CARRYOVER/NEW Tracking
+  - **재발 방지**: 암묵적 기대를 명시적 지시로 변환
+  - 위치: `CLAUDE.md:457-550`
+
+### Technical Details
+
+- **아키텍처 확장**: 문서 강제력 확보 패턴 확장
+  - v1.6.0: WHILE 루프 + Binary Decision (피드백 루프 강제)
+  - v2.2.0: CRITICAL INSTRUCTION + CARRYOVER/NEW (새 탐색 강제)
+  - 패턴: 서술적 지침 ("you should") → 명시적 구조 ("MANDATORY", "DO NOT")
+
+- **새 파일**:
+  - `plan-builder/tests/review_iteration_fresh_exploration.md` (6.5KB, 196 lines)
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: version 2.1.0 → 2.2.0
+  - `plan-builder/SKILL.md`: Step A 6단계로 확장, Step D Step 8 강화 (~100 lines 추가)
+  - `plan-builder/references/review_checklist.md`: Step 2 MANDATORY 지시사항 추가 (~20 lines 추가)
+  - `CLAUDE.md`: v2.2.0 아키텍처 결정 추가 (~100 lines)
+  - `README.md`: plan-builder v2.2.0 변경사항 반영 (~20 lines)
+
+- **검증 지표**:
+  - SKILL.md Markdown syntax 검증 통과 (코드 블록 26개, 짝수) ✅
+  - CRITICAL INSTRUCTION 블록 추가 완료 ✅
+  - CARRYOVER/NEW 태깅 예제 포함 ✅
+  - 테스트 케이스 문서화 완료 ✅
+  - Graceful degradation: 이전 리뷰 파일 없어도 동작 ✅
+
+### Development Process
+
+이 기능은 다음 워크플로우로 개발되었습니다:
+
+1. **analyze-issue**: 리뷰 iteration 문제 분석 (`PLAN_BUILDER_REVIEW_ITERATION_ISSUE_REPORT.md`)
+2. **plan-builder**: Fresh Exploration 강제 계획 수립 (`PLAN_BUILDER_REVIEW_ITERATION_FIX_PLAN.md`, 3차 검토 완료)
+3. **execute-plan**: 9개 태스크 완료 (Phase 1-3)
+4. **document**: 문서화 (현재 단계)
+
+### Migration Guide
+
+**기존 사용자 (v2.1.0 → v2.2.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **자동 업그레이드**:
+   - plan-builder는 확장된 리뷰 프로세스로 자동 업데이트
+   - 다른 Skills는 영향 없음
+
+3. **새 기능 활용**:
+   - **plan-builder 실행 시**:
+     - Iteration 2+에서 [NEW] 이슈 자동 발견
+     - CARRYOVER 이슈 추적으로 진행 상황 가시화
+     - 사용자 개입 없이 자동 iteration (ZERO 이슈까지)
+   - **리뷰 파일 형식**:
+     - `*_PLAN_REVIEW_v[N].md` 형식으로 버전 추적
+     - 각 이슈에 [CARRYOVER] 또는 [NEW] 태그 포함
+
+4. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 계획 파일 형식 동일
+   - ✅ 기존 워크플로우 영향 없음 (단, iteration 횟수는 증가 가능)
+
+**예상 변화**:
+- **이전 (v2.1.0)**: 2-3회 iteration 후 Approve
+- **현재 (v2.2.0)**: 각 iteration마다 새로운 유형의 문제 발견 → 더 철저한 리뷰
+- **결과**: 계획 생성 시간 약간 증가, 품질 크게 향상
+
+### Related Files
+
+- 분석 리포트: `PLAN_BUILDER_REVIEW_ITERATION_ISSUE_REPORT.md`
+- 구현 계획: `PLAN_BUILDER_REVIEW_ITERATION_FIX_PLAN.md`
+- 계획 리뷰: `PLAN_BUILDER_REVIEW_ITERATION_FIX_PLAN_REVIEW_FINAL.md`
+- 테스트 시나리오: `plan-builder/tests/review_iteration_fresh_exploration.md`
+
+---
+
 ## [2.1.0] - 2025-12-10
 
 ### Added

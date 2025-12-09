@@ -12,9 +12,21 @@ Comprehensive checklist for reviewing implementation plans. Use this to ensure t
 - [ ] Note initial impressions and concerns
 
 ### Step 2: Systematic Evaluation
-- [ ] Work through each section of this checklist
+
+⚠️ **MANDATORY**: Apply the FULL checklist EVERY TIME, regardless of previous reviews.
+
+**Critical Requirements**:
+- [ ] Work through **ALL sections** of this checklist (1-10)
+- [ ] Do not skip sections even if previous review was clean
 - [ ] Document specific issues with task/section references
+- [ ] Look for NEW problems, not just CARRYOVER issues from previous reviews
+- [ ] Each iteration should catch different types of issues
 - [ ] Categorize findings: Required Changes / Suggested / Optional
+
+**Why this matters**:
+- Early iterations catch obvious problems (missing sections, unclear criteria)
+- Later iterations catch subtle problems (coupling, edge cases, performance)
+- Skipping sections means missing potential issues
 
 ### Step 3: Assessment & Recommendation
 - [ ] Assign overall assessment (Strong / Good / Needs Improvement / Major Concerns)

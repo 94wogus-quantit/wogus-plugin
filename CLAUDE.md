@@ -92,6 +92,48 @@ Automated code review for SOLID principles, Code Smells, naming conventions.
 | **Examples** | analyze-issue, plan-builder | code-refactorer, test-generator |
 | **Complexity** | High (6-9 phases) | Low (4-5 phases) |
 
+## AC Traceability (요구사항 추적)
+
+requirement-validator agent를 통해 전체 워크플로우에서 JIRA Acceptance Criteria를 추적할 수 있습니다.
+
+### 워크플로우별 AC 활용
+
+```
+JIRA-123: "사용자 이메일 로그인"
+├─ AC#1: 이메일 validation
+├─ AC#2: 5회 실패 시 계정 잠금
+└─ AC#3: JWT 토큰 발급
+
+1. analyze-issue (버그 분석)
+   → requirement-validator Mode 1 (Reverse Tracing)
+   → "이 버그는 AC#2 미충족"
+
+2. plan-builder (계획 수립)
+   → requirement-validator Mode 2 (Pre-validation)
+   → "계획이 AC#1,2,3 모두 커버 ✅"
+
+3. execute-plan (구현)
+   → requirement-validator Mode 3 (Post-validation)
+   → "AC#1 ✅, AC#2 ❌ 미구현"
+
+4. mr-code-review (MR 리뷰)
+   → requirement-validator Mode 4 (Final Gate)
+   → "AC#2 미구현 → MR BLOCKED"
+```
+
+### requirement-validator Agent
+
+**4가지 실행 모드**:
+- **Mode 1 (Reverse)**: 코드 → AC 역매핑
+- **Mode 2 (Pre)**: 계획 → AC coverage
+- **Mode 3 (Post)**: git diff → AC 구현 확인
+- **Mode 4 (Final)**: MR → AC 최종 게이트
+
+**도구**:
+- mcp__atlassian (JIRA AC 조회)
+- mcp__sequential-thinking (체계적 분석)
+- Read, Write, Grep, Glob, Bash (코드 매핑)
+
 ## Skill Development Workflow
 
 ### Creating New Skills

@@ -5,8 +5,8 @@
     "email": "94wogus@quantit.io"
   },
   "metadata": {
-    "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 + Agents - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화 (한국어 기본)",
-    "version": "2.0.0",
+    "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 + Agents - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화, AC 요구사항 추적 (한국어 기본)",
+    "version": "2.1.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
@@ -15,7 +15,22 @@
     {
       "name": "workflow-skills",
       "description": "체계적인 개발 워크플로우를 위한 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화",
-      "source": "./"
+      "source": "./",
+      "strict": true,
+      "skills": [
+        "./analyze-issue",
+        "./plan-builder",
+        "./execute-plan",
+        "./document",
+        "./mr-code-review"
+      ],
+      "agents": [
+        "./agents/code-refactorer.md",
+        "./agents/test-generator.md",
+        "./agents/performance-analyzer.md",
+        "./agents/code-reviewer.md",
+        "./agents/requirement-validator.md"
+      ]
     }
   ]
 }

@@ -275,6 +275,42 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 
 ---
 
+### requirement-validator (P0)
+
+JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 여부를 검증합니다.
+
+**주요 기능:**
+- AC ↔ 코드 자동 매핑
+- 4가지 실행 모드 (Reverse, Pre, Post, Final)
+- 미구현 AC 자동 탐지
+- 전체 워크플로우 AC traceability
+
+**사용 시나리오:**
+```bash
+# 1. 자동 호출 (Skills 통합)
+# - analyze-issue에서 자동 호출 (AC 역추적)
+# - plan-builder에서 자동 호출 (AC coverage 체크)
+# - execute-plan에서 자동 호출 (AC 달성 보고)
+# - mr-code-review에서 자동 호출 (AC 최종 게이트)
+
+# 2. 수동 호출 (Agent 직접 실행)
+# Mode 1: 특정 코드가 어떤 AC와 관련되었는지 역추적
+"requirement-validator agent로 UserService.ts의 login 함수가 어떤 AC와 관련있는지 찾아줘"
+
+# Mode 2: 계획이 모든 AC를 커버하는지 사전 검증
+"requirement-validator agent Mode 2로 FEATURE_PLAN.md의 AC coverage 체크해줘"
+
+# Mode 3: 현재 구현이 AC를 얼마나 충족하는지 확인
+"requirement-validator agent Mode 3로 현재 git diff 기준 AC 달성률 보고해줘"
+
+# Mode 4: MR이 AC를 충족하는지 최종 검증
+"requirement-validator agent Mode 4로 이 MR이 JIRA-123 AC를 모두 달성했는지 확인해줘"
+```
+
+**통합 Skills**: analyze-issue, plan-builder, execute-plan, mr-code-review
+
+---
+
 ### document
 
 워크플로우 아티팩트를 수집하여 프로젝트 문서를 종합적으로 업데이트하는 스킬입니다.

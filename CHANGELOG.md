@@ -9,6 +9,141 @@
 
 ---
 
+## [2.1.0] - 2025-12-10
+
+### Added
+
+- **requirement-validator Agent (P0)**: JIRA Acceptance Criteria와 코드 자동 매핑 및 검증
+  - **4가지 실행 모드**:
+    - **Mode 1 (Reverse Tracing)**: 코드 → AC 역매핑 (for analyze-issue)
+    - **Mode 2 (Pre-validation)**: 계획 → AC coverage 체크 (for plan-builder)
+    - **Mode 3 (Post-validation)**: git diff → AC 구현 확인 (for execute-plan)
+    - **Mode 4 (Final Gate)**: MR → AC 최종 검증 (for mr-code-review)
+  - **도구**: Serena, Atlassian, Sequential Thinking MCP 통합
+  - **출력**: AC 달성률, 미구현 AC 자동 탐지, MR 블로킹 기능
+  - 위치: `agents/requirement-validator.md`
+
+### Enhanced
+
+- **analyze-issue skill**: Phase 3E (Requirement Reverse Tracing) 추가
+  - 버그와 연관된 JIRA AC 자동 역추적
+  - requirement-validator Mode 1 자동 호출
+  - 보고서에 "요구사항 추적" 섹션 추가
+  - 위치: `analyze-issue/SKILL.md:279-322`
+
+- **plan-builder skill**: Phase 2 Step C-2 (AC Coverage Check) 추가
+  - 계획이 모든 JIRA AC를 커버하는지 자동 검증
+  - AC Completeness < 100%면 "Needs Iteration" 판정
+  - requirement-validator Mode 2 자동 호출
+  - STRICT Approval Criteria에 "AC Completeness: 100%" 추가
+  - 위치: `plan-builder/SKILL.md:231-273`
+
+- **execute-plan skill**: Phase 6 (AC Achievement Report) 추가
+  - 구현 완료 후 AC 달성 여부 자동 검증 및 보고
+  - git diff 기반 변경 파일 자동 수집
+  - requirement-validator Mode 3 자동 호출
+  - 미구현 AC 발견 시 TodoList 자동 추가
+  - 위치: `execute-plan/SKILL.md:526-601`
+
+- **mr-code-review skill**: Phase 2-4 (JIRA 요구사항 검증) 자동화
+  - 수동 검증 → requirement-validator Mode 4 자동 호출로 교체
+  - MR 전체 변경사항 기반 AC 최종 검증
+  - 미구현 AC 있을 시 "MR BLOCKED" 판정
+  - 코드 품질, 보안, 테스트 품질 통합 검증
+  - 위치: `mr-code-review/SKILL.md:201-254`
+
+### Changed
+
+- **marketplace.json**: v2.0.0 → v2.1.0
+  - `metadata.version` 업데이트
+  - `metadata.description`에 "AC 요구사항 추적" 추가
+  - `agents` 배열에 `./agents/requirement-validator.md` 추가
+  - 위치: `.claude-plugin/marketplace.json`
+
+### Technical Details
+
+- **아키텍처 확장**: End-to-End AC Traceability
+  - 전체 워크플로우(analyze-issue → plan-builder → execute-plan → mr-code-review)에서 JIRA AC 자동 추적
+  - AC를 중심 축으로 한 품질 게이트 시스템
+  - Graceful Degradation: JIRA/MCP 없어도 정상 작동
+
+- **새 파일**:
+  - `agents/requirement-validator.md` (~15KB, 485 lines)
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: version 2.0.0 → 2.1.0, agent 등록
+  - `analyze-issue/SKILL.md`: Phase 3E 추가 (~45 lines)
+  - `plan-builder/SKILL.md`: Step C-2 추가 (~45 lines)
+  - `execute-plan/SKILL.md`: Phase 6 추가 (~75 lines)
+  - `mr-code-review/SKILL.md`: Phase 2-4 자동화 (~55 lines)
+  - `README.md`: requirement-validator 섹션 추가 (~35 lines)
+  - `CLAUDE.md`: AC Traceability 개념 설명 추가 (~45 lines)
+
+- **검증 지표**:
+  - requirement-validator.md YAML frontmatter 검증 통과 ✅
+  - 4가지 모드 모두 구현 완료 ✅
+  - 4개 Skill 통합 완료 (기존 기능 회귀 테스트 통과) ✅
+  - Sequential Thinking 예제 10개 이상 포함 ✅
+  - Backward Compatibility 보장 (JIRA 없어도 동작) ✅
+
+### Development Process
+
+이 기능은 다음 워크플로우로 개발되었습니다:
+
+1. **analyze-issue**: AC 추적 Gap 분석 (`REQUIREMENT_VALIDATOR_ANALYSIS_REPORT.md`)
+2. **plan-builder**: requirement-validator 구현 계획 수립 (`REQUIREMENT_VALIDATOR_AGENT_PLAN.md`, 2차 검토 완료)
+3. **execute-plan**: 9개 태스크 완료 (Phase 0-3)
+4. **document**: 문서화 (현재 단계)
+
+### Migration Guide
+
+**기존 사용자 (v2.0.0 → v2.1.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **자동 업그레이드**:
+   - requirement-validator Agent 자동 포함 (별도 설치 불필요)
+   - 기존 Skills는 확장된 기능으로 자동 업데이트
+
+3. **새 기능 활용**:
+   - **JIRA 이슈 연결 시**: 전체 워크플로우에서 AC 자동 추적
+     - analyze-issue → AC 역추적 (Phase 3E)
+     - plan-builder → AC coverage 체크 (Step C-2, 100% 강제)
+     - execute-plan → AC 달성 보고 (Phase 6)
+     - mr-code-review → AC 최종 게이트 (Phase 2-4, MR 블로킹 가능)
+   - **JIRA 없을 시**: 기존과 동일하게 작동 (Graceful Degradation)
+
+4. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ JIRA/Atlassian MCP 선택적 (없어도 정상 작동)
+   - ✅ 기존 워크플로우 영향 없음
+
+**수동 호출 예시**:
+```bash
+# Mode 1: 코드 → AC 역추적
+"requirement-validator agent로 UserService.ts의 login 함수가 어떤 AC와 관련있는지 찾아줘"
+
+# Mode 2: 계획 → AC coverage 체크
+"requirement-validator agent Mode 2로 FEATURE_PLAN.md의 AC coverage 체크해줘"
+
+# Mode 3: git diff → AC 달성률
+"requirement-validator agent Mode 3로 현재 git diff 기준 AC 달성률 보고해줘"
+
+# Mode 4: MR → AC 최종 검증
+"requirement-validator agent Mode 4로 이 MR이 JIRA-123 AC를 모두 달성했는지 확인해줘"
+```
+
+### Related Files
+
+- 분석 리포트: `REQUIREMENT_VALIDATOR_ANALYSIS_REPORT.md`
+- 구현 계획: `REQUIREMENT_VALIDATOR_AGENT_PLAN.md`
+- 계획 리뷰: `REQUIREMENT_VALIDATOR_AGENT_PLAN_REVIEW_v1.md`, `REQUIREMENT_VALIDATOR_AGENT_PLAN_REVIEW_v2.md`
+
+---
+
 ## [2.0.0] - 2025-12-09
 
 ### ⚠️ Breaking Changes

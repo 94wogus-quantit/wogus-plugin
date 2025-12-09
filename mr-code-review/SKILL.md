@@ -198,10 +198,60 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    - Sequential Thinking으로 과거 버그 패턴 대조
    - Serena로 과거 버그와 유사 패턴 검색
 
-4. **[JIRA 요구사항 검증](references/verification_guides/jira_validation.md)**
-   - Atlassian MCP로 JIRA 이슈 조회
-   - Sequential Thinking으로 각 Acceptance Criteria 검증
-   - Serena로 요구사항 관련 코드 확인
+4. **JIRA 요구사항 검증 (자동화)**
+
+   **목적**: MR이 JIRA AC를 충족하는지 자동 검증
+
+   **프로세스**:
+
+   **4-1. requirement-validator Agent 호출 (Mode 4: Final Gate)**
+
+   ```typescript
+   // 사용자에게 알림
+   "🤖 requirement-validator agent로 AC 최종 검증 중..."
+
+   // MR 브랜치 변경사항 수집
+   Bash({ command: "git diff main...HEAD --name-only" })
+
+   // Agent 호출
+   // Mode 4: Final Gate
+   // Input: JIRA 이슈 키, MR 전체 변경사항
+   // Output: AC별 상세 검증 리포트 (코드 품질, 보안, 테스트 포함)
+   ```
+
+   **4-2. 리포트를 MR_CODE_REVIEW.md에 통합**
+
+   requirement-validator의 출력을 그대로 포함:
+
+   ```markdown
+   ## 🎯 JIRA 요구사항 검증
+
+   ### AC 달성 요약
+   - **총 AC**: 3개
+   - **구현 완료**: 2개 (66%)
+   - **미구현**: 1개 (AC#2)
+
+   ### 상세 분석
+
+   #### AC#1: 이메일 로그인 ✅
+   [requirement-validator Mode 4 출력 참조]
+
+   #### AC#2: 5회 실패 시 계정 잠금 ❌
+   [requirement-validator Mode 4 출력 참조]
+
+   ### 최종 판정
+
+   🔴 **MR BLOCKED** - AC#2 미구현으로 인해 merge 금지
+   ```
+
+   **4-3. 추가 검증 (기존 로직 유지)**
+
+   requirement-validator 결과 외에도:
+   - 보안 취약점 (OWASP Top 10)
+   - 코드 컨벤션 준수
+   - 테스트 커버리지
+
+   이들은 기존 Phase 2-5, 2-6에서 계속 수행
 
 5. **[보안 및 품질 리뷰](references/verification_guides/security_review.md)**
    - Sequential Thinking으로 OWASP Top 10 체계적 분석

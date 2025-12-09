@@ -523,7 +523,86 @@ npm test -- payment.test.ts --coverage
 
 ---
 
-### Phase 6: Testing and Verification
+### Phase 6: AC Achievement Report (필수)
+
+**목적**: 구현 완료 후 AC 달성 여부 자동 검증 및 보고
+
+**실행 조건**:
+- Phase 5 (Test Generation) 완료 후
+- JIRA 이슈와 연결된 경우
+
+**Steps**:
+
+**1. requirement-validator Agent 호출 (Mode 3)**
+
+```typescript
+// 사용자에게 알림
+"🤖 requirement-validator agent로 AC 달성 여부 검증 중..."
+
+// Git diff로 변경된 파일 수집
+Bash({ command: "git diff --name-only HEAD" })
+
+// Agent 호출
+// Mode 3: Post-validation
+// Input: JIRA 이슈 키, git diff 결과
+// Output: AC별 구현 여부 리포트
+```
+
+**2. 결과 분석 및 TodoList 업데이트**
+
+```typescript
+// 미구현 AC가 있으면 TodoList에 추가
+IF (미구현 AC 존재):
+    TodoWrite({
+      todos: [
+        ...existing_todos,
+        {
+          content: "미구현 AC 처리: AC#2 '5회 실패 시 계정 잠금' 구현",
+          status: "pending",
+          activeForm: "미구현 AC 처리 중"
+        }
+      ]
+    })
+```
+
+**3. AC 달성 보고서 출력**
+
+```markdown
+## 📊 AC 구현 현황
+
+| AC | 구현 위치 | 구현 상태 | 테스트 | 커버리지 |
+|----|----------|----------|--------|----------|
+| AC#1 | [UserService.ts:42](src/auth/UserService.ts#L42) | ✅ 완료 | ✅ 있음 | 85% |
+| AC#2 | ❌ 미구현 | 미구현 | ❌ 없음 | - |
+| AC#3 | [TokenService.ts:15](src/auth/TokenService.ts#L15) | ✅ 완료 | ✅ 있음 | 90% |
+
+**총 AC 달성률**: 66% (2/3)
+
+### 다음 조치
+
+🔴 **CRITICAL**: AC#2 "5회 실패 시 계정 잠금"이 미구현입니다!
+
+**권장 사항**:
+1. LoginAttemptService 추가 구현
+2. 실패 카운터 Redis 저장 로직
+3. 5회 초과 시 계정 잠금 API
+4. 테스트 작성 (Happy path + Edge cases)
+5. Phase 6 재실행하여 재검증
+
+**TodoList에 추가됨** ✅
+```
+
+**4. JIRA 이슈 없을 때 graceful degradation**
+
+```typescript
+IF (JIRA 이슈 없음):
+    "ℹ️ JIRA 이슈가 연결되지 않아 AC 검증을 건너뜁니다."
+    → Phase 6 생략, Phase 7로 진행
+```
+
+---
+
+### Phase 7: Testing and Verification
 
 **Objective**: Comprehensively test all implemented functionality.
 

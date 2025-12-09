@@ -276,6 +276,51 @@ mcp__sequential-thinking__sequentialthinking({
 - **예상 효과**: 복잡도 감소, 테스트 가능성 향상, 유지보수성 개선
 ```
 
+### Phase 3E: Requirement Reverse Tracing (선택적)
+
+**목적**: 버그와 연관된 JIRA AC 역추적
+
+**실행 조건**:
+- JIRA 이슈와 연결된 경우
+- Phase 3 (Codebase Investigation)에서 버그 발생 위치 확인 완료
+
+**Steps**:
+
+**1. requirement-validator Agent 호출 (Mode 1)**
+
+```typescript
+// 사용자에게 알림
+"🤖 requirement-validator agent로 AC 역추적 중..."
+
+// Agent 호출 (Claude Code에서 자동)
+// Mode 1: Reverse Tracing
+// Input: 버그 발생 파일 경로, 함수명
+// Output: 연관 AC 목록
+```
+
+**2. 결과를 보고서에 추가**
+
+보고서 `[ISSUE_ID]_REPORT.md`의 Phase 4 (Root Cause Analysis) 섹션에 추가:
+
+```markdown
+## 🎯 요구사항 추적
+
+### 연관 AC
+- **AC#2**: "비밀번호 5회 실패 시 계정 잠금"
+  - **관련 코드**: [LoginAttemptService.ts:15-45](src/auth/LoginAttemptService.ts#L15-L45)
+  - **버그 원인**: 실패 카운터 로직 오류 (Redis 키 만료 시간 미설정)
+  - **AC 충족 여부**: ❌ 미충족 - 계정 잠금 안 됨
+
+### 영향
+- 이 버그로 인해 AC#2가 충족되지 않습니다
+- 보안 요구사항 위반 (무차별 대입 공격 방어 실패)
+
+### 권장 조치
+1. LoginAttemptService의 카운터 TTL 설정 (5분)
+2. AC#2 테스트 케이스 추가 (현재 누락)
+3. MR 리뷰 시 requirement-validator로 재검증
+```
+
 ### Phase 4: Root Cause Determination
 
 Based on systematic analysis, identify:

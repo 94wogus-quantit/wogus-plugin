@@ -230,23 +230,45 @@ Extract from review:
 
 #### Step C: Decision Gate (STRICT)
 
+**Step C-1: Basic Checks (기존 유지)**
+
 ```
 IF (total_issues == 0 AND
     Overall Assessment == "Strong" AND
     Recommendation == "Approve"):
+    → Continue to Step C-2
+ELSE:
+    → Go to Step D (Apply Feedback)
+```
 
-    ✅ EXIT LOOP → Go to Phase 3 (Finalization)
+**Step C-2: AC Coverage Check (NEW - JIRA 이슈 있을 때만)**
+
+```
+IF (JIRA 이슈 연결됨):
+    1. 🤖 requirement-validator agent 호출 (Mode 2: Pre-validation)
+       Input: [FEATURE]_PLAN.md, JIRA 이슈 키
+
+    2. AC Completeness 확인:
+       IF (AC Completeness < 100%):
+           → 리뷰 파일에 Required Change 추가:
+             "AC#X 누락 - Task 추가 필요"
+           → Recommendation: "Needs Iteration"
+           → Go to Step D (Apply Feedback)
+       ELSE:
+           → AC Completeness: 100% ✅
+           → EXIT LOOP → Go to Phase 3
 
 ELSE:
-    ❌ CONTINUE LOOP → Go to Step D (Apply Feedback)
+    → JIRA 이슈 없음, AC Check 생략
+    → EXIT LOOP → Go to Phase 3
 ```
 
 **⛔ STRICT Approval Criteria (ALL must be true):**
-- Overall Assessment: "Strong" only (NOT "Good" - that needs more work)
-- Recommendation: "Approve" only (NOT "Needs Iteration")
-- Required Changes (🔴): ZERO (not "minor", not "a few" - ZERO!)
-- Suggested Improvements (🟡): ZERO or trivial only
-- No open questions remaining
+- Overall Assessment: "Strong"
+- Recommendation: "Approve"
+- Required Changes: ZERO
+- Suggested Improvements: ZERO or trivial
+- **AC Completeness: 100%** (JIRA 이슈 있을 때만)
 
 **If ANY issues remain → Continue to Step D!**
 

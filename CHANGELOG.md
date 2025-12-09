@@ -7,6 +7,107 @@
 
 ---
 
+## [2.4.0] - 2025-12-10
+
+### Added
+
+- **MCP 서버 추가**: Plugin에 2개 MCP 서버 자동 통합
+  - **sentry**: Sentry 에러 트래킹 서버
+    - Sentry 이슈 조회 및 분석 지원
+    - `SENTRY_ACCESS_TOKEN` 환경 변수 필요
+    - `OPENAI_API_KEY` 환경 변수 필요 (Sentry MCP 내부 사용)
+    - 위치: `.claude-plugin/marketplace.json:65-77`
+  - **atlassian**: Atlassian (JIRA/Confluence) 연동 서버
+    - JIRA 이슈, 코멘트, 상태 전환 등 자동화
+    - 별도 설정 불필요 (OAuth 자동 처리)
+    - 위치: `.claude-plugin/marketplace.json:78-87`
+
+- **MCP 서버 비활성화 가이드**: README에 상세한 비활성화 방법 추가
+  - `deniedMcpServers` 사용법 문서화
+  - 각 MCP 서버별 정확한 `serverCommand` 예시 제공
+  - 5개 MCP 서버 (sequential-thinking, context7, serena, sentry, atlassian) 비활성화 방법
+  - 환경 변수 치환 주의사항 명시
+  - 위치: `README.md:65-150`
+
+### Changed
+
+- **marketplace.json**: v2.3.0 → v2.4.0
+  - `metadata.version` 업데이트
+  - 위치: `.claude-plugin/marketplace.json`
+
+- **README.md**: 환경 변수 설정 가이드 확장
+  - `SENTRY_ACCESS_TOKEN` 추가
+  - `OPENAI_API_KEY` 추가 (Sentry MCP용)
+  - 위치: `README.md:50-63`
+
+### Technical Details
+
+- **환경 변수 추가**:
+  - `SENTRY_ACCESS_TOKEN`: Sentry MCP 서버 인증용
+  - `OPENAI_API_KEY`: Sentry MCP 내부에서 AI 기반 에러 분석 시 사용
+  - `.zshenv`에 환경 변수 설정 권장
+
+- **MCP 서버 총 5개**:
+  1. sequential-thinking (필수 - 체계적 사고)
+  2. context7 (선택 - 라이브러리 문서)
+  3. serena (필수 - 코드 심볼 분석)
+  4. **sentry** (선택 - 에러 트래킹) ← NEW
+  5. **atlassian** (선택 - JIRA 연동) ← NEW
+
+- **보안 강화**:
+  - 모든 민감 정보는 환경 변수로 처리
+  - marketplace.json에 하드코딩된 키 없음
+  - Public repo 노출 방지
+
+### Migration Guide
+
+**기존 사용자 (v2.3.0 → v2.4.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **환경 변수 설정** (선택사항):
+   ```bash
+   # ~/.zshrc 또는 ~/.zshenv에 추가
+   export SENTRY_ACCESS_TOKEN="sntryu_your-token-here"
+   export OPENAI_API_KEY="sk-proj-your-key-here"
+
+   # 적용
+   source ~/.zshenv
+   ```
+
+3. **자동 업그레이드**:
+   - sentry, atlassian MCP 서버 자동 포함
+   - 환경 변수 설정하지 않으면 해당 MCP 서버만 비활성화됨 (다른 서버는 정상 작동)
+
+4. **MCP 서버 비활성화** (선택사항):
+   - README.md의 "MCP 서버 비활성화" 섹션 참조
+   - `.claude/settings.local.json`에서 `deniedMcpServers` 사용
+
+5. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 MCP 서버 (sequential-thinking, context7, serena) 영향 없음
+   - ✅ 기존 워크플로우 정상 작동
+
+**새 MCP 서버 활용**:
+```bash
+# analyze-issue에서 Sentry 에러 자동 조회
+"analyze-issue skill로 Sentry 이슈 ISSUE-123 분석해줘"
+
+# JIRA 이슈 자동 업데이트
+"execute-plan 완료 후 JIRA에 구현 완료 코멘트 남겨줘"
+```
+
+### Related Files
+
+- `.claude-plugin/marketplace.json`: MCP 서버 정의 추가
+- `README.md`: MCP 서버 비활성화 가이드 추가
+- `.zshenv`: 환경 변수 설정
+
+---
+
 ## [2.3.0] - 2025-12-10
 
 ### Added

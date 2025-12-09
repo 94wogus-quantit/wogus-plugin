@@ -55,12 +55,110 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    # Context7 API 키 (라이브러리 문서 조회용)
    export CONTEXT7_API_KEY="your-api-key-here"
 
+   # Sentry 액세스 토큰 (에러 트래킹용)
+   export SENTRY_ACCESS_TOKEN="your-sentry-token-here"
+
+   # OpenAI API 키 (Sentry MCP 내부 AI 분석용)
+   export OPENAI_API_KEY="your-openai-api-key-here"
+
    # Claude Code 재시작
    ```
 
    - **sequential-thinking**: 별도 설정 없이 자동 동작
    - **context7**: [Context7](https://context7.com)에서 API 키 발급 필요
    - **serena**: 코드 심볼 분석 및 검색 (별도 설정 불필요, uvx 자동 설치)
+   - **sentry**: [Sentry](https://sentry.io)에서 액세스 토큰 발급 필요 (+ OpenAI API 키)
+   - **atlassian**: OAuth 기반 인증 (별도 토큰 불필요, 브라우저 인증)
+
+5. **MCP 서버 비활성화** (선택사항):
+
+   특정 MCP 서버를 사용하지 않으려면 `.claude/settings.local.json`에서 `deniedMcpServers`를 사용합니다.
+
+   **주의**:
+   - `serverCommand`는 전체 명령어 배열을 **정확히 일치**시켜야 합니다.
+   - 환경 변수(`${CONTEXT7_API_KEY}`)는 **실제 값으로 치환**해야 합니다.
+   - 현재 API 키 확인: `echo $CONTEXT7_API_KEY`
+
+   ```json
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+       }
+     ]
+   }
+   ```
+
+   **각 MCP 서버의 정확한 serverCommand:**
+
+   ```json
+   // sequential-thinking 비활성화
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+       }
+     ]
+   }
+
+   // context7 비활성화
+   // 주의: ${CONTEXT7_API_KEY}는 실제 API 키 값으로 치환해야 함
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "@upstash/context7-mcp", "--api-key", "ctx7sk-your-actual-api-key-here"]
+       }
+     ]
+   }
+
+   // serena 비활성화
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["uvx", "--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false"]
+       }
+     ]
+   }
+
+   // sentry 비활성화
+   // 주의: access-token은 실제 토큰 값으로 치환해야 함
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "@sentry/mcp-server@latest", "--access-token=sntryu_your-actual-token-here", "--host=quantit-io.sentry.io"]
+       }
+     ]
+   }
+
+   // atlassian 비활성화
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
+       }
+     ]
+   }
+
+   // 여러 개 동시 비활성화 (예: context7 + sequential-thinking + serena)
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "@upstash/context7-mcp", "--api-key", "ctx7sk-your-actual-api-key-here"]
+       },
+       {
+         "serverCommand": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+       },
+       {
+         "serverCommand": ["uvx", "--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false"]
+       }
+     ]
+   }
+   ```
+
+   **확인 방법:**
+   ```bash
+   claude mcp list
+   ```
 
 ### 로컬 패키징으로 설치
 

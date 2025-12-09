@@ -209,6 +209,73 @@ Use Serena tools efficiently for targeted code exploration:
 - Correlate timing with issue occurrence
 - Review related code modifications
 
+### Phase 3D: Code Complexity Assessment (선택적)
+
+**목적**: 복잡한 코드를 탐지하여 리팩토링 필요성 판단
+
+**실행 조건**: Phase 3에서 affected files 확인 완료 후
+
+**Steps**:
+
+**1. Serena로 복잡도 분석**
+
+```typescript
+// 영향받는 파일의 심볼 정보 가져오기
+mcp__serena__find_symbol({
+  name_path_pattern: "UserService/login",
+  relative_path: "src/services/UserService.ts",
+  include_body: true
+})
+```
+
+**2. Sequential Thinking으로 복잡도 측정**
+
+```typescript
+mcp__sequential-thinking__sequentialthinking({
+  thought: "UserService/login 함수의 복잡도 분석: cyclomatic complexity 12 (if문 8개, for문 2개), 함수 길이 95줄. 임계값 초과 (complexity > 10, length > 50)",
+  thoughtNumber: 1,
+  totalThoughts: 3,
+  nextThoughtNeeded: true
+})
+
+mcp__sequential-thinking__sequentialthinking({
+  thought: "책임 분석: 1) 사용자 인증, 2) 세션 관리, 3) 로깅, 4) 에러 처리 → 4개 책임 (SRP 위반 가능성)",
+  thoughtNumber: 2,
+  totalThoughts: 3,
+  nextThoughtNeeded: true
+})
+
+mcp__sequential-thinking__sequentialthinking({
+  thought: "리팩토링 필요 판단: complexity 12 > 10 (임계값), length 95 > 50 (임계값) → code-refactorer agent 권장",
+  thoughtNumber: 3,
+  totalThoughts: 3,
+  nextThoughtNeeded: false
+})
+```
+
+**3. 리팩토링 필요 판단**
+
+임계값 기준:
+- **Cyclomatic complexity > 10**: 조건문/반복문이 너무 많아 테스트 복잡도 증가
+- **함수 길이 > 50줄**: 가독성 저하, 여러 책임 담당 가능성
+- **SRP 위반**: 하나의 함수/클래스가 여러 책임 수행
+
+**4. 보고서에 권장사항 추가**
+
+복잡도가 높은 파일이 발견되면 보고서의 "Recommendations" 섹션에 다음 형식으로 추가:
+
+```markdown
+## 🔧 리팩토링 권장
+
+### 복잡도 높은 파일
+
+#### `src/services/UserService.ts:15-110` (complexity: 12, length: 95줄)
+- **문제**: Cyclomatic complexity 12 (임계값: 10), 함수 길이 95줄 (임계값: 50), SRP 위반 (4개 책임)
+- **권장**: code-refactorer agent 사용
+- **명령 예시**: "UserService.ts의 login 함수 리팩토링해줘"
+- **예상 효과**: 복잡도 감소, 테스트 가능성 향상, 유지보수성 개선
+```
+
 ### Phase 4: Root Cause Determination
 
 Based on systematic analysis, identify:

@@ -13,6 +13,7 @@ GitLab MR(Merge Request)의 변경사항을 분석하여 단순 문법 체크를
 
 **주요 기능**:
 - 📋 **6가지 종합 검증**: 아키텍처, 컨벤션, 이슈 패턴, JIRA 요구사항, 보안, 테스트
+- 🔐 **의존성 보안 분석** (선택적): npm audit 기반 CRITICAL/HIGH 취약점 자동 탐지
 - 🤖 **MCP 기반 심화 분석**: Sequential Thinking + Serena Context7 + Atlassian 적극 활용
 - 📝 **리포트 생성**: MR_CODE_REVIEW.md (3단계 위험도: 🔴 Critical, 🟡 High, 🟢 Medium)
 - 💡 **개선 제안**: 각 이슈별 위치, 설명, 개선 방법 제공
@@ -255,6 +256,127 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    ```
 
 **출력**: `MR_CODE_REVIEW.md`
+
+---
+
+### Phase 4: Dependency Security Analysis (선택적)
+
+**목적**: 의존성 취약점 자동 탐지 및 보고
+
+**실행 조건**: MR에 package.json, package-lock.json, yarn.lock 변경 포함 시
+
+**주요 MCP**: Sequential Thinking
+
+**프로세스**:
+
+**1. package.json 변경 확인**
+
+```bash
+# Git diff로 의존성 파일 변경 확인
+git diff --name-only | grep -E "package\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml"
+```
+
+변경이 있으면 Phase 4 실행, 없으면 skip.
+
+**2. npm audit 실행**
+
+```bash
+# npm audit 실행 및 JSON 결과 저장
+npm audit --json > audit-result.json
+
+# Critical/High 취약점 필터링
+jq '.vulnerabilities | to_entries[] | select(.value.severity == "critical" or .value.severity == "high")' audit-result.json
+```
+
+**3. 취약점 분석 (Sequential Thinking 활용)**
+
+각 취약점을 Sequential Thinking으로 분석:
+
+```typescript
+// 취약점 발견 시
+mcp__sequential-thinking__sequentialthinking({
+  thought: "axios@0.21.0에서 CVE-2021-3749 (SSRF) 취약점 발견. severity: CRITICAL. 영향: Server-Side Request Forgery 가능",
+  thoughtNumber: 1,
+  totalThoughts: 3,
+  nextThoughtNeeded: true
+})
+
+mcp__sequential-thinking__sequentialthinking({
+  thought: "해결 방법: axios@0.21.2 이상으로 업데이트. Breaking changes 없음 (CHANGELOG 확인). 즉시 적용 권장",
+  thoughtNumber: 2,
+  totalThoughts: 3,
+  nextThoughtNeeded: true
+})
+
+mcp__sequential-thinking__sequentialthinking({
+  thought: "영향 범위: src/api/*.ts 파일 11개에서 사용. 프로덕션 환경 포함. 긴급 수정 필요",
+  thoughtNumber: 3,
+  totalThoughts: 3,
+  nextThoughtNeeded: false
+})
+```
+
+**4. 보고서 섹션 추가**
+
+MR_CODE_REVIEW.md에 다음 섹션 추가:
+
+```markdown
+## 🔐 의존성 보안 분석
+
+### CRITICAL 취약점 (즉시 수정 필요 🔴)
+
+#### 1. axios@0.21.0: CVE-2021-3749 (SSRF)
+**위치**: package.json:15
+**영향**: Server-Side Request Forgery 공격 가능. 공격자가 임의의 내부 서버에 요청을 보낼 수 있음
+**해결 방법**:
+- `npm install axios@latest` (v0.21.2 이상)
+- Breaking changes 없음
+- 프로덕션 배포 전 반드시 수정 필요
+
+**영향 범위**:
+- src/api/user.ts:12
+- src/api/payment.ts:8
+- src/utils/http-client.ts:5
+(총 11개 파일)
+
+---
+
+### HIGH 취약점 (우선 수정 권장 🟡)
+
+#### 1. lodash@4.17.19: Prototype Pollution
+**위치**: package.json:18
+**영향**: 객체 프로토타입 오염 가능. 애플리케이션 로직 변조 가능
+**해결 방법**:
+- `npm install lodash@4.17.21`
+- Breaking changes 없음
+- 24시간 내 수정 권장
+
+**영향 범위**:
+- src/utils/data.ts:7
+- src/services/transform.ts:12
+(총 5개 파일)
+
+---
+
+### 권장사항
+
+1. **즉시 조치**: CRITICAL 취약점 0개 될 때까지 MR merge 금지
+2. **24시간 내**: HIGH 취약점 모두 수정
+3. **정기 점검**: 매주 `npm audit` 실행 권장
+4. **CI/CD 통합**: 취약점 발견 시 자동으로 PR 실패하도록 설정 권장
+
+**Dependencies Updated**:
+```bash
+npm install axios@latest lodash@latest
+npm audit fix --force  # 자동 수정 시도
+```
+```
+
+**Best Practices**:
+- Phase 4는 Phase 3 (Report Generation) 직후 실행
+- 의존성 파일 변경이 없으면 이 Phase는 skip
+- CRITICAL 취약점 발견 시 MR 승인 보류 권장
+- HIGH 취약점은 warning으로 표시하되 blocking하지 않음
 
 ---
 

@@ -1,0 +1,33 @@
+{
+  "name": "workflow-skills",
+  "version": "2.0.0",
+  "description": "체계적인 개발 워크플로우를 위한 통합 솔루션 (Skills + Agents)",
+  "author": {
+    "name": "94wogus",
+    "email": "94wogus@quantit.io"
+  },
+  "repository": "https://github.com/94wogus-quantit/wogus-plugin",
+  "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
+  "license": "Private",
+  "skills": [
+    "./analyze-issue",
+    "./plan-builder",
+    "./execute-plan",
+    "./document",
+    "./mr-code-review"
+  ],
+  "agents": [
+    "./agents/code-refactorer.md",
+    "./agents/test-generator.md",
+    "./agents/performance-analyzer.md",
+    "./agents/code-reviewer.md",
+    "./agents/requirement-validator.md"
+  ],
+  "keywords": [
+    "code-quality",
+    "testing",
+    "refactoring",
+    "security",
+    "performance"
+  ]
+}

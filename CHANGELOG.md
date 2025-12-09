@@ -9,6 +9,162 @@
 
 ---
 
+## [2.0.0] - 2025-12-09
+
+### ⚠️ Breaking Changes
+
+**없음**: v2.0.0은 기능 추가 중심이며, 기존 Skills는 하위 호환됩니다.
+- 기존 analyze-issue, plan-builder, execute-plan, document, mr-code-review → 정상 작동
+- 새로운 Agents는 추가 기능이며 기존 워크플로우를 방해하지 않음
+- 버전 Major bump 이유: **새로운 아키텍처 컨셉 도입** (Skills + Agents)
+
+### Added
+
+- **Agents System (NEW)**: 특정 기술 작업 자동화를 위한 Agent 4개 추가
+  - **code-refactorer** (P0): 복잡한 레거시 코드 자동 리팩토링
+    - Cyclomatic complexity > 10, 함수 길이 > 50줄 탐지
+    - Extract Method, Extract Class, Magic Number 상수화 자동 적용
+    - SRP 위반 탐지 및 책임 분리
+    - 위치: `agents/code-refactorer.md`
+
+  - **test-generator** (P0): 포괄적인 단위 테스트 자동 생성
+    - Happy path, Edge cases, Error handling 완전 커버
+    - 프로젝트 기존 테스트 패턴 학습 (Jest, pytest)
+    - AAA 패턴 (Arrange-Act-Assert) 준수
+    - 위치: `agents/test-generator.md`
+
+  - **performance-analyzer** (P2): 성능 병목 지점 자동 탐지
+    - N+1 Query 패턴 탐지 (Loop + await)
+    - React re-render 최적화 (useMemo, useCallback)
+    - Bundle size 분석 (임계값: 500KB)
+    - 위치: `agents/performance-analyzer.md`
+
+  - **code-reviewer** (P3): 자동 코드 품질 리뷰
+    - SOLID 원칙 위반 탐지 (SRP, OCP, LSP, ISP, DIP)
+    - Code Smell 탐지 (Long Method, Large Class, Duplicate Code)
+    - 네이밍 규칙 검증 (Magic Number, 헝가리안 표기법)
+    - 위치: `agents/code-reviewer.md`
+
+- **plugin.json**: Skills + Agents 통합 매니페스트 파일
+  - `"agents": "./agents"` 필드로 Agents 디렉토리 지정
+  - `"version": "2.0.0"` 버전 정보
+  - 위치: `.claude-plugin/plugin.json`
+
+- **agents/ 디렉토리**: Agent 정의 파일 저장소
+  - 4개 Agent .md 파일 포함
+  - YAML frontmatter 형식 (name, description, tools, model)
+
+### Changed
+
+- **marketplace.json**: v1.6.0 → v2.0.0
+  - `metadata.version` 업데이트
+  - `metadata.description`에 "+ Agents" 추가
+  - 위치: `.claude-plugin/marketplace.json`
+
+### Enhanced
+
+- **analyze-issue skill**: Phase 3D (Code Complexity Assessment) 추가
+  - 영향받는 파일의 복잡도 자동 분석
+  - Cyclomatic complexity, 함수 길이, SRP 위반 탐지
+  - code-refactorer Agent 권장 메시지 자동 생성
+  - 위치: `analyze-issue/SKILL.md:211-278`
+
+- **execute-plan skill**: 6-Phase → **7-Phase** 구조로 확장
+  - **Phase 4C**: Database Migration Validation (선택적)
+    - 위험한 마이그레이션 패턴 자동 차단 (NOT NULL without DEFAULT, DROP)
+    - 성능 문제 패턴 탐지 (ALTER TYPE, non-concurrent INDEX)
+    - CRITICAL 위험 시 실행 차단
+  - **Phase 5**: Automated Test Generation (선택적)
+    - 테스트 누락 파일 자동 탐지
+    - test-generator Agent 자동 호출
+    - 커버리지 측정 및 보고
+  - Phase 6: Testing and Verification (기존 Phase 5)
+  - Phase 7: Documentation Updates (기존 Phase 5)
+  - 위치: `execute-plan/SKILL.md:283-522`
+
+- **mr-code-review skill**: Phase 4 (Dependency Security Analysis) 추가
+  - npm audit 자동 실행
+  - CRITICAL/HIGH 취약점 필터링 (jq 활용)
+  - Sequential Thinking으로 취약점 분석
+  - CVE 추적 및 영향 평가
+  - 위치: `mr-code-review/SKILL.md:259-342`
+
+### Technical Details
+
+- **아키텍처 변경**: Skills + Agents 분리
+  - **Skills**: 워크플로우 오케스트레이션 (6-9 phases, 복잡도 높음)
+  - **Agents**: 기술 작업 자동화 (4-5 phases, 단일 책임)
+  - **통합 방식**: Skills가 필요 시 Agents 자동 호출 (Composition over Inheritance)
+
+- **새 파일**:
+  - `.claude-plugin/plugin.json` (132 bytes)
+  - `agents/code-refactorer.md` (~8KB)
+  - `agents/test-generator.md` (~6KB)
+  - `agents/performance-analyzer.md` (~7KB)
+  - `agents/code-reviewer.md` (~6KB)
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: version 1.6.0 → 2.0.0
+  - `analyze-issue/SKILL.md`: Phase 3D 추가 (~70 lines)
+  - `execute-plan/SKILL.md`: Phase 4C, Phase 5 추가, 6→7 Phase 구조 (~240 lines)
+  - `mr-code-review/SKILL.md`: Phase 4 추가 (~80 lines)
+  - `README.md`: Agents 섹션 추가, v2.0.0 변경사항 반영 (~140 lines)
+  - `CLAUDE.md`: Agent Development 가이드 추가 (~150 lines)
+
+- **검증 지표**:
+  - plugin.json JSON valid ✅
+  - 4개 Agent YAML frontmatter 검증 통과 ✅
+  - Phase numbering 일관성 (execute-plan 7-Phase) ✅
+  - README/CLAUDE.md v2.0.0 언급 15회+ ✅
+
+### Development Process
+
+이 기능은 다음 워크플로우로 개발되었습니다:
+
+1. **analyze-issue**: Gap 분석 (`AGENT_INTEGRATION_ANALYSIS_REPORT.md`)
+2. **plan-builder**: v2.0.0 구현 계획 수립 (`WORKFLOW_SKILLS_V2_PLAN.md`)
+3. **execute-plan**: 14개 태스크 완료 (Phase 0-5)
+4. **document**: 문서화 (현재 단계)
+
+### Migration Guide
+
+**기존 사용자 (v1.6.0 → v2.0.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **자동 업그레이드**:
+   - Skills는 기존과 동일하게 작동
+   - Agents는 자동으로 포함됨 (별도 설치 불필요)
+
+3. **새 기능 활용**:
+   - analyze-issue 실행 시 Phase 3D에서 code-refactorer 권장 자동 확인
+   - execute-plan 실행 시 Phase 5에서 test-generator 자동 호출
+   - mr-code-review 실행 시 Phase 4에서 의존성 보안 체크 자동 실행
+
+4. **호환성**:
+   - ✅ 기존 워크플로우 영향 없음
+   - ✅ 기존 명령어 그대로 작동
+   - ✅ 기존 리포트/계획 파일 형식 동일
+
+**새 Agent 직접 사용**:
+```bash
+# Agent는 Skills에서 자동 호출되지만, 독립 실행도 가능:
+"code-refactorer agent로 src/utils/payment.ts 리팩토링해줘"
+"performance-analyzer agent로 성능 분석해줘"
+"PR 올리기 전에 code-reviewer agent로 검토해줘"
+```
+
+### Related Files
+
+- 분석 리포트: `AGENT_INTEGRATION_ANALYSIS_REPORT_v2.md`
+- 구현 계획: `WORKFLOW_SKILLS_V2_PLAN.md`
+- 아키텍처 결정사항: `CLAUDE.md` (2025-12-09 섹션)
+
+---
+
 ## [1.6.0] - 2025-12-09
 
 ### ⚠️ Breaking Changes

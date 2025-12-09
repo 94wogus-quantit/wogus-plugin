@@ -39,20 +39,23 @@ analyze-issue → plan-builder → **execute-plan** → document
 
 ## Overview
 
-This skill executes approved implementation plans through a 6-phase systematic process:
+This skill executes approved implementation plans through a 7-phase systematic process:
 
 1. **Plan Loading & Validation**: Load plan file, parse tasks, verify prerequisites
 2. **TodoList Setup**: Create comprehensive TodoList from all plan tasks
 3. **Task Execution**: Execute tasks sequentially, respecting dependencies
-4. **Testing & Verification**: Run tests and verify success criteria
-5. **Documentation**: Update code documentation and save learnings
-6. **Summary**: Present comprehensive execution report
+4. **Handle Dependencies**: Manage task dependencies and execution order
+5. **Automated Test Generation** (선택적): Detect missing tests and auto-generate using test-generator agent
+6. **Testing & Verification**: Run tests and verify success criteria
+7. **Documentation**: Update code documentation and save learnings
 
-**Note**: Project documentation and file cleanup are handled by the `document` skill, not this skill.
+**Note**:
+- Phase 4C (DB Migration Validation) and Phase 5 (Test Generation) are optional
+- Project documentation and file cleanup are handled by the `document` skill, not this skill
 
 ---
 
-## Workflow: 6-Phase Execution Process
+## Workflow: 7-Phase Execution Process
 
 ### Phase 1: Plan Loading and Validation
 
@@ -282,7 +285,245 @@ Task A (completed) → Task B (in_progress) → Task D (pending, blocked by B)
 
 ---
 
-### Phase 5: Testing and Verification
+### Phase 4C: Database Migration Validation (선택적)
+
+**목적**: 위험한 DB 마이그레이션 패턴 자동 탐지 및 차단
+
+**실행 조건**: Plan에 DB migration 관련 작업이 있을 때
+
+**Steps**:
+
+**1. 마이그레이션 파일 탐지**
+
+```bash
+# migrations/ 또는 db/ 디렉토리에서 SQL/migration 파일 찾기
+find . -path "*/migrations/*.sql" -o -path "*/db/migrate/*.rb" -o -path "*/migrations/*.ts"
+```
+
+**2. 위험 패턴 분석**
+
+다음 정규표현식으로 위험 패턴 탐지:
+
+```typescript
+const dangerousPatterns = {
+  // CRITICAL: 데이터 손실 위험
+  notNull: /ADD COLUMN .* NOT NULL(?! DEFAULT)/i,
+  dropColumn: /DROP COLUMN/i,
+  dropTable: /DROP TABLE/i,
+
+  // HIGH: 성능 문제
+  alterType: /ALTER COLUMN .* TYPE/i,
+  addIndex: /CREATE INDEX(?! CONCURRENTLY)/i
+};
+
+// 각 마이그레이션 파일 스캔
+for (const file of migrationFiles) {
+  const content = readFile(file);
+
+  for (const [risk, pattern] of Object.entries(dangerousPatterns)) {
+    if (pattern.test(content)) {
+      warnings.push({
+        file,
+        risk,
+        severity: (risk === 'notNull' || risk === 'dropColumn' || risk === 'dropTable')
+          ? 'CRITICAL'
+          : 'HIGH'
+      });
+    }
+  }
+}
+```
+
+**3. 경고 및 승인 요청**
+
+위험 패턴 발견 시 다음 형식으로 경고 메시지 출력:
+
+```markdown
+## ⚠️ Database Migration 위험 탐지
+
+### CRITICAL 위험
+- **File**: migrations/20231209_add_user_email.sql
+  - **Pattern**: `ADD COLUMN email VARCHAR(255) NOT NULL`
+  - **Problem**: 기존 row에 NULL 값 불가 → Migration 실패
+  - **Solution**: DEFAULT 값 추가 또는 2단계 migration (1. ADD COLUMN with DEFAULT, 2. ALTER COLUMN DROP DEFAULT)
+
+### HIGH 위험
+- **File**: migrations/20231209_alter_user_type.sql
+  - **Pattern**: `ALTER COLUMN user_type TYPE VARCHAR(50)`
+  - **Problem**: Table lock 발생, 대용량 테이블에서 장시간 소요
+  - **Solution**: 새 컬럼 추가 → 데이터 복사 → 기존 컬럼 삭제 (Zero-downtime migration)
+
+**Action Required**:
+- CRITICAL 위험이 있으면 실행 중단
+- HIGH 위험은 사용자 승인 후 진행
+```
+
+**4. 실행 중단 로직**
+
+```typescript
+if (warnings.some(w => w.severity === 'CRITICAL')) {
+  console.log('❌ CRITICAL migration 위험 발견 - 실행 중단');
+  console.log('마이그레이션 파일 수정 후 다시 시도하세요.');
+  // Phase 3 Task Execution으로 돌아가지 않고 종료
+  process.exit(1);
+}
+
+if (warnings.some(w => w.severity === 'HIGH')) {
+  console.log('⚠️ HIGH migration 위험 발견 - 사용자 승인 필요');
+  // 사용자에게 승인 요청
+}
+```
+
+**5. Grep으로 위험 패턴 탐지 (실제 구현 예시)**
+
+```bash
+# NOT NULL without DEFAULT
+grep -rE 'ADD COLUMN .* NOT NULL(?! DEFAULT)' migrations/
+
+# DROP COLUMN/TABLE
+grep -rE 'DROP (COLUMN|TABLE)' migrations/
+
+# ALTER TYPE
+grep -rE 'ALTER COLUMN .* TYPE' migrations/
+
+# Non-concurrent INDEX
+grep -rE 'CREATE INDEX(?! CONCURRENTLY)' migrations/
+```
+
+**Best Practices**:
+- Phase 4C는 Phase 4 직후, Phase 5 (Test Generation) 이전에 실행
+- 마이그레이션 파일이 없으면 이 Phase는 skip
+- CRITICAL 위험 발견 시 즉시 중단 (사용자 안전 우선)
+- HIGH 위험은 warning만 출력하고 진행 (사용자 판단)
+
+---
+
+### Phase 5: Automated Test Generation (선택적)
+
+**목적**: 테스트 누락된 파일 탐지 및 자동 생성
+
+**실행 조건**: Phase 3 (Task Execution) 완료 후, Phase 6 (Testing) 이전
+
+**Steps**:
+
+**1. 변경된 파일 확인**
+
+```bash
+# Git으로 수정된 파일 목록 가져오기
+git diff --name-only HEAD
+# 또는 최근 커밋과 비교
+git diff --name-only HEAD~1..HEAD
+```
+
+**2. 테스트 파일 존재 확인**
+
+각 변경된 파일에 대해 테스트 파일이 존재하는지 확인:
+
+```typescript
+// 변경된 파일 목록
+const modifiedFiles = ["src/api/payment.ts", "src/utils/validator.ts"];
+
+// 각 파일에 대해 테스트 파일 찾기
+for (const file of modifiedFiles) {
+  // 패턴: *.test.ts, *.spec.ts, *.test.js, *.spec.js
+  const testPatterns = [
+    file.replace(/\.(ts|js)$/, '.test.$1'),
+    file.replace(/\.(ts|js)$/, '.spec.$1'),
+    file.replace(/^src\//, 'tests/').replace(/\.(ts|js)$/, '.test.$1')
+  ];
+
+  let testFileExists = false;
+  for (const pattern of testPatterns) {
+    if (fileExists(pattern)) {
+      testFileExists = true;
+      break;
+    }
+  }
+
+  if (!testFileExists) {
+    console.log(`⚠️ 테스트 누락: ${file}`);
+    missingTests.push(file);
+  }
+}
+```
+
+**3. Glob/Grep으로 실제 탐지**
+
+```bash
+# 변경된 파일 목록
+git diff --name-only HEAD | grep -E '\.(ts|js)$' | grep -v '.test.' | grep -v '.spec.'
+
+# 각 파일에 대해 테스트 파일 존재 확인
+for file in $(git diff --name-only HEAD | grep -E 'src/.*\.(ts|js)$'); do
+  testfile=$(echo $file | sed 's/\.ts$/.test.ts/' | sed 's/\.js$/.test.js/')
+  if [ ! -f "$testfile" ]; then
+    echo "⚠️ 테스트 누락: $file"
+  fi
+done
+```
+
+**4. test-generator Agent 자동 호출**
+
+테스트가 누락된 파일이 발견되면 test-generator agent를 자동으로 호출:
+
+```markdown
+🤖 **test-generator agent 자동 실행 중...**
+
+**파일**: src/api/payment.ts
+**프레임워크**: Jest (package.json에서 자동 탐지)
+**예상 테스트 케이스**: 8-12개
+**테스트 유형**: Happy path, Edge cases, Error handling
+
+[test-generator agent 실행 중...]
+```
+
+Agent 호출 예시:
+```
+"test-generator agent를 사용하여 src/api/payment.ts에 대한 테스트를 생성해줘"
+```
+
+**5. 생성된 테스트 검증**
+
+```bash
+# 생성된 테스트 파일 실행
+npm test -- payment.test.ts
+
+# 커버리지 확인
+npm test -- payment.test.ts --coverage
+```
+
+**6. 보고서 업데이트**
+
+생성된 테스트 결과를 실행 보고서에 추가:
+
+```markdown
+## 📝 자동 생성된 테스트
+
+### src/api/payment.test.ts (NEW)
+- **테스트 케이스**: 8개 생성
+- **커버리지**: Line 92%, Branch 88%
+- **실행 결과**: ✅ 8/8 통과
+- **생성 시간**: 45초
+
+### src/utils/validator.test.ts (NEW)
+- **테스트 케이스**: 12개 생성
+- **커버리지**: Line 95%, Branch 90%
+- **실행 결과**: ✅ 12/12 통과
+- **생성 시간**: 30초
+
+**총 테스트 추가**: 20개
+**평균 커버리지**: 93.5%
+```
+
+**Best Practices**:
+- Phase 5는 Phase 3 (Implementation) 직후, Phase 6 (Testing) 이전에 실행
+- 테스트 누락이 없으면 이 Phase는 skip
+- test-generator agent가 실패하면 warning만 출력하고 진행 (blocking하지 않음)
+- 생성된 테스트는 반드시 실행하여 검증
+
+---
+
+### Phase 6: Testing and Verification
 
 **Objective**: Comprehensively test all implemented functionality.
 
@@ -333,18 +574,18 @@ Task A (completed) → Task B (in_progress) → Task D (pending, blocked by B)
 
 ---
 
-### Phase 5: Documentation Updates
+### Phase 7: Documentation Updates
 
 **Objective**: Update code documentation and capture learnings.
 
 **Note**: Project-level documentation (README, CHANGELOG) is handled by the 'document' skill.
 
-#### 5A. Code Documentation
+#### 7A. Code Documentation
 - Add/update inline comments
 - Update function/class documentation
 - Add README sections if new modules created
 
-#### 5B. Capture Learnings
+#### 7B. Capture Learnings
 
 ```typescript
 // Save key insights to Serena memory
@@ -372,7 +613,7 @@ mcp__serena__write_memory({
 })
 ```
 
-#### 5C. Update Project Management
+#### 7C. Update Project Management
 
 ```typescript
 // Update JIRA issue
@@ -399,7 +640,7 @@ mcp__atlassian__addCommentToJiraIssue({
 })
 ```
 
-#### 5D. Final Review
+#### 7D. Final Review
 
 ```typescript
 // Verify everything is done

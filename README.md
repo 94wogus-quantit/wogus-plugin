@@ -1,6 +1,16 @@
-# Personal Skills Collection
+# Personal Claude Code Plugins
 
-개인적으로 사용할 Claude Code skills와 custom commands를 모아둔 저장소입니다.
+Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills, Custom Commands, MCP Servers를 통합 관리합니다.
+
+## 🔌 Plugin이란?
+
+**Plugin**은 Claude Code를 확장하는 모든 기능의 총칭입니다:
+
+- **🤖 Skills**: AI 기반 특화 기능 (분석, 계획, 실행, 디자인, 문서화 등)
+- **⚙️ Custom Commands**: 워크플로우 자동화 커맨드 (`/analyze-issue`, `/plan` 등)
+- **🔗 MCP Servers**: 외부 도구/서비스 통합 (Serena, Atlassian, Sentry 등)
+
+이 저장소는 주로 **Skills**를 관리하며, Custom Commands와 MCP Servers는 별도로 설정됩니다.
 
 ## 🌐 언어 정책
 
@@ -34,6 +44,38 @@
 ```bash
 # Claude Code에 스킬 설치
 /plugin install analyze-issue.zip
+```
+
+### mr-code-review
+
+GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행하는 스킬입니다.
+
+**주요 기능:**
+- **6가지 종합 검증**: 아키텍처, 컨벤션, 이슈 패턴, JIRA 요구사항, 보안, 테스트
+- **MCP 기반 심화 분석**: Sequential Thinking + Serena Context7 + Atlassian 적극 활용
+- **리포트 생성**: MR_CODE_REVIEW.md (3단계 위험도: 🔴 Critical, 🟡 High, 🟢 Medium)
+- **개선 제안**: 각 이슈별 위치, 설명, 개선 방법 제공
+- 프로젝트 문서(README, CLAUDE.md), Serena memory 활용
+
+**사용 시점:**
+- GitLab MR 코드 리뷰가 필요할 때
+- 맥락 기반 종합 리뷰가 필요한 중요한 MR (아키텍처 변경, 신규 기능)
+- 프로젝트 문서와 JIRA 요구사항을 종합 검증해야 할 때
+- 보안, 품질, 테스트 커버리지를 체계적으로 검증하고 싶을 때
+
+**사용 방법:**
+```bash
+# 로컬에서 직접 실행
+claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/user-auth"
+
+# 또는 대화형으로
+# "mr-code-review skill로 이 MR 리뷰해줘"
+```
+
+**설치:**
+```bash
+# Claude Code에 스킬 설치
+/plugin install mr-code-review.zip
 ```
 
 ### plan-builder
@@ -274,18 +316,125 @@ analyze-issue
 - **글로벌**: `~/.claude/commands/`
 - **프로젝트별**: `<project>/.claude/commands/`
 
+## 📦 Marketplace Distribution
+
+이 저장소는 **Claude Code Marketplace**로 배포되어 있습니다.
+
+### 마켓플레이스 설정
+
+마켓플레이스 구성은 [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)에 정의되어 있습니다:
+
+```json
+{
+  "name": "personal-skills",
+  "owner": {
+    "name": "94wogus",
+    "email": "94wogus@quantit.io"
+  },
+  "metadata": {
+    "description": "개인적으로 사용할 Claude Code skills 모음",
+    "version": "1.5.1"
+  },
+  "plugins": [
+    {
+      "name": "workflow-skills",
+      "description": "체계적인 개발 워크플로우를 위한 스킬 모음",
+      "source": "./",
+      "skills": [
+        "./analyze-issue",
+        "./plan-builder",
+        "./execute-plan",
+        "./frontend-designer",
+        "./document"
+      ]
+    }
+  ]
+}
+```
+
+### 마켓플레이스 사용 방법
+
+**사용자 입장:**
+
+1. 마켓플레이스 추가:
+   ```bash
+   /marketplace add git@github.com:94wogus-quantit/skills.git
+   ```
+
+2. 사용 가능한 스킬 확인:
+   ```bash
+   /marketplace list
+   ```
+
+3. 원하는 스킬 설치:
+   ```bash
+   /plugin install workflow-skills:analyze-issue
+   /plugin install workflow-skills:plan-builder
+   # 또는 짧은 형식
+   /plugin install analyze-issue
+   ```
+
+**배포자 입장:**
+
+1. **GitHub Public 저장소 설정**
+   - 저장소를 public으로 설정
+   - `.claude-plugin/marketplace.json` 파일 작성
+   - 스킬 소스 디렉토리 구조 유지
+
+2. **버전 관리**
+   - `marketplace.json`의 `metadata.version` 업데이트
+   - 변경사항 커밋 및 푸시
+   - 사용자는 마켓플레이스 갱신으로 최신 버전 확인 가능
+
+3. **스킬 추가/수정**
+   ```bash
+   # 새 스킬 생성
+   python3 ~/.claude/.../init_skill.py new-skill --path .
+
+   # marketplace.json의 skills 배열에 추가
+   # "skills": [..., "./new-skill"]
+
+   # Git 커밋 및 푸시
+   git add .
+   git commit -m "feat: add new-skill"
+   git push
+   ```
+
+### 마켓플레이스 vs 로컬 패키징
+
+| 방식 | 장점 | 단점 |
+|------|------|------|
+| **Marketplace** | ✅ 자동 업데이트<br>✅ 중앙 관리<br>✅ 간편한 설치 | ⚠️ GitHub 의존성<br>⚠️ Public 저장소 필요 |
+| **로컬 패키징** | ✅ 오프라인 가능<br>✅ 버전 고정 | ⚠️ 수동 업데이트<br>⚠️ 패키징 필요 |
+
+**권장**: 개인/팀 사용은 Marketplace, 특정 버전 고정이 필요한 경우 로컬 패키징 사용
+
 ## 📁 Repository Structure
 
 ```
-skills/
+plugins/  (구 skills/)
 ├── .claude-plugin/         # Marketplace 설정
-│   └── marketplace.json    # 스킬 목록 및 메타데이터
+│   └── marketplace.json    # 플러그인 목록 및 메타데이터
 │
 ├── analyze-issue/          # 이슈 분석 스킬
 │   ├── SKILL.md           # 스킬 설명 및 가이드
 │   └── references/        # 참조 문서
 │       ├── report_template.md
 │       └── common_bug_patterns.md
+│
+├── mr-code-review/        # MR 코드 리뷰 스킬 ✨ NEW
+│   ├── SKILL.md
+│   └── references/
+│       ├── review_template.md
+│       ├── review_checklist.md
+│       ├── inline_comment_format.md
+│       └── verification_guides/
+│           ├── architecture_check.md
+│           ├── convention_check.md
+│           ├── known_issues_check.md
+│           ├── jira_validation.md
+│           ├── security_review.md
+│           └── test_coverage.md
 │
 ├── plan-builder/          # 계획 생성 스킬
 │   ├── SKILL.md

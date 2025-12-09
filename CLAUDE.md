@@ -119,9 +119,67 @@ Skills work alongside custom commands in `~/.claude/commands/`:
 - Document integrations with other skills/commands
 - Keep examples and templates up to date
 
+## Marketplace Distribution
+
+This repository is distributed as a **Claude Code Marketplace**.
+
+### Configuration
+
+Marketplace configuration is in `.claude-plugin/marketplace.json`:
+- `name`: Marketplace identifier
+- `owner`: Owner information
+- `metadata.version`: Current version (semantic versioning)
+- `plugins[].skills`: Array of skill directories to include
+
+### Publishing Workflow
+
+1. **Develop**: Create/modify skills in source directories
+2. **Update Version**: Increment `metadata.version` in `marketplace.json`
+3. **Commit & Push**: Push to GitHub public repository
+4. **Users Update**: Users run `/marketplace refresh` to get latest version
+
+### Version Management
+
+```bash
+# Update version in marketplace.json
+# v1.5.1 → v1.6.0 (new feature)
+# v1.5.1 → v1.5.2 (bug fix)
+
+git add .claude-plugin/marketplace.json
+git commit -m "chore: bump version to v1.6.0"
+git push
+```
+
+### Adding New Skills to Marketplace
+
+```bash
+# 1. Create new skill
+python3 ~/.claude/.../init_skill.py new-skill --path .
+
+# 2. Edit marketplace.json
+# Add "./new-skill" to plugins[0].skills array
+
+# 3. Commit and push
+git add .claude-plugin/ new-skill/
+git commit -m "feat: add new-skill to marketplace"
+git push
+```
+
+### User Installation
+
+Users install from marketplace:
+```bash
+# Add marketplace
+/marketplace add git@github.com:94wogus-quantit/skills.git
+
+# Install skills
+/plugin install workflow-skills:analyze-issue
+/plugin install plan-builder  # short form
+```
+
 ## Common Tasks
 
-**Package a skill:**
+**Package a skill (for local distribution):**
 ```bash
 cd /path/to/skills
 python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scripts/package_skill.py ./analyze-issue
@@ -129,7 +187,19 @@ python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scri
 
 **Install a skill:**
 ```bash
+# From marketplace (recommended)
+/plugin install analyze-issue
+
+# From local zip
 /plugin install analyze-issue.zip
+```
+
+**Update marketplace version:**
+```bash
+# Edit .claude-plugin/marketplace.json
+# Increment metadata.version
+git commit -m "chore: bump version"
+git push
 ```
 
 **Validate skill structure:**
@@ -141,3 +211,5 @@ The packaging script automatically validates before creating the zip file.
 - All skills designed for Korean language output and documentation
 - Skills integrate with existing custom command workflow
 - Reference files loaded on-demand to manage context efficiently
+- Marketplace distribution requires GitHub public repository
+- Version updates are reflected when users refresh marketplace

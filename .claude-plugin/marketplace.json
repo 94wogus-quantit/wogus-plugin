@@ -1,17 +1,20 @@
 {
-  "name": "personal-skills",
+  "name": "wogus-plugins",
   "owner": {
     "name": "94wogus",
     "email": "94wogus@quantit.io"
   },
   "metadata": {
-    "description": "개인적으로 사용할 Claude Code skills 모음 - 이슈 분석, 계획 수립, 체계적 실행, 종합 문서화 (한국어 기본)",
-    "version": "1.5.1"
+    "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화 (한국어 기본)",
+    "version": "1.5.1",
+    "repository": "https://github.com/94wogus-quantit/wogus-plugin",
+    "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
+    "license": "Private"
   },
   "plugins": [
     {
       "name": "workflow-skills",
-      "description": "체계적인 개발 워크플로우를 위한 스킬 모음 - 이슈 분석, 계획 수립, 실행, 문서화",
+      "description": "체계적인 개발 워크플로우를 위한 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화",
       "source": "./",
       "strict": false,
       "skills": [

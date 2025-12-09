@@ -666,7 +666,7 @@ v2.2.0까지 workflow-skills plugin을 설치한 사용자는 MCP 서버(sequent
 - API 키 등 민감 정보는 항상 환경 변수 사용
 - README에 환경 변수 설정 방법 문서화
 
-**버전**: v2.2.0 (Unreleased)
+**버전**: v2.2.0 → v2.3.0
 
 ---
 

@@ -5,7 +5,9 @@
 이 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 기반으로 하며,
 이 프로젝트는 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
-## [Unreleased]
+---
+
+## [2.3.0] - 2025-12-10
 
 ### Added
 

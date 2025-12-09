@@ -25,10 +25,6 @@
         "./mr-code-review"
       ],
       "agents": [
-        "./agents/code-refactorer.md",
-        "./agents/test-generator.md",
-        "./agents/performance-analyzer.md",
-        "./agents/code-reviewer.md",
         "./agents/requirement-validator.md"
       ]
     }

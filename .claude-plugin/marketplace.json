@@ -46,6 +46,14 @@
             "${CONTEXT7_API_KEY}"
           ],
           "env": {}
+        },
+        "filesystem": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-filesystem",
+            "${FILESYSTEM_PATH:-.}"
+          ]
         }
       }
     }

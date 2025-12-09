@@ -47,19 +47,23 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    /plugin list
    ```
 
-4. **Context7 MCP 서버 설정** (선택사항):
+4. **MCP 서버 설정** (선택사항):
 
-   Context7 MCP 서버를 사용하려면 API 키 설정이 필요합니다:
+   일부 MCP 서버는 환경 변수 설정이 필요합니다:
 
    ```bash
-   # 환경 변수 설정
+   # Context7 API 키 (라이브러리 문서 조회용)
    export CONTEXT7_API_KEY="your-api-key-here"
+
+   # Filesystem 경로 (지정하지 않으면 현재 디렉토리 사용)
+   export FILESYSTEM_PATH="/path/to/your/project"
 
    # Claude Code 재시작
    ```
 
-   - [Context7](https://context7.com)에서 가입 및 API 키 발급
-   - sequential-thinking MCP는 별도 설정 없이 자동 동작합니다
+   - **sequential-thinking**: 별도 설정 없이 자동 동작
+   - **context7**: [Context7](https://context7.com)에서 API 키 발급 필요
+   - **filesystem**: 기본값은 현재 디렉토리(`.`), 프로젝트별로 경로 지정 가능
 
 ### 로컬 패키징으로 설치
 

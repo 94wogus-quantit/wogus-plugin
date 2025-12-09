@@ -7,6 +7,28 @@
 
 ## [Unreleased]
 
+### Added
+
+- **MCP 서버 자동 통합**: Plugin 설치 시 3개 MCP 서버 자동 활성화
+  - **sequential-thinking**: 체계적 사고 프로세스 지원 (별도 설정 불필요)
+  - **context7**: 최신 라이브러리 문서 조회 (`CONTEXT7_API_KEY` 환경 변수 필요)
+  - **filesystem**: 파일 시스템 접근 (`FILESYSTEM_PATH` 환경 변수, 기본값: 현재 디렉토리)
+  - 위치: `.claude-plugin/marketplace.json:34-58`
+
+### Changed
+
+- **README.md**: MCP 서버 설정 안내 추가
+  - 환경 변수 설정 방법 문서화 (CONTEXT7_API_KEY, FILESYSTEM_PATH)
+  - 각 MCP 서버별 요구사항 및 기본값 설명
+  - 위치: `README.md:50-66`
+
+### Technical Details
+
+- **보안 강화**: API 키를 환경 변수로 처리하여 public repo 노출 방지
+- **유연성 향상**: `${VAR:-default}` 문법으로 기본값 지원
+- **의존성**: `@modelcontextprotocol/server-sequential-thinking`, `@upstash/context7-mcp`, `@modelcontextprotocol/server-filesystem`
+- **참고 문서**: [MCP_INTEGRATION_REPORT.md](MCP_INTEGRATION_REPORT.md)
+
 ---
 
 ## [2.2.0] - 2025-12-10

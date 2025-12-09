@@ -55,15 +55,12 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    # Context7 API 키 (라이브러리 문서 조회용)
    export CONTEXT7_API_KEY="your-api-key-here"
 
-   # Filesystem 경로 (지정하지 않으면 현재 디렉토리 사용)
-   export FILESYSTEM_PATH="/path/to/your/project"
-
    # Claude Code 재시작
    ```
 
    - **sequential-thinking**: 별도 설정 없이 자동 동작
    - **context7**: [Context7](https://context7.com)에서 API 키 발급 필요
-   - **filesystem**: 기본값은 현재 디렉토리(`.`), 프로젝트별로 경로 지정 가능
+   - **serena**: 코드 심볼 분석 및 검색 (별도 설정 불필요, uvx 자동 설치)
 
 ### 로컬 패키징으로 설치
 

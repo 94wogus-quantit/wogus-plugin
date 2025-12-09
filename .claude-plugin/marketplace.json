@@ -47,13 +47,20 @@
           ],
           "env": {}
         },
-        "filesystem": {
-          "command": "npx",
+        "serena": {
+          "type": "stdio",
+          "command": "uvx",
           "args": [
-            "-y",
-            "@modelcontextprotocol/server-filesystem",
-            "${FILESYSTEM_PATH:-.}"
-          ]
+            "--from",
+            "git+https://github.com/oraios/serena",
+            "serena",
+            "start-mcp-server",
+            "--context",
+            "ide-assistant",
+            "--enable-web-dashboard",
+            "false"
+          ],
+          "env": {}
         }
       }
     }

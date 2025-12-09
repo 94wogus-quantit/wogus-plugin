@@ -619,7 +619,7 @@ v2.2.0까지 workflow-skills plugin을 설치한 사용자는 MCP 서버(sequent
 1. **3개 MCP 서버 자동 활성화**:
    - **sequential-thinking**: 모든 Skills에서 17회 사용 (필수)
    - **context7**: 최신 라이브러리 문서 조회 (선택)
-   - **filesystem**: 파일 시스템 접근 (선택)
+   - **serena**: 코드 심볼 분석 및 검색 (필수)
 
 2. **환경 변수 사용**:
    ```json
@@ -627,13 +627,14 @@ v2.2.0까지 workflow-skills plugin을 설치한 사용자는 MCP 서버(sequent
      "context7": {
        "args": ["--api-key", "${CONTEXT7_API_KEY}"]
      },
-     "filesystem": {
-       "args": ["${FILESYSTEM_PATH:-.}"]
+     "serena": {
+       "command": "uvx",
+       "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
      }
    }
    ```
    - `${VAR}`: 환경 변수 확장
-   - `${VAR:-default}`: 기본값 지원
+   - uvx로 Serena 자동 설치 및 실행
 
 3. **보안 강화**:
    - API 키를 환경 변수로 처리 (public repo 노출 방지)
@@ -643,23 +644,22 @@ v2.2.0까지 workflow-skills plugin을 설치한 사용자는 MCP 서버(sequent
 **영향**:
 - **사용자 경험 개선**: Plugin 설치만으로 MCP 서버 자동 활성화
 - **보안 향상**: API 키가 Git 히스토리에 노출되지 않음
-- **유연성**: 환경 변수로 프로젝트별 설정 가능
+- **코드 분석 강화**: Serena MCP로 심볼 기반 검색 및 편집 지원
 - **Breaking Change**: 없음 (기존 `.mcp.json` 설정과 병존 가능)
 
 **대안**:
 1. ~~API 키 하드코딩~~ → 보안 리스크, public repo에 노출
 2. ~~MCP 서버 미포함~~ → 사용자가 수동 설정 필요, 복잡도 증가
-3. ✅ **환경 변수 + 기본값 지원** → 채택 (보안 + 유연성)
+3. ✅ **환경 변수 + uvx 자동 설치** → 채택 (보안 + 편의성)
 
 **패턴**: Plugin 의존성 자동 관리
 - 사용자가 별도로 설정하지 않아도 필수 의존성(MCP 서버) 자동 활성화
-- 환경 변수 + 기본값으로 보안과 편의성 동시 확보
+- 환경 변수 + uvx 자동 설치로 보안과 편의성 동시 확보
 - 이 패턴은 다른 Plugin 개발 시에도 적용 가능
 
 **관련 파일**:
-- [.claude-plugin/marketplace.json:34-58](.claude-plugin/marketplace.json#L34-L58) - mcpServers 설정
-- [README.md:50-66](README.md#L50-L66) - 환경 변수 설정 안내
-- [MCP_INTEGRATION_REPORT.md](MCP_INTEGRATION_REPORT.md) - 상세 분석 보고서
+- [.claude-plugin/marketplace.json:34-64](.claude-plugin/marketplace.json#L34-L64) - mcpServers 설정
+- [README.md:50-63](README.md#L50-L63) - 환경 변수 설정 안내
 
 **재발 방지**:
 - 새 MCP 서버 추가 시 marketplace.json에 함께 정의

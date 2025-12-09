@@ -1,16 +1,16 @@
 # Personal Claude Code Plugins
 
-Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills, Custom Commands, MCP Servers를 통합 관리합니다.
+Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를 중심으로 체계적인 개발 워크플로우를 지원합니다.
 
 ## 🔌 Plugin이란?
 
 **Plugin**은 Claude Code를 확장하는 모든 기능의 총칭입니다:
 
-- **🤖 Skills**: AI 기반 특화 기능 (분석, 계획, 실행, 디자인, 문서화 등)
-- **⚙️ Custom Commands**: 워크플로우 자동화 커맨드 (`/analyze-issue`, `/plan` 등)
-- **🔗 MCP Servers**: 외부 도구/서비스 통합 (Serena, Atlassian, Sentry 등)
+- **🤖 Skills**: AI 기반 특화 기능 (분석, 계획, 실행, 문서화 등)
+- **⚙️ Custom Commands**: 워크플로우 자동화 커맨드 (별도 설치 필요)
+- **🔗 MCP Servers**: 외부 도구/서비스 통합 (별도 설정 필요)
 
-이 저장소는 주로 **Skills**를 관리하며, Custom Commands와 MCP Servers는 별도로 설정됩니다.
+이 저장소는 **Skills**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
 
 ## 🌐 언어 정책
 
@@ -22,6 +22,41 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills, C
 - 🔄 예외: 사용자가 다른 언어로 작성하면 해당 언어로 응답
 
 이는 모든 스킬에 강제 적용되는 **필수 정책**입니다.
+
+## 🚀 Getting Started
+
+### 마켓플레이스로 설치 (권장)
+
+1. Claude Code에서 marketplace 추가:
+   ```bash
+   /marketplace add git@github.com:94wogus-quantit/wogus-plugin.git
+   ```
+
+2. 원하는 스킬 설치:
+   ```bash
+   /plugin install analyze-issue
+   /plugin install plan-builder
+   /plugin install execute-plan
+   /plugin install document
+   /plugin install mr-code-review
+   ```
+
+3. 설치 확인:
+   ```bash
+   /plugin list
+   ```
+
+### 로컬 패키징으로 설치
+
+1. 스킬을 패키징하여 `.zip` 파일 생성:
+   ```bash
+   python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scripts/package_skill.py analyze-issue
+   ```
+
+2. Claude Code에서 설치:
+   ```bash
+   /plugin install analyze-issue.zip
+   ```
 
 ## 📦 Available Skills
 
@@ -162,45 +197,9 @@ analyze-issue
     └─> README, CHANGELOG, CLAUDE 문서, Serena 메모리
 ```
 
-## 🔧 Custom Commands
-
-이 저장소의 skills는 다음 커스텀 커맨드들과 함께 사용하도록 설계되었습니다:
-
-### 워크플로우 커맨드
-
-1. **`/analyze-issue`** - 이슈 근본 원인 분석
-   - JIRA/Sentry 통합 조사
-   - `*_REPORT.md` 생성
-
-2. **`/plan`** - 작업 계획 수립
-   - 리포트 기반 계획 생성
-   - `*_PLAN.md` 파일 생성
-
-3. **`/plan-review`** - 계획 검토
-   - 계획의 완성도, 타당성, 위험 분석
-   - `*_PLAN_REVIEW.md` 생성
-
-4. **`/apply-review`** - 리뷰 피드백 반영
-   - 리뷰 피드백을 계획에 반영
-   - 검증 후 리뷰 파일 정리
-
-5. **`/execute-plan`** - 계획 실행
-   - TodoList 자동 생성 및 진행 추적
-   - README 자동 업데이트
-   - 완료 후 계획/리포트 파일 정리
-
-6. **`/document`** - 최종 문서화
-   - README, CHANGELOG 업데이트
-   - Serena 메모리 저장
-   - 워크플로우 아티팩트 정리
-
-7. **`/security`** - 보안 점검
-   - 취약점 분석 및 수정 가이드
-   - OWASP Top 10 체크
-
 ## 📋 권장 워크플로우
 
-### 기본 워크플로우 (Skills 사용)
+### 표준 워크플로우
 ```
 1. analyze-issue [JIRA/버그 리포트]
    └─> *_REPORT.md 생성
@@ -223,69 +222,18 @@ analyze-issue
    └─> 워크플로우 아티팩트 정리 (*_PLAN.md, *_REPORT.md)
 ```
 
-### 레거시 워크플로우 (Custom Commands 사용)
+**중요**:
+- `plan-builder`는 자동으로 피드백 루프를 반복하여 고품질 계획을 보장합니다
+- `execute-plan`은 코드 구현에, `document`는 문서화에 집중하도록 역할이 분리되어 있습니다
+- 완전한 워크플로우를 위해서는 두 단계를 모두 실행해야 합니다
+
+### MR 리뷰 워크플로우
 ```
-1. /analyze-issue [JIRA]
-   └─> *_REPORT.md 생성
-
-2. /plan [REPORT]
-   └─> *_PLAN.md 생성
-
-3. 🔄 완전해질 때까지 반복:
-   ├─> /plan-review [PLAN]
-   │   └─> *_PLAN_REVIEW.md 생성
-   │
-   └─> /apply-review [REVIEW]
-       └─> *_PLAN.md 업데이트
-
-4. /execute-plan [PLAN]
-   └─> 계획 실행 및 구현
-
-5. /document
-   └─> 최종 문서화
+mr-code-review [Branch/MR URL]
+└─> MR_CODE_REVIEW.md 생성
+└─> 아키텍처, 보안, 테스트 등 6가지 검증
 ```
 
-**권장**: Skills를 사용하는 기본 워크플로우가 더 자동화되어 있고 고품질을 보장합니다.
-
-**중요**: `execute-plan`은 코드 구현에, `document`는 문서화에 집중하도록 역할이 분리되어 있습니다. 둘 다 실행해야 완전한 워크플로우가 완성됩니다.
-
-## 🚀 Getting Started
-
-### Skills 설치
-
-**방법 1: Marketplace 사용 (권장)**
-
-1. Claude Code에서 marketplace 추가:
-   ```
-   /marketplace add git@github.com:94wogus-quantit/wogus-plugin.git
-   ```
-
-2. 원하는 스킬 설치:
-   ```
-   /plugin install analyze-issue
-   /plugin install plan-builder
-   /plugin install execute-plan
-   /plugin install document
-   /plugin install mr-code-review
-   ```
-
-**방법 2: 로컬 패키징**
-
-1. 스킬을 패키징하여 `.zip` 파일 생성:
-   ```bash
-   python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scripts/package_skill.py analyze-issue
-   ```
-
-2. Claude Code에서 설치:
-   ```bash
-   /plugin install analyze-issue.zip
-   ```
-
-### Custom Commands 설치
-
-커스텀 커맨드는 다음 위치에 설치:
-- **글로벌**: `~/.claude/commands/`
-- **프로젝트별**: `<project>/.claude/commands/`
 
 ## 📦 Marketplace Distribution
 

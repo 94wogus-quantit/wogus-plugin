@@ -7,6 +7,129 @@
 
 ---
 
+## [3.2.0] - 2025-12-10
+
+### Added
+
+- **MCP 서버 3개 추가**: Plugin에 3개 MCP 서버 자동 통합
+  - **terraform**: HashiCorp Terraform IaC 자동화
+    - Docker 이미지: `hashicorp/terraform-mcp-server` (버전 미지정 → latest)
+    - Docker 설치 필요
+    - 별도 환경 변수 불필요
+    - 위치: `.claude-plugin/marketplace.json:93-101`
+  - **amplitude**: Amplitude 사용자 행동 분석
+    - `AMPLITUDE_API_KEY` 환경 변수 필요
+    - 위치: `.claude-plugin/marketplace.json:102-112`
+  - **chrome-devtools**: Chrome DevTools 연동
+    - 별도 설정 불필요
+    - 위치: `.claude-plugin/marketplace.json:113-118`
+
+- **mcp-config skill 기능 강화**:
+  - **환경 변수 설정 가이드**: MCP별 필요 환경 변수 및 발급처 안내
+  - **실제 MCP 상태 확인**: `claude mcp list` 명령어로 실제 연결 상태 확인
+  - **에러 진단 가이드**: 환경 변수 누락, Docker 미실행, 의존성 문제 해결 방법
+  - **상태 테이블 개선**: 설정 상태 + 실제 상태 분리 표시
+  - 트리거 키워드 확장: "환경변수", "API 키", "설정" 추가
+  - 위치: `mcp-config/SKILL.md`
+
+### Changed
+
+- **marketplace.json**: v3.1.0 → v3.2.0
+  - `metadata.version` 업데이트
+  - `mcpServers`에 terraform, amplitude, chrome-devtools 추가
+  - 위치: `.claude-plugin/marketplace.json`
+
+- **mcp-config skill**: 5개 MCP → 8개 MCP 관리 지원
+  - MCP 서버 참조 테이블 업데이트 (8개)
+  - 유효한 MCP ID 목록 업데이트
+  - 상태 조회 출력 형식 개선 (설정/실제 상태 분리)
+  - tools에 Bash 추가 (`claude mcp list` 실행용)
+  - 위치: `mcp-config/SKILL.md`
+
+- **README.md**: v3.2.0 반영
+  - 환경 변수 섹션에 `AMPLITUDE_API_KEY` 추가
+  - MCP 서버 목록에 terraform, amplitude, chrome-devtools 추가
+  - 비활성화 예시에 새 MCP serverCommand 추가
+  - 버전 정보 업데이트
+  - 위치: `README.md`
+
+- **CLAUDE.md**: v3.2.0 아키텍처 결정사항 추가
+  - "MCP 서버 확장 (Terraform, Amplitude, Chrome DevTools)" 섹션 추가
+  - 버전 정보 업데이트
+  - 위치: `CLAUDE.md`
+
+### Technical Details
+
+- **환경 변수 추가**:
+  - `AMPLITUDE_API_KEY`: Amplitude MCP 서버 인증용
+  - 위치: `~/.zshenv`
+
+- **MCP 서버 총 8개**:
+  1. sequential-thinking (필수 - 체계적 사고)
+  2. context7 (선택 - 라이브러리 문서)
+  3. serena (필수 - 코드 심볼 분석)
+  4. sentry (선택 - 에러 트래킹)
+  5. atlassian (선택 - JIRA 연동)
+  6. **terraform** (선택 - IaC 자동화) ← NEW
+  7. **amplitude** (선택 - 사용자 분석) ← NEW
+  8. **chrome-devtools** (선택 - DevTools) ← NEW
+
+- **mcp-config 기능 확장**:
+  - 환경 변수 설정 가이드 (API 키 발급처 포함)
+  - 실제 MCP 상태 확인 (`claude mcp list`)
+  - 에러 진단 가이드 (4가지 시나리오)
+  - 상태 아이콘: 🟢 connected, 🔴 error, 🟡 disconnected, ⚫ 비활성화
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: version 3.1.0 → 3.2.0, MCP 3개 추가
+  - `mcp-config/SKILL.md`: 5개→8개 MCP, 환경 변수 가이드, 에러 진단 (~150 lines 추가)
+  - `README.md`: 환경 변수, MCP 목록, 비활성화 예시 업데이트 (~40 lines)
+  - `CLAUDE.md`: v3.2.0 아키텍처 결정사항 (~35 lines)
+  - `~/.zshenv`: AMPLITUDE_API_KEY 추가
+
+### Migration Guide
+
+**기존 사용자 (v3.1.0 → v3.2.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **환경 변수 설정** (선택사항):
+   ```bash
+   # ~/.zshenv에 추가
+   export AMPLITUDE_API_KEY="your-amplitude-api-key"
+
+   # 적용
+   source ~/.zshenv
+   ```
+
+3. **Docker 확인** (terraform, atlassian 사용 시):
+   ```bash
+   docker --version
+   docker ps  # Docker 실행 확인
+   ```
+
+4. **새 기능 활용**:
+   ```bash
+   # MCP 상태 + 실제 연결 상태 확인
+   "MCP 상태 보여줘"
+
+   # 환경 변수 설정 안내
+   "amplitude 환경변수 설정 방법"
+
+   # 새 MCP 비활성화
+   "terraform 비활성화해줘"
+   ```
+
+5. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 MCP 서버 영향 없음
+   - ✅ 새 MCP 서버는 선택적 (환경 변수 없으면 자동 비활성화)
+
+---
+
 ## [3.1.0] - 2025-12-10
 
 ### Added

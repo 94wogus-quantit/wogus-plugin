@@ -69,6 +69,9 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    export ATLASSIAN_USERNAME="your.email@company.com"
    export ATLASSIAN_API_TOKEN="your-api-token-here"
 
+   # Amplitude API 키 (사용자 행동 분석용) - v3.2.0 NEW
+   export AMPLITUDE_API_KEY="your-amplitude-api-key-here"
+
    # Claude Code 재시작
    ```
 
@@ -79,6 +82,9 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    - **atlassian**: Docker 기반 API 토큰 인증
      - [Atlassian API 토큰 생성](https://id.atlassian.com/manage-profile/security/api-tokens)에서 토큰 발급
      - Docker가 설치되어 있어야 함 (`docker --version`으로 확인)
+   - **terraform** (v3.2.0 NEW): HashiCorp Terraform IaC 자동화 (별도 설정 불필요, Docker 필요)
+   - **amplitude** (v3.2.0 NEW): [Amplitude](https://amplitude.com)에서 API 키 발급 필요
+   - **chrome-devtools** (v3.2.0 NEW): Chrome DevTools 연동 (별도 설정 불필요)
 
 5. **MCP 서버 비활성화** (선택사항):
 
@@ -159,6 +165,33 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
      "deniedMcpServers": [
        {
          "serverCommand": ["docker", "run", "-i", "--rm", "-e", "JIRA_URL", "-e", "JIRA_USERNAME", "-e", "JIRA_API_TOKEN", "-e", "CONFLUENCE_URL", "-e", "CONFLUENCE_USERNAME", "-e", "CONFLUENCE_API_TOKEN", "ghcr.io/sooperset/mcp-atlassian:latest"]
+       }
+     ]
+   }
+
+   // terraform 비활성화 (v3.2.0+)
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["docker", "run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
+       }
+     ]
+   }
+
+   // amplitude 비활성화 (v3.2.0+)
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "amplitude-mcp-server"]
+       }
+     ]
+   }
+
+   // chrome-devtools 비활성화 (v3.2.0+)
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "chrome-devtools-mcp@latest"]
        }
      ]
    }
@@ -366,7 +399,7 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 workflow-skills 플러그인의 MCP 서버를 쉽게 활성화/비활성화하는 스킬입니다.
 
 **주요 기능:**
-- MCP 서버 상태 조회 (5개 MCP 한눈에 확인)
+- MCP 서버 상태 조회 (8개 MCP 한눈에 확인)
 - 단일/다중/전체 MCP 비활성화
 - 비활성화된 MCP 활성화 (리셋)
 - `settings.local.json` 자동 관리
@@ -512,7 +545,7 @@ mr-code-review [Branch/MR URL]
   },
   "metadata": {
     "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화 + Agents (한국어 기본)",
-    "version": "2.2.0",
+    "version": "3.2.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
@@ -594,7 +627,7 @@ mr-code-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.0.0)
+wogus-plugin/  (v3.2.0)
 ├── .claude-plugin/         # Marketplace 설정
 │   ├── marketplace.json    # 플러그인 목록 및 메타데이터
 │   └── plugin.json         # Plugin manifest (Skills + Agents)

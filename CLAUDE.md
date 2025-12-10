@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.1.0):**
+**Key Artifacts (v3.2.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.1.0)
+wogus-plugin/  (v3.2.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -403,6 +403,42 @@ git push
 The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
+
+### 2025-12-10 - v3.2.0 MCP 서버 확장 (Terraform, Amplitude, Chrome DevTools)
+
+**컨텍스트**:
+v3.1.0까지 5개 MCP 서버(sequential-thinking, context7, serena, sentry, atlassian)만 포함되어 있었습니다. IaC 자동화(Terraform), 사용자 행동 분석(Amplitude), 브라우저 디버깅(Chrome DevTools) 통합이 필요했습니다.
+
+**결정**: 3개 MCP 서버 추가
+
+1. **terraform**:
+   - HashiCorp 공식 Docker 이미지 사용
+   - `hashicorp/terraform-mcp-server` (버전 미지정 → latest 자동 사용)
+   - Terraform IaC 자동화 지원
+
+2. **amplitude**:
+   - 사용자 행동 분석 MCP
+   - API 키를 `env` 블록으로 처리 (v3.0.2 보안 패턴 준수)
+   - `AMPLITUDE_API_KEY` 환경 변수 필요
+
+3. **chrome-devtools**:
+   - Chrome DevTools 연동
+   - 별도 인증 불필요
+
+**영향**:
+- **MCP 서버 총 8개**: 기존 5개 + terraform, amplitude, chrome-devtools
+- **mcp-config 스킬 업데이트**: 8개 MCP 관리 지원
+- **환경 변수 1개 추가**: `AMPLITUDE_API_KEY`
+- **Breaking Change**: 없음 (새 기능 추가)
+
+**관련 파일**:
+- [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) - mcpServers에 3개 추가
+- [mcp-config/SKILL.md](mcp-config/SKILL.md) - 8개 MCP 참조 테이블
+- `~/.zshenv` - AMPLITUDE_API_KEY 환경 변수
+
+**버전**: v3.1.0 → v3.2.0
+
+---
 
 ### 2025-12-10 - v3.1.0 mcp-config Skill 추가
 

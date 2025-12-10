@@ -396,6 +396,53 @@ The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
 
+### 2025-12-10 - v3.0.2 MCP 서버 환경 변수 통합
+
+**컨텍스트**:
+v3.0.1에서 MCP 서버들이 `args`에 직접 API 키와 토큰을 포함하고 있어 프로세스 목록(`ps aux`)에서 민감 정보가 노출될 수 있었습니다.
+
+**문제점**:
+- **보안 리스크**: `--api-key`, `--access-token` 등이 프로세스 args에 노출
+- **일관성 부족**: 일부 MCP는 args, 일부는 env 사용
+- **args 복잡성**: 인증 정보로 인해 args 배열이 비대해짐
+
+**결정**: 모든 인증 정보를 `env` 블록으로 이동
+
+1. **context7**:
+   - **이전**: `args: ["-y", "@upstash/context7-mcp", "--api-key", "${CONTEXT7_API_KEY}"]`
+   - **현재**: `args: ["-y", "@upstash/context7-mcp"]`, `env: { "CONTEXT7_API_KEY": "..." }`
+
+2. **sentry**:
+   - **이전**: `args: [..., "--access-token=${SENTRY_ACCESS_TOKEN}", "--host=quantit-io.sentry.io"]`
+   - **현재**: `args: ["-y", "@sentry/mcp-server@latest"]`, `env: { "SENTRY_ACCESS_TOKEN", "SENTRY_HOST", "OPENAI_API_KEY" }`
+
+3. **환경 변수 1개 추가**:
+   - `SENTRY_HOST`: Sentry 인스턴스 호스트 (예: `quantit-io.sentry.io`)
+
+**영향**:
+- **보안 강화**: 프로세스 args에 토큰 노출 방지
+- **일관성 향상**: 모든 MCP 서버가 `env` 블록 사용
+- **args 간소화**: 패키지 이름과 필수 플래그만 유지
+- **Breaking Change**: 없음 (환경 변수 추가만)
+
+**대안**:
+1. ~~args에 토큰 유지~~ → 보안 리스크 지속
+2. ~~환경 변수 없이 직접 값 사용~~ → 하드코딩, public repo 노출
+3. ✅ **env 블록으로 통합** → 채택 (보안 + 일관성)
+
+**관련 파일**:
+- [.claude-plugin/marketplace.json:35-66](.claude-plugin/marketplace.json#L35-L66) - MCP 서버 설정
+- `~/.zshenv` - SENTRY_HOST 환경 변수 추가
+
+**재발 방지**:
+- MCP 서버 추가 시 인증 정보는 항상 `env` 블록 사용
+- `args`에는 패키지 이름과 필수 플래그만 포함
+- 민감 정보는 절대 args에 직접 넣지 않기
+
+**버전**: v3.0.1 → v3.0.2
+
+---
+
 ### 2025-12-10 - v3.0.1 Atlassian MCP Docker 기반 API 토큰 인증으로 변경
 
 **컨텍스트**:

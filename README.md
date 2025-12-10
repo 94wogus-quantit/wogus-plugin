@@ -57,8 +57,9 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    # Context7 API 키 (라이브러리 문서 조회용)
    export CONTEXT7_API_KEY="your-api-key-here"
 
-   # Sentry 액세스 토큰 (에러 트래킹용)
+   # Sentry 설정 (에러 트래킹용)
    export SENTRY_ACCESS_TOKEN="your-sentry-token-here"
+   export SENTRY_HOST="your-org.sentry.io"  # 예: quantit-io.sentry.io
 
    # OpenAI API 키 (Sentry MCP 내부 AI 분석용)
    export OPENAI_API_KEY="your-openai-api-key-here"
@@ -110,12 +111,11 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
      ]
    }
 
-   // context7 비활성화
-   // 주의: ${CONTEXT7_API_KEY}는 실제 API 키 값으로 치환해야 함
+   // context7 비활성화 (v3.0.2+)
    {
      "deniedMcpServers": [
        {
-         "serverCommand": ["npx", "-y", "@upstash/context7-mcp", "--api-key", "ctx7sk-your-actual-api-key-here"]
+         "serverCommand": ["npx", "-y", "@upstash/context7-mcp"]
        }
      ]
    }
@@ -129,12 +129,11 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
      ]
    }
 
-   // sentry 비활성화
-   // 주의: access-token은 실제 토큰 값으로 치환해야 함
+   // sentry 비활성화 (v3.0.2+)
    {
      "deniedMcpServers": [
        {
-         "serverCommand": ["npx", "-y", "@sentry/mcp-server@latest", "--access-token=sntryu_your-actual-token-here", "--host=quantit-io.sentry.io"]
+         "serverCommand": ["npx", "-y", "@sentry/mcp-server@latest"]
        }
      ]
    }
@@ -148,14 +147,14 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
      ]
    }
 
-   // 여러 개 동시 비활성화 (예: context7 + sequential-thinking + serena)
+   // 여러 개 동시 비활성화 (예: context7 + sentry + serena)
    {
      "deniedMcpServers": [
        {
-         "serverCommand": ["npx", "-y", "@upstash/context7-mcp", "--api-key", "ctx7sk-your-actual-api-key-here"]
+         "serverCommand": ["npx", "-y", "@upstash/context7-mcp"]
        },
        {
-         "serverCommand": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+         "serverCommand": ["npx", "-y", "@sentry/mcp-server@latest"]
        },
        {
          "serverCommand": ["uvx", "--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false"]

@@ -7,6 +7,48 @@
 
 ---
 
+## [3.0.2] - 2025-12-10
+
+### Changed
+
+- **MCP 서버 환경 변수 통합**: args에서 민감 정보 제거 → env로 이동
+  - **context7**: `--api-key ${CONTEXT7_API_KEY}` → `env.CONTEXT7_API_KEY`
+  - **sentry**: `--access-token`, `--host` → `env.SENTRY_ACCESS_TOKEN`, `env.SENTRY_HOST`
+  - 위치: `.claude-plugin/marketplace.json:35-66`
+
+### Added
+
+- **환경 변수 1개 추가**:
+  - `SENTRY_HOST`: Sentry 인스턴스 호스트 (예: `quantit-io.sentry.io`)
+
+### Technical Details
+
+- **보안 강화**: 프로세스 args에 토큰 노출 방지 (`ps aux`로 볼 수 없음)
+- **일관성 향상**: 모든 MCP 서버가 `env` 블록으로 인증 정보 전달
+- **args 간소화**: 패키지 이름과 필수 플래그만 유지
+
+### Migration Guide
+
+**기존 사용자 (v3.0.1 → v3.0.2)**:
+
+1. **환경 변수 추가**:
+   ```bash
+   # ~/.zshenv에 추가
+   export SENTRY_HOST="quantit-io.sentry.io"  # 또는 your-org.sentry.io
+   ```
+
+2. **자동 업그레이드**: 마켓플레이스 갱신 시 자동 적용
+   ```bash
+   /marketplace refresh
+   ```
+
+3. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 환경 변수 그대로 사용
+   - ✅ 기능 변경 없음 (보안 개선만)
+
+---
+
 ## [3.0.1] - 2025-12-10
 
 ### Changed

@@ -6,25 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v2.0.0):**
+**Key Artifacts (v3.0.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
-- **Agents**: Specialized automation for technical tasks (리팩토링, 테스트 생성, 성능 분석)
+- **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
 - **Reference Materials**: Templates and pattern catalogs
 
 ## Repository Structure
 
 ```
-wogus-plugin/  (v2.0.0)
+wogus-plugin/  (v3.0.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
-│   └── plugin.json         # ✨ NEW: Plugin manifest (Skills + Agents)
+│   └── plugin.json         # Plugin manifest (Skills + Agents)
 │
-├── agents/                 # ✨ NEW: Agent definitions
-│   ├── code-refactorer.md       # Automatic refactoring
-│   ├── test-generator.md        # Automatic test generation
-│   ├── performance-analyzer.md  # Performance bottleneck analysis
-│   └── code-reviewer.md         # Code quality review
+├── agents/                 # Agent definitions (v3.0.0: 1개만 유지)
+│   └── requirement-validator.md  # AC traceability (유일하게 유지)
 │
 ├── <skill-name>/          # Each skill is a directory
 │   ├── SKILL.md          # Required: Metadata + instructions
@@ -47,50 +44,43 @@ Systematic root cause analysis for bugs and issues.
 **Output**: `[ISSUE_ID]_REPORT.md` with root cause, affected code, and recommendations
 **Integration**: First step in `/analyze-issue → /plan → /execute-plan → /document` workflow
 
-## Available Agents (v2.0.0 NEW)
+## Available Agents (v3.0.0)
 
 **What are Agents?**
 
-Agents are specialized automation tools that focus on specific technical tasks. Unlike Skills (which orchestrate multi-step workflows), Agents perform focused, deterministic operations like refactoring code, generating tests, or analyzing performance.
+Agents are specialized automation tools that focus on specific technical tasks. v3.0.0에서는 Skills에서 실제로 활용되는 Agent만 유지하고, 나머지는 Skills의 Phase에 직접 통합했습니다.
 
-### code-refactorer
+### requirement-validator (유일하게 유지)
 
-Automatically refactors complex legacy code using Extract Method, Extract Class patterns.
+JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 여부를 검증합니다.
 
-**Triggers**: Cyclomatic complexity > 10, function length > 50 lines
-**Integration**: Called by `analyze-issue` (Phase 3D) and `execute-plan` (Phase 4)
+**4가지 실행 모드**:
+- **Mode 1 (Reverse)**: 코드 → AC 역매핑 (analyze-issue)
+- **Mode 2 (Pre)**: 계획 → AC coverage (plan-builder)
+- **Mode 3 (Post)**: git diff → AC 구현 확인 (execute-plan)
+- **Mode 4 (Final)**: MR → AC 최종 게이트 (mr-code-review)
 
-### test-generator
+**Integration**: 4개 Skills에서 자동 호출 (analyze-issue, plan-builder, execute-plan, mr-code-review)
 
-Generates comprehensive unit tests (Jest, pytest) with Happy path, Edge cases, Error handling.
+### v3.0.0에서 삭제된 Agents (Skills에 통합)
 
-**Triggers**: Missing test files, low coverage
-**Integration**: Called by `execute-plan` (Phase 5)
+| Agent | 통합 위치 | 비고 |
+|-------|----------|------|
+| code-refactorer | analyze-issue Phase 3D | 복잡도 분석 + 리팩토링 가이드 직접 제공 |
+| test-generator | execute-plan Phase 5 | AAA 패턴, 테스트 케이스 직접 생성 |
+| code-reviewer | 삭제 | Skills에서 미사용, 독립 호출 ROI 낮음 |
+| performance-analyzer | 삭제 | Skills에서 미사용, 독립 호출 ROI 낮음 |
 
-### performance-analyzer
-
-Analyzes performance bottlenecks (N+1 queries, slow queries, bundle size).
-
-**Triggers**: Manual invocation or performance issues detected
-**Integration**: Independent or called by custom commands
-
-### code-reviewer
-
-Automated code review for SOLID principles, Code Smells, naming conventions.
-
-**Triggers**: Manual invocation before PRs
-**Integration**: Independent or called by `mr-code-review`
-
-## Skills vs Agents
+## Skills vs Agents (v3.0.0)
 
 | Aspect | Skills | Agents |
 |--------|--------|--------|
-| **Purpose** | Orchestrate multi-step workflows | Automate specific technical tasks |
-| **Scope** | Broad (analysis → plan → execution) | Narrow (refactoring, testing, etc.) |
+| **Purpose** | Orchestrate multi-step workflows | AC (Acceptance Criteria) traceability |
+| **Scope** | Broad (analysis → plan → execution) | Narrow (AC 추적 전용) |
 | **File Format** | `SKILL.md` in skill directory | `.md` files in `agents/` |
 | **Invocation** | User explicitly uses skill | Skills call Agents automatically |
-| **Examples** | analyze-issue, plan-builder | code-refactorer, test-generator |
-| **Complexity** | High (6-9 phases) | Low (4-5 phases) |
+| **Examples** | analyze-issue, plan-builder | requirement-validator |
+| **Count** | 5개 | 1개 (v3.0.0) |
 
 ## AC Traceability (요구사항 추적)
 
@@ -405,6 +395,68 @@ git push
 The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
+
+### 2025-12-10 - v3.0.0 Agents 시스템 축소 리팩토링
+
+**컨텍스트**:
+v2.4.0에서 5개의 Agents가 존재했지만, Skills에서 실제로 활용되는 Agent는 1개(requirement-validator)뿐이었습니다. 나머지 4개(code-refactorer, test-generator, code-reviewer, performance-analyzer)는 외부에서 단독 호출용으로만 존재하고, Skills 내부에서 호출되지 않아 72%의 dead code로 판단되었습니다.
+
+**문제점**:
+- **Dead Code**: 5개 Agent 중 4개가 Skills에서 미사용 (72%)
+- **과잉 엔지니어링**: 단독 호출용 Agent들이 복잡한 Phase 구조로 작성됨
+- **일관성 부족**: Skills와 Agents 간 통합 패턴 불명확
+- **유지보수 부담**: 사용하지 않는 Agent 파일들 관리 필요
+
+**결정**: Agents 시스템 축소 (5개 → 1개) + Skills에 핵심 로직 통합
+
+1. **삭제 대상 (4개)**:
+   - `code-reviewer.md` (미사용 - Skills에서 호출 없음)
+   - `performance-analyzer.md` (미사용 - Skills에서 호출 없음)
+   - `code-refactorer.md` (analyze-issue Phase 3D에 통합)
+   - `test-generator.md` (execute-plan Phase 5에 통합)
+
+2. **유지 대상 (1개)**:
+   - `requirement-validator.md` (4개 Skills에서 활발히 사용)
+
+3. **Skills 강화**:
+   - **analyze-issue Phase 3D**: "선택적" → "조건부 필수", code-refactorer 핵심 로직 직접 통합
+     - Sequential Thinking 패턴으로 복잡도 분석
+     - Cyclomatic complexity > 10, 함수 길이 > 50줄 기준
+     - Extract Method/Extract Class 리팩토링 가이드
+   - **execute-plan Phase 5**: "선택적" → "조건부 필수", test-generator 핵심 로직 직접 통합
+     - AAA 패턴 (Arrange-Act-Assert) 예시
+     - Given/When/Then BDD 스타일 예시
+     - Happy path/Edge cases/Error handling 분류
+
+**영향**:
+- **Breaking Change**: v2.4.0 → v3.0.0 (Agent 참조 변경)
+- **Dead Code 제거**: 72% → 0% (4개 Agent 삭제)
+- **Skills 자립성**: Agent 의존 없이 직접 기능 수행
+- **유지보수 간소화**: 관리 대상 Agent 5개 → 1개
+
+**대안**:
+1. ~~전체 Agents 유지~~ → Dead code 72% 지속, 유지보수 부담
+2. ~~전체 Agents 삭제~~ → requirement-validator의 AC 추적 기능 손실
+3. ✅ **선택적 축소 + 핵심 통합** → 채택 (효율성 + 기능 보존)
+
+**패턴**: Agent → Skill 인라인 통합
+- 외부 단독 호출용 Agent는 제거 (ROI 낮음)
+- 핵심 로직은 Skills의 Phase에 직접 통합
+- AC 추적처럼 여러 Skills에서 공유하는 기능만 Agent로 유지
+
+**관련 파일**:
+- [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) - agents 배열 1개로 축소
+- [analyze-issue/SKILL.md](analyze-issue/SKILL.md) - Phase 3D 강화
+- [execute-plan/SKILL.md](execute-plan/SKILL.md) - Phase 5 강화
+
+**재발 방지**:
+- 새 Agent 추가 전 "Skills에서 실제로 호출되는가?" 검토 필수
+- 단독 호출 전용이면 Agent 대신 Skills Phase로 구현
+- Agent는 여러 Skills에서 공유할 때만 생성
+
+**버전**: v2.4.0 → v3.0.0
+
+---
 
 ### 2025-12-10 - v2.4.0 MCP 서버 확장 (Sentry + Atlassian)
 

@@ -7,6 +7,23 @@
 
 ---
 
+## [3.3.1] - 2025-12-11
+
+### Fixed
+
+- **mcp-config skill의 deniedMcpServers 형식 오류 수정**
+  - Phase 3에서 배열만 추가하던 것을 `{ "serverCommand": [...] }` 객체 형식으로 수정
+  - 올바른 형식 예시 코드 추가로 명확성 향상
+  - Claude Code의 settings.local.json 스펙에 맞게 수정
+
+### Technical Details
+
+- **수정된 파일**:
+  - `mcp-config/SKILL.md`: Phase 3 "비활성화 요청"/"활성화 요청" 섹션 업데이트, 예시 추가 (~20 lines)
+  - `.claude-plugin/marketplace.json`: version 3.3.0 → 3.3.1
+
+---
+
 ## [3.3.0] - 2025-12-10
 
 ### Added

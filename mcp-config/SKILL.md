@@ -259,14 +259,26 @@ echo "${AMPLITUDE_API_KEY:-}"  # 없으면 빈 문자열
 1. Step 1에서 생성한 serverCommand 사용
 2. 이미 `deniedMcpServers`에 존재하는지 확인합니다 (중복 방지)
    - 이미 존재하면: "이미 비활성화되어 있습니다" 메시지
-   - 존재하지 않으면: `deniedMcpServers` 배열에 추가
+   - 존재하지 않으면: `{ "serverCommand": [...] }` 형식의 객체를 `deniedMcpServers` 배열에 추가
 3. Edit 도구로 JSON을 업데이트합니다
+
+**예시**:
+```json
+"deniedMcpServers": [
+  {
+    "serverCommand": ["npx", "-y", "@sentry/mcp-server@latest"]
+  },
+  {
+    "serverCommand": ["docker", "run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
+  }
+]
+```
 
 **활성화 요청**:
 1. Step 1에서 생성한 serverCommand 사용
 2. `deniedMcpServers`에 존재하는지 확인합니다
    - 존재하지 않으면: "이미 활성화되어 있습니다" 메시지
-   - 존재하면: 해당 항목을 `deniedMcpServers` 배열에서 제거
+   - 존재하면: 해당 serverCommand를 가진 객체를 `deniedMcpServers` 배열에서 제거
 3. Edit 도구로 JSON을 업데이트합니다
 
 **전체 활성화 (리셋)**:
@@ -275,7 +287,7 @@ echo "${AMPLITUDE_API_KEY:-}"  # 없으면 빈 문자열
 
 **전체 비활성화**:
 1. 8개 MCP 모두에 대해 Step 1 수행하여 serverCommand 생성
-2. 모든 serverCommand를 `deniedMcpServers`에 추가합니다
+2. 모든 serverCommand를 `{ "serverCommand": [...] }` 형식의 객체로 `deniedMcpServers`에 추가합니다
 3. Edit 도구로 JSON을 업데이트합니다
 
 ---

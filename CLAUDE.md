@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.2.0):**
+**Key Artifacts (v3.2.1):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.2.0)
+wogus-plugin/  (v3.2.1)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -403,6 +403,53 @@ git push
 The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
+
+### 2025-12-10 - v3.2.1 amplitude MCP 환경 변수 전달 방식 수정
+
+**컨텍스트**:
+v3.2.0에서 amplitude MCP 서버를 추가할 때, v3.0.2의 보안 패턴("인증 정보는 args 대신 env 사용")을 따라 `env` 블록으로 API 키를 전달했습니다. 그러나 amplitude-mcp-server가 환경 변수를 인식하지 못해 연결 실패가 발생했습니다.
+
+**문제점**:
+- **amplitude MCP 연결 실패**: `claude mcp list`에서 `✗ Failed to connect`
+- **원인 조사**: amplitude-mcp-server 및 대안 패키지들 모두 환경 변수 미지원
+- **mcp-config 한계**: 하드코딩된 serverCommand 테이블로는 `${VAR}` 패턴 처리 불가
+
+**결정**: args 방식 + 동적 serverCommand 생성
+
+1. **amplitude MCP 설정 변경**:
+   - **이전**: `env: { "AMPLITUDE_API_KEY": "${AMPLITUDE_API_KEY}" }`
+   - **현재**: `args: ["--api-key", "${AMPLITUDE_API_KEY:-}"]`
+   - `${VAR:-}` 문법으로 환경 변수 없을 때 빈 값 처리
+
+2. **mcp-config skill 개선**:
+   - 하드코딩된 serverCommand 테이블 → 동적 생성 방식
+   - Phase 3에 "Step 1: serverCommand 동적 생성 (MANDATORY)" 추가
+   - `${VAR}` 패턴을 실제 환경 변수 값으로 치환
+   - 환경 변수 없으면 빈 문자열 `""`로 대체
+
+**영향**:
+- **amplitude MCP 정상 연결**: Claude Code 재시작 후 `✓ Connected`
+- **mcp-config 유연성**: 동적 args 포함 MCP도 비활성화/활성화 가능
+- **v3.0.2 보안 원칙 예외**: amplitude-mcp-server 한계로 args 사용 불가피
+- **Breaking Change**: 없음
+
+**대안**:
+1. ~~다른 amplitude MCP 패키지 사용~~ → 모두 환경 변수 미지원
+2. ~~amplitude MCP 삭제~~ → 기능 손실
+3. ✅ **args 방식 + ${VAR:-} 문법** → 채택 (기능 유지 + 빈 값 처리)
+
+**조사한 패키지**:
+- `amplitude-mcp-server` (현재 사용): `--api-key` 플래그만 지원
+- `amplitude-mcp`: `--amplitude-api-key` 플래그만 지원
+- Amplitude 공식 Remote MCP: OAuth 2.0 (복잡한 인증)
+
+**관련 파일**:
+- [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) - amplitude 설정 변경
+- [mcp-config/SKILL.md](mcp-config/SKILL.md) - 동적 serverCommand 로직
+
+**버전**: v3.2.0 → v3.2.1
+
+---
 
 ### 2025-12-10 - v3.2.0 MCP 서버 확장 (Terraform, Amplitude, Chrome DevTools)
 

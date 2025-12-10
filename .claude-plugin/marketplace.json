@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 + Agents - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화, AC 요구사항 추적, MCP 자동 통합 (한국어 기본)",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
@@ -105,11 +105,10 @@
           "command": "npx",
           "args": [
             "-y",
-            "amplitude-mcp-server"
-          ],
-          "env": {
-            "AMPLITUDE_API_KEY": "${AMPLITUDE_API_KEY}"
-          }
+            "amplitude-mcp-server",
+            "--api-key",
+            "${AMPLITUDE_API_KEY:-}"
+          ]
         },
         "chrome-devtools": {
           "type": "stdio",

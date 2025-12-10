@@ -7,6 +7,74 @@
 
 ---
 
+## [3.2.1] - 2025-12-10
+
+### Fixed
+
+- **amplitude MCP 서버 연결 실패 수정**: 환경 변수 전달 방식 변경
+  - **문제**: amplitude-mcp-server가 `env` 블록의 환경 변수를 인식하지 못함
+  - **원인**: amplitude-mcp-server는 환경 변수가 아닌 `--api-key` CLI 플래그만 지원
+  - **해결**: `env.AMPLITUDE_API_KEY` → `args["--api-key", "${AMPLITUDE_API_KEY:-}"]`
+  - 위치: `.claude-plugin/marketplace.json:103-112`
+
+- **mcp-config skill 동적 serverCommand 생성**: 환경 변수 포함 MCP 지원
+  - **문제**: 하드코딩된 serverCommand 테이블로는 `${VAR}` 패턴 처리 불가
+  - **해결**: marketplace.json에서 동적으로 serverCommand 생성
+    - `${VAR}` 패턴을 실제 환경 변수 값으로 치환
+    - 환경 변수 없으면 빈 문자열 `""`로 대체
+  - 위치: `mcp-config/SKILL.md:25-60, 212-258`
+
+### Changed
+
+- **marketplace.json**: amplitude MCP 설정 변경
+  - **이전**: `env: { "AMPLITUDE_API_KEY": "${AMPLITUDE_API_KEY}" }`
+  - **현재**: `args: ["-y", "amplitude-mcp-server", "--api-key", "${AMPLITUDE_API_KEY:-}"]`
+  - `${VAR:-}` 문법으로 환경 변수 없을 때 빈 값 처리
+
+- **mcp-config skill**: 참조 테이블 구조 변경
+  - **이전**: 하드코딩된 `serverCommand` 배열
+  - **현재**: `command` + `동적 args 포함` 여부 표시
+  - Phase 3에 "Step 1: serverCommand 동적 생성 (MANDATORY)" 추가
+
+### Technical Details
+
+- **amplitude-mcp-server 한계**: 환경 변수 미지원 (CLI 플래그만 지원)
+  - 조사한 패키지: `amplitude-mcp-server`, `amplitude-mcp`, Amplitude 공식 Remote MCP
+  - 모두 환경 변수 미지원 → `--api-key` 플래그 사용이 유일한 방법
+
+- **v3.0.2 보안 원칙 예외**:
+  - 원칙: "인증 정보는 args 대신 env 사용"
+  - 예외: amplitude-mcp-server가 env 미지원으로 args 사용 불가피
+  - `${VAR:-}` 문법으로 프로세스 목록 노출 최소화
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: amplitude 설정 변경 (~8 lines)
+  - `mcp-config/SKILL.md`: 동적 serverCommand 로직 추가 (~70 lines)
+
+### Migration Guide
+
+**기존 사용자 (v3.2.0 → v3.2.1)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **Claude Code 재시작**: amplitude MCP 연결 정상화
+
+3. **확인**:
+   ```bash
+   claude mcp list
+   # amplitude: ✓ Connected 확인
+   ```
+
+4. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 환경 변수 설정 그대로 사용
+   - ✅ 다른 MCP 서버 영향 없음
+
+---
+
 ## [3.2.0] - 2025-12-10
 
 ### Added

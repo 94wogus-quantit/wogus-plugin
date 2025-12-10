@@ -24,20 +24,40 @@ workflow-skills 플러그인의 8개 MCP 서버를 관리하고 활성화/비활
 
 ## MCP 서버 참조 테이블
 
-아래 테이블은 8개 MCP 서버의 ID와 `serverCommand` 값입니다. `deniedMcpServers`에 추가할 때 이 값을 **정확히** 사용해야 합니다.
+8개 MCP 서버의 ID입니다. `serverCommand` 값은 **marketplace.json에서 동적으로 읽어야** 합니다.
 
-> **중요**: `serverCommand` 값이 정확히 일치해야 비활성화가 됩니다. 최신 정보는 [marketplace.json](../.claude-plugin/marketplace.json)을 참고하세요.
+> **중요**: args에 `${ENV_VAR}` 패턴이 있으면 실제 환경 변수 값으로 확장됩니다. `deniedMcpServers`에 추가할 때는 **확장된 값**을 사용해야 합니다.
 
-| ID | serverCommand |
-|----|---------------|
-| `sequential-thinking` | `["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]` |
-| `context7` | `["npx", "-y", "@upstash/context7-mcp"]` |
-| `serena` | `["uvx", "--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false"]` |
-| `sentry` | `["npx", "-y", "@sentry/mcp-server@latest"]` |
-| `atlassian` | `["docker", "run", "-i", "--rm", "-e", "JIRA_URL", "-e", "JIRA_USERNAME", "-e", "JIRA_API_TOKEN", "-e", "CONFLUENCE_URL", "-e", "CONFLUENCE_USERNAME", "-e", "CONFLUENCE_API_TOKEN", "ghcr.io/sooperset/mcp-atlassian:latest"]` |
-| `terraform` | `["docker", "run", "-i", "--rm", "hashicorp/terraform-mcp-server"]` |
-| `amplitude` | `["npx", "-y", "amplitude-mcp-server"]` |
-| `chrome-devtools` | `["npx", "-y", "chrome-devtools-mcp@latest"]` |
+| ID | command | 동적 args 포함 |
+|----|---------|---------------|
+| `sequential-thinking` | `npx` | ❌ |
+| `context7` | `npx` | ❌ |
+| `serena` | `uvx` | ❌ |
+| `sentry` | `npx` | ❌ |
+| `atlassian` | `docker` | ❌ |
+| `terraform` | `docker` | ❌ |
+| `amplitude` | `npx` | ✅ `${AMPLITUDE_API_KEY}` |
+| `chrome-devtools` | `npx` | ❌ |
+
+### serverCommand 생성 방법
+
+**Phase 3에서 marketplace.json을 읽고 serverCommand를 동적으로 생성합니다:**
+
+1. marketplace.json에서 해당 MCP의 `command`와 `args` 읽기
+2. `args`에서 `${VAR}` 패턴을 환경 변수 값으로 치환
+3. `[command, ...args]` 형태로 serverCommand 배열 생성
+
+**예시 (amplitude)**:
+```
+marketplace.json:
+  "args": ["-y", "amplitude-mcp-server", "--api-key", "${AMPLITUDE_API_KEY}"]
+
+환경 변수:
+  AMPLITUDE_API_KEY=abc123
+
+생성된 serverCommand:
+  ["npx", "-y", "amplitude-mcp-server", "--api-key", "abc123"]
+```
 
 ### MCP 서버 설명
 
@@ -189,18 +209,43 @@ claude mcp list
 2. `references/settings_template.json`의 내용을 사용합니다
 3. 생성 후 비활성화/활성화 작업을 수행합니다
 
+**Step 1: serverCommand 동적 생성 (MANDATORY)**
+
+모든 비활성화/활성화 작업 전에 serverCommand를 동적으로 생성해야 합니다:
+
+1. marketplace.json에서 대상 MCP의 `command`와 `args` 읽기
+2. `args` 배열의 각 요소에서 `${VAR}` 패턴 처리:
+   - Bash로 환경 변수 값 조회: `echo "${VAR_NAME}"`
+   - 환경 변수가 설정되어 있으면: 실제 값으로 치환
+   - 환경 변수가 없으면: 빈 문자열 `""`로 치환
+3. `[command, ...expanded_args]` 형태로 serverCommand 배열 생성
+
+**예시**:
+```bash
+# 환경 변수 확인
+echo "${AMPLITUDE_API_KEY:-}"  # 없으면 빈 문자열
+```
+
+```
+환경 변수 있음:
+  ["npx", "-y", "amplitude-mcp-server", "--api-key", "abc123"]
+
+환경 변수 없음:
+  ["npx", "-y", "amplitude-mcp-server", "--api-key", ""]
+```
+
 **비활성화 요청**:
-1. 참조 테이블에서 대상 MCP의 `serverCommand` 값을 가져옵니다
+1. Step 1에서 생성한 serverCommand 사용
 2. 이미 `deniedMcpServers`에 존재하는지 확인합니다 (중복 방지)
    - 이미 존재하면: "이미 비활성화되어 있습니다" 메시지
    - 존재하지 않으면: `deniedMcpServers` 배열에 추가
 3. Edit 도구로 JSON을 업데이트합니다
 
 **활성화 요청**:
-1. 참조 테이블에서 대상 MCP의 `serverCommand` 값을 가져옵니다
+1. Step 1에서 생성한 serverCommand 사용
 2. `deniedMcpServers`에 존재하는지 확인합니다
    - 존재하지 않으면: "이미 활성화되어 있습니다" 메시지
-   - 존재하면: 해당 문자열을 `deniedMcpServers` 배열에서 제거
+   - 존재하면: 해당 항목을 `deniedMcpServers` 배열에서 제거
 3. Edit 도구로 JSON을 업데이트합니다
 
 **전체 활성화 (리셋)**:
@@ -208,8 +253,9 @@ claude mcp list
 2. Edit 도구로 JSON을 업데이트합니다
 
 **전체 비활성화**:
-1. 8개 MCP의 `serverCommand` 값을 모두 `deniedMcpServers`에 추가합니다
-2. Edit 도구로 JSON을 업데이트합니다
+1. 8개 MCP 모두에 대해 Step 1 수행하여 serverCommand 생성
+2. 모든 serverCommand를 `deniedMcpServers`에 추가합니다
+3. Edit 도구로 JSON을 업데이트합니다
 
 ---
 

@@ -52,6 +52,8 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    일부 MCP 서버는 환경 변수 설정이 필요합니다:
 
    ```bash
+   # ~/.zshenv 또는 ~/.bashrc에 추가
+
    # Context7 API 키 (라이브러리 문서 조회용)
    export CONTEXT7_API_KEY="your-api-key-here"
 
@@ -61,6 +63,11 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    # OpenAI API 키 (Sentry MCP 내부 AI 분석용)
    export OPENAI_API_KEY="your-openai-api-key-here"
 
+   # Atlassian API 토큰 (JIRA/Confluence 연동용)
+   export ATLASSIAN_URL="https://your-company.atlassian.net"
+   export ATLASSIAN_USERNAME="your.email@company.com"
+   export ATLASSIAN_API_TOKEN="your-api-token-here"
+
    # Claude Code 재시작
    ```
 
@@ -68,7 +75,9 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    - **context7**: [Context7](https://context7.com)에서 API 키 발급 필요
    - **serena**: 코드 심볼 분석 및 검색 (별도 설정 불필요, uvx 자동 설치)
    - **sentry**: [Sentry](https://sentry.io)에서 액세스 토큰 발급 필요 (+ OpenAI API 키)
-   - **atlassian**: OAuth 기반 인증 (별도 토큰 불필요, 브라우저 인증)
+   - **atlassian**: Docker 기반 API 토큰 인증
+     - [Atlassian API 토큰 생성](https://id.atlassian.com/manage-profile/security/api-tokens)에서 토큰 발급
+     - Docker가 설치되어 있어야 함 (`docker --version`으로 확인)
 
 5. **MCP 서버 비활성화** (선택사항):
 
@@ -134,7 +143,7 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
    {
      "deniedMcpServers": [
        {
-         "serverCommand": ["npx", "-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
+         "serverCommand": ["docker", "run", "-i", "--rm", "-e", "JIRA_URL", "-e", "JIRA_USERNAME", "-e", "JIRA_API_TOKEN", "-e", "CONFLUENCE_URL", "-e", "CONFLUENCE_USERNAME", "-e", "CONFLUENCE_API_TOKEN", "ghcr.io/sooperset/mcp-atlassian:latest"]
        }
      ]
    }

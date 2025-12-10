@@ -396,6 +396,56 @@ The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
 
+### 2025-12-10 - v3.0.1 Atlassian MCP Docker 기반 API 토큰 인증으로 변경
+
+**컨텍스트**:
+v2.4.0에서 추가된 Atlassian MCP 서버가 `mcp-remote` + OAuth 방식을 사용하고 있어, 브라우저 인증이 반복적으로 필요했습니다. OAuth 토큰이 만료될 때마다 재인증이 필요해 사용자 경험이 불편했습니다.
+
+**문제점**:
+- **반복적 OAuth 인증**: 토큰 만료 시마다 브라우저에서 재인증 필요
+- **사용자 경험 저하**: Claude Code 세션 중 인증 팝업으로 작업 흐름 중단
+- **자동화 제한**: 비대화형 환경에서 OAuth 인증 불가능
+
+**결정**: Docker 기반 API 토큰 인증 방식으로 변경
+
+1. **인증 방식 변경**:
+   - **이전**: `npx mcp-remote https://mcp.atlassian.com/v1/sse` (OAuth)
+   - **현재**: `docker run ghcr.io/sooperset/mcp-atlassian:latest` (API 토큰)
+
+2. **환경 변수 3개 추가**:
+   - `ATLASSIAN_URL`: Atlassian 인스턴스 URL
+   - `ATLASSIAN_USERNAME`: 사용자 이메일
+   - `ATLASSIAN_API_TOKEN`: API 토큰
+
+3. **Docker 환경 변수 전달**:
+   - `-e JIRA_URL`, `-e JIRA_USERNAME`, `-e JIRA_API_TOKEN`
+   - `-e CONFLUENCE_URL`, `-e CONFLUENCE_USERNAME`, `-e CONFLUENCE_API_TOKEN`
+
+**영향**:
+- **사용자 경험 개선**: OAuth 반복 인증 불필요
+- **자동화 가능**: 비대화형 환경에서도 작동
+- **보안 유지**: API 토큰은 환경 변수로 처리, 하드코딩 없음
+- **의존성 추가**: Docker 설치 필요
+
+**대안**:
+1. ~~OAuth 방식 유지~~ → 반복 인증으로 사용자 경험 저하
+2. ~~Personal Access Token (PAT) 직접 사용~~ → mcp-remote가 PAT 미지원
+3. ✅ **Docker 기반 mcp-atlassian** → 채택 (API 토큰 + 환경 변수)
+
+**관련 파일**:
+- [.claude-plugin/marketplace.json:74-97](.claude-plugin/marketplace.json#L74-L97) - atlassian MCP 설정
+- [README.md:66-80](README.md#L66-L80) - 환경 변수 설정 가이드
+- `~/.zshenv` - 환경 변수 저장
+
+**재발 방지**:
+- MCP 서버 추가 시 인증 방식의 사용자 경험 고려
+- OAuth보다 API 토큰 방식 선호 (자동화 친화적)
+- 환경 변수로 민감 정보 처리
+
+**버전**: v3.0.0 → v3.0.1
+
+---
+
 ### 2025-12-10 - v3.0.0 Agents 시스템 축소 리팩토링
 
 **컨텍스트**:

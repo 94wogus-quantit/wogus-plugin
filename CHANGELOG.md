@@ -7,6 +7,55 @@
 
 ---
 
+## [3.0.1] - 2025-12-10
+
+### Changed
+
+- **Atlassian MCP 서버**: OAuth 방식 → Docker 기반 API 토큰 방식으로 변경
+  - **이전**: `mcp-remote` + OAuth 인증 (브라우저 인증 필요, 반복적 재인증)
+  - **현재**: Docker 컨테이너 + API 토큰 인증 (환경 변수 설정 후 자동 인증)
+  - 위치: `.claude-plugin/marketplace.json:74-97`
+
+### Added
+
+- **환경 변수 3개 추가**:
+  - `ATLASSIAN_URL`: Atlassian 인스턴스 URL (예: `https://company.atlassian.net`)
+  - `ATLASSIAN_USERNAME`: 사용자 이메일
+  - `ATLASSIAN_API_TOKEN`: API 토큰 ([생성 링크](https://id.atlassian.com/manage-profile/security/api-tokens))
+
+### Technical Details
+
+- **Docker 이미지**: `ghcr.io/sooperset/mcp-atlassian:latest`
+- **환경 변수 전달**: Docker `-e` 플래그로 JIRA/Confluence 인증 정보 주입
+- **보안**: API 토큰은 환경 변수로 처리, marketplace.json에 하드코딩 없음
+
+### Migration Guide
+
+**기존 사용자 (v3.0.0 → v3.0.1)**:
+
+1. **환경 변수 설정**:
+   ```bash
+   # ~/.zshenv 또는 ~/.bashrc에 추가
+   export ATLASSIAN_URL="https://your-company.atlassian.net"
+   export ATLASSIAN_USERNAME="your.email@company.com"
+   export ATLASSIAN_API_TOKEN="your-api-token-here"
+   ```
+
+2. **API 토큰 생성**:
+   - https://id.atlassian.com/manage-profile/security/api-tokens 접속
+   - "Create API token" 클릭
+   - 토큰 이름 입력 (예: "Claude Code MCP")
+   - 생성된 토큰을 `ATLASSIAN_API_TOKEN`에 설정
+
+3. **Docker 필요**: `docker --version`으로 설치 확인
+
+4. **장점**:
+   - ✅ OAuth 반복 인증 불필요
+   - ✅ API 토큰은 수동 revoke 전까지 유효
+   - ✅ Docker 컨테이너로 격리된 환경
+
+---
+
 ## [3.0.0] - 2025-12-10
 
 ### ⚠️ Breaking Changes

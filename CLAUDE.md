@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.0.0):**
+**Key Artifacts (v3.1.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.0.0)
+wogus-plugin/  (v3.1.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -43,6 +43,14 @@ Systematic root cause analysis for bugs and issues.
 **When to use**: Analyzing JIRA issues, Sentry errors, or investigating bug reports
 **Output**: `[ISSUE_ID]_REPORT.md` with root cause, affected code, and recommendations
 **Integration**: First step in `/analyze-issue → /plan → /execute-plan → /document` workflow
+
+### mcp-config (v3.1.0 NEW)
+
+workflow-skills 플러그인의 MCP 서버를 활성화/비활성화합니다.
+
+**When to use**: MCP 서버 상태 확인, 특정 MCP 비활성화/활성화
+**Trigger phrases**: "MCP 상태 보여줘", "sentry 비활성화해줘", "atlassian 끄기", "모든 MCP 활성화"
+**Configuration file**: `.claude/settings.local.json`의 `deniedMcpServers` 배열 관리
 
 ## Available Agents (v3.0.0)
 
@@ -80,7 +88,7 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 | **File Format** | `SKILL.md` in skill directory | `.md` files in `agents/` |
 | **Invocation** | User explicitly uses skill | Skills call Agents automatically |
 | **Examples** | analyze-issue, plan-builder | requirement-validator |
-| **Count** | 5개 | 1개 (v3.0.0) |
+| **Count** | 6개 (v3.1.0) | 1개 |
 
 ## AC Traceability (요구사항 추적)
 
@@ -395,6 +403,58 @@ git push
 The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
+
+### 2025-12-10 - v3.1.0 mcp-config Skill 추가
+
+**컨텍스트**:
+v3.0.3까지 MCP 서버 비활성화는 사용자가 직접 `.claude/settings.local.json` 파일을 편집하고 `deniedMcpServers` 배열에 정확한 `serverCommand`를 추가해야 했습니다. 이 과정이 복잡하고 오류가 발생하기 쉬웠습니다.
+
+**문제점**:
+- **복잡한 설정**: `serverCommand` 배열을 JSON.stringify하여 정확히 매칭해야 함
+- **문서화 부족**: 각 MCP 서버의 정확한 `serverCommand` 값을 찾기 어려움
+- **오류 발생**: 오타나 형식 오류로 비활성화 실패
+- **상태 파악 어려움**: 어떤 MCP가 활성화/비활성화 상태인지 한눈에 확인 불가
+
+**결정**: mcp-config Skill 추가
+
+1. **4 Phase 워크플로우**:
+   - Phase 1: 현재 상태 파악 (settings.local.json 읽기)
+   - Phase 2: 사용자 요청 파싱 (자연어 → MCP ID)
+   - Phase 3: 설정 파일 수정 (deniedMcpServers 업데이트)
+   - Phase 4: 결과 확인 (상태 테이블 출력)
+
+2. **MCP 매핑 테이블**:
+   - 5개 MCP 서버의 정확한 `serverCommand` 값 문서화
+   - ID로 간편하게 참조 가능 (예: "sentry 비활성화해줘")
+
+3. **자동 파일 생성**:
+   - `settings.local.json` 없을 때 기본 템플릿 생성
+   - `references/settings_template.json` 참조
+
+**영향**:
+- **사용자 경험 개선**: 자연어로 MCP 관리 가능
+- **오류 감소**: 정확한 `serverCommand` 자동 처리
+- **상태 가시성**: 모든 MCP 상태를 테이블로 확인
+- **Breaking Change**: 없음 (새 기능 추가)
+
+**대안**:
+1. ~~README에 수동 설정 방법만 문서화~~ → 복잡성 그대로, 오류 발생 가능
+2. ~~marketplace.json에 비활성화 옵션 추가~~ → plugin 구조 변경 필요, 유연성 부족
+3. ✅ **mcp-config Skill** → 채택 (자동화 + 사용자 친화적)
+
+**관련 파일**:
+- [mcp-config/SKILL.md](mcp-config/SKILL.md) - Skill 정의
+- [mcp-config/references/settings_template.json](mcp-config/references/settings_template.json) - 설정 템플릿
+- [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) - v3.1.0, skills 배열에 추가
+
+**패턴**: 자연어 인터페이스 Skill
+- 복잡한 설정 작업을 자연어로 처리
+- 내부적으로 정확한 JSON 조작 수행
+- 결과를 사용자 친화적인 형식으로 출력
+
+**버전**: v3.0.3 → v3.1.0
+
+---
 
 ### 2025-12-10 - v3.0.2 MCP 서버 환경 변수 통합
 

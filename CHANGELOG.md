@@ -7,6 +7,89 @@
 
 ---
 
+## [3.1.0] - 2025-12-10
+
+### Added
+
+- **mcp-config skill (NEW)**: MCP 서버 활성화/비활성화 자동화 스킬
+  - **상태 조회**: 5개 MCP 서버 상태 한눈에 확인
+  - **비활성화/활성화**: MCP 이름만으로 설정 변경 (serverCommand 자동 처리)
+  - **전체 리셋**: 모든 MCP 활성화 (deniedMcpServers 초기화)
+  - **자동 파일 생성**: settings.local.json 없을 때 기본 템플릿 생성
+  - 위치: `mcp-config/SKILL.md`
+
+- **mcp-config references**: 설정 파일 템플릿
+  - `mcp-config/references/settings_template.json`: settings.local.json 기본 구조
+  - 위치: `mcp-config/references/`
+
+### Changed
+
+- **marketplace.json**: v3.0.3 → v3.1.0
+  - `metadata.version` 업데이트
+  - `plugins[0].skills` 배열에 `"./mcp-config"` 추가
+  - 위치: `.claude-plugin/marketplace.json`
+
+- **README.md**: mcp-config skill 문서화
+  - Available Skills 섹션에 mcp-config 추가
+  - MCP 비활성화 가이드에 "mcp-config skill 사용 (권장)" 방법 추가
+  - Repository Structure에 mcp-config 디렉토리 추가
+  - 위치: `README.md`
+
+### Technical Details
+
+- **새 파일 (3개)**:
+  - `mcp-config/SKILL.md` (~6KB, 230 lines)
+  - `mcp-config/references/settings_template.json` (120 bytes)
+  - `CHANGELOG.md` 업데이트
+
+- **수정된 파일 (2개)**:
+  - `.claude-plugin/marketplace.json`: version 3.0.3 → 3.1.0, skill 등록
+  - `README.md`: mcp-config 섹션 추가 (~50 lines)
+
+- **Skills 총 6개**:
+  1. analyze-issue (이슈 분석)
+  2. plan-builder (계획 수립)
+  3. execute-plan (계획 실행)
+  4. document (문서화)
+  5. mr-code-review (MR 코드 리뷰)
+  6. **mcp-config** (MCP 설정) ← NEW
+
+### Migration Guide
+
+**기존 사용자 (v3.0.3 → v3.1.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **새 기능 사용**:
+   ```bash
+   # MCP 상태 확인
+   "MCP 상태 보여줘"
+
+   # 특정 MCP 비활성화
+   "sentry 비활성화해줘"
+
+   # 모든 MCP 활성화 (리셋)
+   "모든 MCP 활성화"
+   ```
+
+3. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 Skills 영향 없음
+   - ✅ 기존 워크플로우 정상 작동
+
+### Development Process
+
+이 기능은 다음 워크플로우로 개발되었습니다:
+
+1. **analyze-issue**: MCP 설정 자동화 필요성 분석 (`MCP_CONFIG_SKILL_REPORT.md`)
+2. **plan-builder**: 구현 계획 수립 (`MCP_CONFIG_PLAN.md`, 3차 검토 완료)
+3. **execute-plan**: 9개 태스크 완료 (현재 단계)
+
+---
+
 ## [3.0.3] - 2025-12-10
 
 ### Changed

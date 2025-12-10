@@ -82,7 +82,23 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 
 5. **MCP 서버 비활성화** (선택사항):
 
-   특정 MCP 서버를 사용하지 않으려면 `.claude/settings.local.json`에서 `deniedMcpServers`를 사용합니다.
+   특정 MCP 서버를 사용하지 않으려면 **mcp-config skill** 또는 수동으로 `.claude/settings.local.json`을 편집합니다.
+
+   **방법 1: mcp-config skill 사용 (권장)**
+   ```bash
+   # MCP 상태 확인
+   "MCP 상태 보여줘"
+
+   # 특정 MCP 비활성화
+   "sentry 비활성화해줘"
+   "atlassian이랑 serena 끄기"
+
+   # 모든 MCP 활성화 (리셋)
+   "모든 MCP 활성화"
+   ```
+
+   **방법 2: 수동 편집**
+   `.claude/settings.local.json`에서 `deniedMcpServers`를 사용합니다.
 
    **주의**:
    - `serverCommand`는 전체 명령어 배열을 **정확히 일치**시켜야 합니다.
@@ -345,6 +361,42 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 
 ---
 
+### mcp-config
+
+workflow-skills 플러그인의 MCP 서버를 쉽게 활성화/비활성화하는 스킬입니다.
+
+**주요 기능:**
+- MCP 서버 상태 조회 (5개 MCP 한눈에 확인)
+- 단일/다중/전체 MCP 비활성화
+- 비활성화된 MCP 활성화 (리셋)
+- `settings.local.json` 자동 관리
+
+**사용 시점:**
+- MCP 서버 상태를 확인하고 싶을 때
+- 특정 MCP 서버를 임시로 비활성화하고 싶을 때
+- 비활성화된 MCP를 다시 활성화하고 싶을 때
+
+**사용 예시:**
+```bash
+# MCP 상태 조회
+"MCP 상태 보여줘"
+
+# 특정 MCP 비활성화
+"sentry 비활성화해줘"
+"atlassian이랑 serena 끄기"
+
+# MCP 활성화
+"sentry 활성화해줘"
+"모든 MCP 활성화"  # 리셋
+```
+
+**설치:**
+```bash
+/plugin install mcp-config
+```
+
+---
+
 ### document
 
 워크플로우 아티팩트를 수집하여 프로젝트 문서를 종합적으로 업데이트하는 스킬입니다.
@@ -583,6 +635,11 @@ wogus-plugin/  (v3.0.0)
 │
 ├── document/              # 문서화 스킬
 │   └── SKILL.md
+│
+├── mcp-config/            # MCP 설정 스킬 (NEW v3.1.0)
+│   ├── SKILL.md           # MCP 활성화/비활성화 자동화
+│   └── references/
+│       └── settings_template.json
 │
 ├── .gitignore            # Git 제외 설정
 ├── CHANGELOG.md          # 변경 이력

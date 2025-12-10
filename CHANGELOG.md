@@ -7,6 +7,36 @@
 
 ---
 
+## [3.3.2] - 2025-12-11
+
+### Changed
+
+- **mcp-config skill의 전역 설정 파일 수정 금지 경고 대폭 강화**
+  - 최상단에 "CRITICAL WARNING" 섹션 추가 (영어 + 한국어)
+  - 전역 설정 파일 절대 금지 경로 명시 (`~/.claude/*`, `$HOME/.claude/*`)
+  - 프로젝트별 설정만 허용 (`./.claude/settings.local.json`)
+  - Phase 1, 3, 5에 경로 검증 경고 추가 (총 10곳)
+  - 모든 Read/Write/Edit 작업 전 경로 검증 체크리스트 추가
+  - 실수 시 즉시 중단 프로토콜 명시
+
+### Technical Details
+
+- **수정된 파일**:
+  - `mcp-config/SKILL.md`: CRITICAL WARNING 섹션 추가 (~30 lines), Phase별 경고 추가 (~40 lines)
+
+- **경고 추가 위치**:
+  - 최상단: CRITICAL WARNING 섹션 (전역 설정 절대 금지)
+  - Phase 1: 현재 상태 파악 전 경로 검증 (2곳)
+  - Phase 3: 설정 파일 수정 전 경로 검증 (5곳)
+  - Phase 5: 도구 권한 관리 전 경로 검증 (3곳)
+
+- **보안 강화**:
+  - 전역 설정 수정 방지로 다른 프로젝트 영향 차단
+  - 명시적 경로 검증으로 사용자 실수 방지
+  - 다국어 경고(영어/한국어)로 명확성 향상
+
+---
+
 ## [3.3.1] - 2025-12-11
 
 ### Fixed

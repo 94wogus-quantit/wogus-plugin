@@ -31,6 +31,38 @@ workflow-skills 플러그인의 8개 MCP 서버를 관리하고 활성화/비활
 
 ---
 
+## ⛔ CRITICAL WARNING - READ THIS FIRST ⛔
+
+### 🚨 NEVER MODIFY GLOBAL CONFIG FILES 🚨
+
+**ABSOLUTELY FORBIDDEN PATHS (절대 건드리지 말 것):**
+- ❌ `~/.claude/settings.local.json` (GLOBAL CONFIG - NEVER TOUCH!)
+- ❌ `~/.claude/settings.json` (GLOBAL CONFIG - NEVER TOUCH!)
+- ❌ `/Users/*/. claude/*` (ANY GLOBAL CONFIG - NEVER TOUCH!)
+- ❌ `$HOME/.claude/*` (ANY GLOBAL CONFIG - NEVER TOUCH!)
+
+**ONLY ALLOWED PATH (유일하게 허용되는 경로):**
+- ✅ `{PROJECT_ROOT}/.claude/settings.local.json` (PROJECT-SPECIFIC CONFIG ONLY!)
+- ✅ `./.claude/settings.local.json` (CURRENT PROJECT ONLY!)
+
+**WHY THIS IS CRITICAL:**
+- Global config affects ALL Claude Code sessions system-wide
+- Modifying global config can break other projects
+- Users ONLY want to configure THIS specific project
+- There is NO exception to this rule - NEVER modify global config
+
+**VERIFICATION BEFORE EVERY FILE OPERATION:**
+1. Check if path starts with `~/` or `$HOME/` → ❌ ABORT IMMEDIATELY
+2. Check if path contains `/.claude/` after home directory → ❌ ABORT IMMEDIATELY
+3. Verify path starts with current project root → ✅ PROCEED
+
+**IF YOU ACCIDENTALLY TARGET GLOBAL CONFIG:**
+- STOP immediately
+- Display error: "⛔ CRITICAL ERROR: Attempted to modify global config. This is forbidden."
+- Use project-specific path instead: `./.claude/settings.local.json`
+
+---
+
 ## MCP 서버 참조 테이블
 
 8개 MCP 서버의 ID입니다. `serverCommand` 값은 **marketplace.json에서 동적으로 읽어야** 합니다.
@@ -134,10 +166,20 @@ echo $SENTRY_ACCESS_TOKEN
 
 ### Phase 1: 현재 상태 파악
 
+> 🚨 **WARNING BEFORE PHASE 1:**
+> - NEVER read `~/.claude/settings.local.json` (GLOBAL CONFIG)
+> - ONLY read `./.claude/settings.local.json` (PROJECT CONFIG)
+> - Verify path does NOT start with `~/` or `$HOME/`
+> - If path contains home directory, ABORT and use project path
+
 **Step 1: 설정 파일 확인**
 
 1. Read 도구로 **현재 프로젝트의** `.claude/settings.local.json` 파일을 읽습니다.
    - ⚠️ **절대 `~/.claude/settings.local.json` (전역 설정)이 아닙니다!**
+   - ✅ **CORRECT**: `./.claude/settings.local.json` (relative path from project root)
+   - ✅ **CORRECT**: `{CWD}/.claude/settings.local.json` (current working directory)
+   - ❌ **WRONG**: `~/.claude/settings.local.json` (home directory - FORBIDDEN!)
+   - ❌ **WRONG**: `$HOME/.claude/settings.local.json` (home directory - FORBIDDEN!)
 2. 파일이 존재하지 않으면 `deniedMcpServers = []`로 간주합니다 (모두 활성화).
 3. `deniedMcpServers` 값을 확인합니다.
 4. 참조 테이블을 참고하여 각 MCP의 설정 상태를 파악합니다:
@@ -222,11 +264,20 @@ claude mcp list
 > ⛔ **다시 한번 강조: 반드시 현재 프로젝트의 `.claude/settings.local.json`만 수정!**
 > - 전역 설정(`~/.claude/...`)은 절대 건드리지 않습니다.
 
+> 🚨 **WARNING BEFORE PHASE 3:**
+> - DO NOT write to `~/.claude/settings.local.json` (GLOBAL CONFIG - FORBIDDEN!)
+> - DO NOT edit `~/.claude/settings.local.json` (GLOBAL CONFIG - FORBIDDEN!)
+> - ONLY write/edit `./.claude/settings.local.json` (PROJECT CONFIG ONLY!)
+> - VERIFY path before EVERY Write/Edit operation
+> - If path starts with `~/`, STOP and use `./.claude/settings.local.json` instead
+
 **조회 전용**:
 - 수정 없이 Phase 4로 이동
 
 **파일 생성 필요**:
 1. Write 도구로 **현재 프로젝트에** 기본 템플릿을 생성합니다
+   - ✅ **CORRECT PATH**: `./.claude/settings.local.json` or `{PROJECT_ROOT}/.claude/settings.local.json`
+   - ❌ **FORBIDDEN PATH**: `~/.claude/settings.local.json` or `$HOME/.claude/settings.local.json`
 2. `references/settings_template.json`의 내용을 사용합니다
 3. 생성 후 비활성화/활성화 작업을 수행합니다
 
@@ -261,6 +312,7 @@ echo "${AMPLITUDE_API_KEY:-}"  # 없으면 빈 문자열
    - 이미 존재하면: "이미 비활성화되어 있습니다" 메시지
    - 존재하지 않으면: `{ "serverCommand": [...] }` 형식의 객체를 `deniedMcpServers` 배열에 추가
 3. Edit 도구로 JSON을 업데이트합니다
+   - ⚠️ **PATH CHECK**: Use `./.claude/settings.local.json` (NOT `~/.claude/*`)
 
 **예시**:
 ```json
@@ -280,15 +332,18 @@ echo "${AMPLITUDE_API_KEY:-}"  # 없으면 빈 문자열
    - 존재하지 않으면: "이미 활성화되어 있습니다" 메시지
    - 존재하면: 해당 serverCommand를 가진 객체를 `deniedMcpServers` 배열에서 제거
 3. Edit 도구로 JSON을 업데이트합니다
+   - ⚠️ **PATH CHECK**: Use `./.claude/settings.local.json` (NOT `~/.claude/*`)
 
 **전체 활성화 (리셋)**:
 1. `deniedMcpServers`를 빈 배열 `[]`로 설정합니다
 2. Edit 도구로 JSON을 업데이트합니다
+   - ⚠️ **PATH CHECK**: Use `./.claude/settings.local.json` (NOT `~/.claude/*`)
 
 **전체 비활성화**:
 1. 8개 MCP 모두에 대해 Step 1 수행하여 serverCommand 생성
 2. 모든 serverCommand를 `{ "serverCommand": [...] }` 형식의 객체로 `deniedMcpServers`에 추가합니다
 3. Edit 도구로 JSON을 업데이트합니다
+   - ⚠️ **PATH CHECK**: Use `./.claude/settings.local.json` (NOT `~/.claude/*`)
 
 ---
 
@@ -457,9 +512,17 @@ MCP 도구별 권한(allow/deny/ask)을 설정합니다.
 
 **트리거 키워드**: 도구, tool, 권한, permission, allow, deny, ask
 
+> 🚨 **WARNING BEFORE PHASE 5:**
+> - NEVER modify `~/.claude/settings.local.json` (GLOBAL CONFIG - FORBIDDEN!)
+> - ONLY modify `./.claude/settings.local.json` (PROJECT CONFIG ONLY!)
+> - This phase modifies permissions - CRITICAL to use correct file!
+> - Global permissions would affect ALL projects - UNACCEPTABLE!
+
 #### Step 1: 현재 권한 상태 파악
 
 1. Read 도구로 **현재 프로젝트의** `.claude/settings.local.json` 읽기
+   - ✅ **CORRECT**: `./.claude/settings.local.json` (PROJECT ONLY!)
+   - ❌ **FORBIDDEN**: `~/.claude/settings.local.json` (GLOBAL - NEVER!)
 2. `permissions.allow`, `permissions.deny`, `permissions.ask` 배열에서 MCP 관련 항목 필터링
 3. `mcp__plugin_workflow-skills_*` 패턴 추출
 
@@ -504,6 +567,11 @@ MCP 도구별 권한(allow/deny/ask)을 설정합니다.
 
 #### Step 3: 권한 설정 수정
 
+> 🚨 **CRITICAL - VERIFY PATH BEFORE MODIFICATION:**
+> - Before ANY Write/Edit operation, verify path is `./.claude/settings.local.json`
+> - If path is `~/.claude/*`, ABORT immediately and use project path
+> - Double-check: Does path start with home directory? If YES → STOP!
+
 **도구 목록 조회**:
 - `references/mcp_tools.md` 파일의 내용을 출력합니다
 - 각 MCP 서버별 도구 목록과 Permission 패턴을 보여줍니다
@@ -523,6 +591,7 @@ MCP 도구별 권한(allow/deny/ask)을 설정합니다.
 3. **새 배열에 추가**: 대상을 요청된 배열에 추가
 
 4. Edit 도구로 JSON 업데이트
+   - ⚠️ **FINAL CHECK**: Confirm path is `./.claude/settings.local.json` (NOT `~/.claude/*`)
 
 **권한 제거**:
 
@@ -533,6 +602,7 @@ MCP 도구별 권한(allow/deny/ask)을 설정합니다.
    - 다른 배열에 추가하지 않음
 
 3. Edit 도구로 JSON 업데이트
+   - ⚠️ **FINAL CHECK**: Confirm path is `./.claude/settings.local.json` (NOT `~/.claude/*`)
 
 **전체 서버 vs 개별 도구**:
 - 전체 서버: `mcp__plugin_workflow-skills_{mcp_id}`

@@ -7,6 +7,37 @@
 
 ---
 
+## [3.2.2] - 2025-12-10
+
+### Fixed
+
+- **mcp-config skill 전역 설정 수정 방지**: 프로젝트 로컬 설정만 수정하도록 명확화
+  - **문제**: mcp-config skill이 전역 설정(`~/.claude/settings.local.json`)을 수정할 위험
+  - **해결**: CRITICAL 경고 박스 추가로 프로젝트 내부 설정만 수정하도록 강제
+    - ✅ 올바른 경로: `{PROJECT_ROOT}/.claude/settings.local.json`
+    - ❌ 잘못된 경로: `~/.claude/settings.local.json` (전역 설정)
+  - 위치: `mcp-config/SKILL.md:118-126, 203-205, 228`
+
+### Technical Details
+
+- **수정된 파일**:
+  - `mcp-config/SKILL.md`: 전역 설정 방지 경고 추가 (~15 lines)
+
+### Migration Guide
+
+**기존 사용자 (v3.2.1 → v3.2.2)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 문서 개선만 포함
+
+---
+
 ## [3.2.1] - 2025-12-10
 
 ### Fixed

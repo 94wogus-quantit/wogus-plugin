@@ -115,11 +115,20 @@ echo $SENTRY_ACCESS_TOKEN
 
 ## 워크플로우
 
+> ⛔ **CRITICAL: 절대 전역 설정(`~/.claude/settings.local.json`)을 수정하지 마세요!**
+>
+> 반드시 **현재 프로젝트 내부**의 `.claude/settings.local.json`만 수정해야 합니다.
+> - ✅ 올바른 경로: `{PROJECT_ROOT}/.claude/settings.local.json`
+> - ❌ 잘못된 경로: `~/.claude/settings.local.json` (전역 설정)
+>
+> 이 규칙은 **무조건** 준수해야 합니다. 예외 없음.
+
 ### Phase 1: 현재 상태 파악
 
 **Step 1: 설정 파일 확인**
 
-1. Read 도구로 `.claude/settings.local.json` 파일을 읽습니다.
+1. Read 도구로 **현재 프로젝트의** `.claude/settings.local.json` 파일을 읽습니다.
+   - ⚠️ **절대 `~/.claude/settings.local.json` (전역 설정)이 아닙니다!**
 2. 파일이 존재하지 않으면 `deniedMcpServers = []`로 간주합니다 (모두 활성화).
 3. `deniedMcpServers` 값을 확인합니다.
 4. 참조 테이블을 참고하여 각 MCP의 설정 상태를 파악합니다:
@@ -201,11 +210,14 @@ claude mcp list
 
 ### Phase 3: 설정 파일 수정
 
+> ⛔ **다시 한번 강조: 반드시 현재 프로젝트의 `.claude/settings.local.json`만 수정!**
+> - 전역 설정(`~/.claude/...`)은 절대 건드리지 않습니다.
+
 **조회 전용**:
 - 수정 없이 Phase 4로 이동
 
 **파일 생성 필요**:
-1. Write 도구로 기본 템플릿을 생성합니다
+1. Write 도구로 **현재 프로젝트에** 기본 템플릿을 생성합니다
 2. `references/settings_template.json`의 내용을 사용합니다
 3. 생성 후 비활성화/활성화 작업을 수행합니다
 

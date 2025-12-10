@@ -78,29 +78,23 @@ Collect all necessary context:
   - Identify recommended fixes and testing requirements
 
 - **JIRA/Atlassian**:
-  - Use `mcp__atlassian__getJiraIssue` for requirements
+  - Use `mcp__plugin_workflow-skills_atlassian__jira_get_issue` for requirements
   - Extract acceptance criteria and constraints
   - Check linked issues and dependencies
 
-- **GitHub Repository** (if provided):
-  - Use `mcp__github__repository_info` for structure
-  - Use `mcp__github__list_files` to explore codebase
-  - Use `mcp__github__search_repository` for patterns
-  - Review recent PRs and issues
-
 - **Codebase** (using Serena):
-  - Use `mcp__serena__check_onboarding_performed`
-  - Use `mcp__serena__list_memories` for project knowledge
-  - Use `mcp__serena__find_symbol` for affected components
-  - Use `mcp__serena__search_for_pattern` for similar code
+  - Use `mcp__plugin_workflow-skills_serena__check_onboarding_performed`
+  - Use `mcp__plugin_workflow-skills_serena__list_memories` for project knowledge
+  - Use `mcp__plugin_workflow-skills_serena__find_symbol` for affected components
+  - Use `mcp__plugin_workflow-skills_serena__search_for_pattern` for similar code
 
 - **Framework Documentation** (using Context7):
-  - Use `mcp__context7__get-library-docs` for best practices
+  - Use `mcp__plugin_workflow-skills_context7__get-library-docs` for best practices
   - Verify API usage and patterns
 
 **2. Plan Structure Creation**
 
-Use `mcp__sequential-thinking__sequentialthinking` to organize the plan.
+Use `mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking` to organize the plan.
 
 Reference the template in `references/plan_template.md` for complete structure.
 
@@ -146,7 +140,7 @@ This phase implements an explicit WHILE-style loop that repeats until ZERO issue
    - Review all sections comprehensively
 
 3. **Perform FULL FRESH Critical Review** ⚠️ MANDATORY
-   - Use `mcp__sequential-thinking__sequentialthinking` to analyze
+   - Use `mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking` to analyze
    - Apply **ENTIRE** `references/review_checklist.md` systematically
 
    **⛔ CRITICAL INSTRUCTION**:
@@ -367,7 +361,7 @@ ELSE:
 
 6. **Verification After Changes**
 
-   Use `mcp__sequential-thinking__sequentialthinking` to verify:
+   Use `mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking` to verify:
    - [ ] All required changes applied
    - [ ] All testing strategies complete
    - [ ] All task independence issues resolved

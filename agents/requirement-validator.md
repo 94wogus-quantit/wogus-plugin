@@ -1,7 +1,7 @@
 ---
 name: requirement-validator
 description: JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 여부를 검증합니다. 4가지 모드 지원 - Reverse Tracing(역추적), Pre-validation(사전 검증), Post-validation(사후 검증), Final Gate(최종 게이트)
-tools: Read, Write, Grep, Glob, Bash, mcp__atlassian, mcp__sequential-thinking
+tools: Read, Write, Grep, Glob, Bash, mcp__plugin_workflow-skills_atlassian, mcp__plugin_workflow-skills_sequential-thinking
 model: sonnet
 ---
 
@@ -32,7 +32,7 @@ model: sonnet
 
 ```typescript
 // JIRA 이슈 조회
-mcp__atlassian__getJiraIssue({
+mcp__plugin_workflow-skills_atlassian__jira_get_issue({
   cloudId: process.env.ATLASSIAN_CLOUD_ID,
   issueIdOrKey: "PROJ-123"
 })
@@ -48,21 +48,21 @@ mcp__atlassian__getJiraIssue({
 **Sequential Thinking으로 AC 파싱**:
 
 ```typescript
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "JIRA description에서 Acceptance Criteria 섹션 찾기. 'AC:', 'Acceptance Criteria:', '인수 조건:' 등의 키워드로 식별",
   thoughtNumber: 1,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1: '사용자는 이메일로 로그인할 수 있어야 한다' → 키워드 추출: [email, login, authenticate]",
   thoughtNumber: 2,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2: '비밀번호 5회 실패 시 계정 잠금' → 키워드 추출: [password, failed, attempt, lock, account]",
   thoughtNumber: 3,
   totalThoughts: 5,
@@ -108,7 +108,7 @@ mcp__sequential-thinking__sequentialthinking({
 Read({ file_path: "src/auth/UserService.ts" })
 
 // 2. 코드에서 키워드 추출
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "login 함수 분석: email validation 로직 있음, password 체크 있음 → keywords: [email, password, login]",
   thoughtNumber: 1,
   totalThoughts: 3,
@@ -116,7 +116,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 3. AC와 매칭
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1의 keywords [email, login, authenticate, user]와 코드 keywords [email, password, login] 비교 → 매칭률 75% → 관련 있음",
   thoughtNumber: 2,
   totalThoughts: 3,
@@ -124,7 +124,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 4. 매핑 결과 확정
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "버그 발생 위치인 UserService.login 함수는 AC#1 '이메일 로그인'과 직접 관련. 버그로 인해 AC#1이 미충족될 가능성 높음",
   thoughtNumber: 3,
   totalThoughts: 3,
@@ -158,14 +158,14 @@ mcp__sequential-thinking__sequentialthinking({
 Read({ file_path: "/path/to/FEATURE_PLAN.md" })
 
 // 2. 계획의 각 Task에서 키워드 추출
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "Task 1: 'UserService에 이메일 로그인 로직 구현' → keywords: [email, login, UserService]",
   thoughtNumber: 1,
   totalThoughts: 7,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "Task 2: 'JWT 토큰 발급 로직 구현' → keywords: [JWT, token, issue]",
   thoughtNumber: 2,
   totalThoughts: 7,
@@ -173,21 +173,21 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 3. AC별로 계획에서 커버하는지 체크
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 [email, login] vs Task 1 [email, login, UserService] → 매칭됨 ✅",
   thoughtNumber: 3,
   totalThoughts: 7,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2 [password, failed, lock] vs 모든 Task 검색 → 매칭 없음 ❌ → 누락된 AC",
   thoughtNumber: 4,
   totalThoughts: 7,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#3 [JWT, token] vs Task 2 [JWT, token, issue] → 매칭됨 ✅",
   thoughtNumber: 5,
   totalThoughts: 7,
@@ -195,7 +195,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 4. AC Completeness 계산
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "총 3개 AC 중 2개(AC#1, AC#3) 커버됨 → AC Completeness: 66% (2/3)",
   thoughtNumber: 6,
   totalThoughts: 7,
@@ -203,7 +203,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 5. 누락 AC에 대한 권장 조치
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2 '5회 실패 시 계정 잠금'이 계획에 없음 → 권장 조치: 'LoginAttemptService에 실패 카운터 로직 구현' Task 추가 필요",
   thoughtNumber: 7,
   totalThoughts: 7,
@@ -258,21 +258,21 @@ Grep({
 })
 
 // 3. AC와 매핑
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 [email, login] vs UserService [login, validateEmail] → 매칭됨, 구현 완료 ✅",
   thoughtNumber: 1,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2 [password, failed, lock] vs 변경된 파일들 → 관련 코드 없음 ❌ → 미구현",
   thoughtNumber: 2,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#3 [JWT, token] vs TokenService 파일 존재 → 매칭 가능성 높음, 확인 필요",
   thoughtNumber: 3,
   totalThoughts: 5,
@@ -282,7 +282,7 @@ mcp__sequential-thinking__sequentialthinking({
 // 4. 테스트 커버리지 확인
 Glob({ pattern: "**/*.test.ts" })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "UserService.test.ts 존재 → AC#1 테스트 커버리지 있음 ✅. TokenService.test.ts 존재 → AC#3 테스트 커버리지 있음 ✅",
   thoughtNumber: 4,
   totalThoughts: 5,
@@ -290,7 +290,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 5. 총 AC 달성률 계산
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "총 3개 AC 중 2개(AC#1, AC#3) 구현 완료 → AC 달성률: 66% (2/3). AC#2 미구현은 CRITICAL 이슈",
   thoughtNumber: 5,
   totalThoughts: 5,
@@ -335,14 +335,14 @@ Mode 3 (Post-validation)과 유사하지만 더 상세한 검증:
 // Mode 3 로직 실행 후 추가 검증
 
 // 1. AC#1 구현 코드 품질 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 구현 코드 품질 분석: UserService.login 함수 complexity 체크. 함수 길이 36줄 (양호), 중첩 depth 2 (양호)",
   thoughtNumber: 1,
   totalThoughts: 10,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 테스트 커버리지 확인: UserService.test.ts에 8개 테스트 케이스, Happy path + Edge cases 포함 → 커버리지 85% (양호)",
   thoughtNumber: 2,
   totalThoughts: 10,
@@ -350,14 +350,14 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 2. AC#1 보안 체크
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 보안 체크: SQL Injection 위험 없음 (Prepared Statement 사용), XSS 위험 없음 (입력 sanitization 있음)",
   thoughtNumber: 3,
   totalThoughts: 10,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 인증 로직: 비밀번호 해싱 bcrypt 사용 ✅, salt rounds 10 ✅, 평문 비밀번호 로깅 없음 ✅",
   thoughtNumber: 4,
   totalThoughts: 10,
@@ -365,14 +365,14 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 3. AC#3 구현 코드 품질 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#3 구현 코드 품질: TokenService.issueToken 함수, JWT 서명 알고리즘 HS256, exp claim 설정됨 (24시간)",
   thoughtNumber: 5,
   totalThoughts: 10,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#3 보안: JWT secret 환경변수 사용 ✅, 토큰 검증 로직 있음 ✅, refresh token 구현됨 ✅",
   thoughtNumber: 6,
   totalThoughts: 10,
@@ -380,14 +380,14 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 4. AC#2 미구현 영향 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2 미구현으로 인한 보안 위험: 무차별 대입 공격(Brute Force) 방어 불가 → CRITICAL 보안 취약점",
   thoughtNumber: 7,
   totalThoughts: 10,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2 미구현 시 비즈니스 영향: 사용자 계정 탈취 가능성, OWASP Top 10 A07:2021 (Identification and Authentication Failures) 위반",
   thoughtNumber: 8,
   totalThoughts: 10,
@@ -395,14 +395,14 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // 5. 최종 판정
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 PASS ✅, AC#2 FAIL ❌ (CRITICAL), AC#3 PASS ✅ → 총 2/3 구현 완료 (66%)",
   thoughtNumber: 9,
   totalThoughts: 10,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2가 CRITICAL 보안 요구사항이므로 미구현 시 MR merge 금지. 다음 조치: LoginAttemptService 구현, Redis 카운터, 5회 초과 시 계정 잠금 API, 테스트 작성 필요",
   thoughtNumber: 10,
   totalThoughts: 10,
@@ -478,21 +478,21 @@ Grep({
 ### 3B. 테스트 품질 평가
 
 ```typescript
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#1 테스트 분석: Happy path (이메일 로그인 성공) 있음, Edge case (잘못된 이메일 형식, 존재하지 않는 사용자, 잘못된 비밀번호) 있음 → 품질 양호",
   thoughtNumber: 1,
   totalThoughts: 3,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#2 테스트 분석: 테스트 파일 없음 ❌ → AC#2가 미구현이므로 테스트도 없음 (당연)",
   thoughtNumber: 2,
   totalThoughts: 3,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "AC#3 테스트 분석: JWT 발급, 검증, 만료 테스트 있음 ✅ → 품질 우수",
   thoughtNumber: 3,
   totalThoughts: 3,

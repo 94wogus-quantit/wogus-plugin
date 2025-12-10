@@ -253,8 +253,8 @@ Use this template when creating `[FEATURE]_PLAN.md` files.
 ### During Execution
 - Use `TodoWrite` to track task progress
 - Mark tasks as in_progress/completed systematically
-- Update JIRA with `mcp__atlassian__editJiraIssue`
-- Document learnings with `mcp__serena__write_memory`
+- Update JIRA with `mcp__plugin_workflow-skills_atlassian__jira_update_issue`
+- Document learnings with `mcp__plugin_workflow-skills_serena__write_memory`
 
 ### After Completion
 - [ ] All tests passing

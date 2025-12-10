@@ -70,7 +70,7 @@ This skill executes approved implementation plans through a 7-phase systematic p
    ```
 
 2. **Parse Plan Structure**
-   - Use `mcp__sequential-thinking__sequentialthinking` to understand:
+   - Use `mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking` to understand:
      - Task breakdown and priorities (P0 → P1 → P2 → P3)
      - Dependencies between tasks
      - Success criteria for each task
@@ -81,8 +81,8 @@ This skill executes approved implementation plans through a 7-phase systematic p
 3. **Validate Prerequisites**
    - Check codebase context:
      ```typescript
-     mcp__serena__check_onboarding_performed()
-     mcp__serena__get_current_config()
+     mcp__plugin_workflow-skills_serena__check_onboarding_performed()
+     mcp__plugin_workflow-skills_serena__get_current_config()
      ```
    - Verify required MCP servers are accessible
    - Confirm tools specified in plan are available
@@ -147,32 +147,32 @@ Use appropriate tools based on task needs:
 **Code Reading/Understanding**:
 ```typescript
 // Get file overview
-mcp__serena__get_symbols_overview({relative_path: "src/auth/service.ts"})
+mcp__plugin_workflow-skills_serena__get_symbols_overview({relative_path: "src/auth/service.ts"})
 
 // Find specific symbols
-mcp__serena__find_symbol({name_path: "AuthService/login", include_body: true})
+mcp__plugin_workflow-skills_serena__find_symbol({name_path: "AuthService/login", include_body: true})
 
 // Find references
-mcp__serena__find_referencing_symbols({name_path: "login", relative_path: "src/auth/service.ts"})
+mcp__plugin_workflow-skills_serena__find_referencing_symbols({name_path: "login", relative_path: "src/auth/service.ts"})
 
 // Search patterns
-mcp__serena__search_for_pattern({substring_pattern: "OAuth.*config"})
+mcp__plugin_workflow-skills_serena__search_for_pattern({substring_pattern: "OAuth.*config"})
 ```
 
 **Documentation**:
 ```typescript
 // Get library docs
-mcp__context7__resolve_library_id({libraryName: "passport"})
-mcp__context7__get_library_docs({context7CompatibleLibraryID: "/jaredhanson/passport"})
+mcp__plugin_workflow-skills_context7__resolve-library-id({libraryName: "passport"})
+mcp__plugin_workflow-skills_context7__get-library-docs({context7CompatibleLibraryID: "/jaredhanson/passport"})
 ```
 
 **Project Management**:
 ```typescript
 // Get JIRA details
-mcp__atlassian__getJiraIssue({cloudId, issueIdOrKey: "PROJ-123"})
+mcp__plugin_workflow-skills_atlassian__jira_get_issue({issue_key: "PROJ-123"})
 
 // Check Sentry errors
-mcp__sentry__get_issue_details({organizationSlug, issueId})
+mcp__plugin_workflow-skills_sentry__get_issue_details({organizationSlug, issueId})
 ```
 
 #### 3C. Implement Task
@@ -182,21 +182,21 @@ Follow the implementation approach defined in the plan:
 **Code Editing**:
 ```typescript
 // Replace symbol body
-mcp__serena__replace_symbol_body({
+mcp__plugin_workflow-skills_serena__replace_symbol_body({
   name_path: "AuthService/login",
   relative_path: "src/auth/service.ts",
   body: newImplementation
 })
 
 // Insert new code
-mcp__serena__insert_after_symbol({
+mcp__plugin_workflow-skills_serena__insert_after_symbol({
   name_path: "AuthService",
   relative_path: "src/auth/service.ts",
   body: newMethodCode
 })
 
 // Rename symbols
-mcp__serena__rename_symbol({
+mcp__plugin_workflow-skills_serena__rename_symbol({
   name_path: "oldName",
   relative_path: "src/auth/service.ts",
   new_name: "newName"
@@ -214,7 +214,7 @@ Check ALL success criteria for the task:
 
 ```typescript
 // Use thinking tool to assess
-mcp__serena__think_about_task_adherence()
+mcp__plugin_workflow-skills_serena__think_about_task_adherence()
 
 // For each criterion:
 - [ ] Criterion 1: [Check if met]
@@ -435,7 +435,7 @@ done
 
 ```typescript
 // Step 1: 함수 시그니처 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "processPayment 함수 분석: 입력은 amount (number), 출력은 Promise<PaymentResult>",
   thoughtNumber: 1,
   totalThoughts: 6,
@@ -443,7 +443,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 2: 입력 제약 조건 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "입력 제약: amount는 0 이상이어야 함, 1,000,000 이하여야 함",
   thoughtNumber: 2,
   totalThoughts: 6,
@@ -451,7 +451,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 3: 의존성 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "의존성: PaymentAPI.process() 호출 → 모킹 필요",
   thoughtNumber: 3,
   totalThoughts: 6,
@@ -459,7 +459,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 4: Edge Cases 식별
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "Edge cases: 1) amount = 0 (경계값), 2) amount = 1000000 (최대값), 3) amount = -1 (음수), 4) amount = 1000001 (초과)",
   thoughtNumber: 4,
   totalThoughts: 6,
@@ -467,7 +467,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 5: Error Cases 식별
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "Error cases: 1) API 호출 실패, 2) 네트워크 타임아웃, 3) 잘못된 응답 형식",
   thoughtNumber: 5,
   totalThoughts: 6,
@@ -475,7 +475,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 6: 테스트 케이스 설계 완료
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "테스트 케이스 설계 완료: Happy path (2개), Edge cases (4개), Error cases (2개) 총 8개",
   thoughtNumber: 6,
   totalThoughts: 6,
@@ -761,7 +761,7 @@ IF (JIRA 이슈 없음):
 
 ```typescript
 // Save key insights to Serena memory
-mcp__serena__write_memory({
+mcp__plugin_workflow-skills_serena__write_memory({
   memory_file_name: "auth_implementation_learnings.md",
   content: `
 # Authentication Implementation Learnings
@@ -789,20 +789,17 @@ mcp__serena__write_memory({
 
 ```typescript
 // Update JIRA issue
-mcp__atlassian__editJiraIssue({
-  cloudId,
-  issueIdOrKey: "PROJ-123",
+mcp__plugin_workflow-skills_atlassian__jira_update_issue({
+  issue_key: "PROJ-123",
   fields: {
-    status: {name: "Done"},
-    comment: "Implementation completed. All tests passing."
+    status: {name: "Done"}
   }
 })
 
 // Add implementation notes
-mcp__atlassian__addCommentToJiraIssue({
-  cloudId,
-  issueIdOrKey: "PROJ-123",
-  commentBody: `
+mcp__plugin_workflow-skills_atlassian__jira_add_comment({
+  issue_key: "PROJ-123",
+  comment: `
 ## Implementation Summary
 - [Summary of what was implemented]
 - All success criteria met
@@ -816,7 +813,7 @@ mcp__atlassian__addCommentToJiraIssue({
 
 ```typescript
 // Verify everything is done
-mcp__serena__think_about_whether_you_are_done()
+mcp__plugin_workflow-skills_serena__think_about_whether_you_are_done()
 ```
 
 **Checklist**:

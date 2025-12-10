@@ -37,14 +37,14 @@ GitLab MR(Merge Request)의 변경사항을 분석하여 단순 문법 체크를
 
 **사용 예시**:
 ```typescript
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "변경된 코드가 기존 아키텍처 레이어 분리 원칙을 준수하는가? Controller → Service → Repository 패턴을 따르는가?",
   thoughtNumber: 1,
   totalThoughts: 7,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "SQL Injection 취약점: 사용자 입력이 쿼리에 직접 사용되는가? Prepared Statement를 사용하는가?",
   thoughtNumber: 3,
   totalThoughts: 10,
@@ -70,21 +70,21 @@ mcp__sequential-thinking__sequentialthinking({
 
 **사용 예시**:
 ```typescript
-// Context7으로 프로젝트 아키텍처 이해
-mcp__serena__get_project_context({
-  query: "프로젝트 레이어 아키텍처 및 디렉토리 구조 규칙",
-  depth: 7
-})
-
 // Memory에서 과거 이슈 패턴 읽기
-mcp__serena__read_memory({
+mcp__plugin_workflow-skills_serena__read_memory({
   memory_file_name: "known_issues.md"
 })
 
 // 심볼 의존성 검색
-mcp__serena__find_referencing_symbols({
-  symbol_name: "UserService",
-  include_body: true
+mcp__plugin_workflow-skills_serena__find_referencing_symbols({
+  name_path: "UserService",
+  relative_path: "src/services/user.service.ts"
+})
+
+// 코드 패턴 검색
+mcp__plugin_workflow-skills_serena__search_for_pattern({
+  substring_pattern: "async.*await",
+  paths_include_glob: "**/*.ts"
 })
 ```
 
@@ -105,15 +105,13 @@ mcp__serena__find_referencing_symbols({
 **사용 예시**:
 ```typescript
 // JIRA 이슈 조회
-mcp__atlassian__getJiraIssue({
-  cloudId: process.env.ATLASSIAN_CLOUD_ID,
-  issueIdOrKey: "PROJ-123"
+mcp__plugin_workflow-skills_atlassian__jira_get_issue({
+  issue_key: "PROJ-123"
 })
 
 // Confluence 검색
-mcp__atlassian__searchConfluence({
-  cloudId: process.env.ATLASSIAN_CLOUD_ID,
-  cql: "title ~ \"API 명세\" AND space = \"TECH\""
+mcp__plugin_workflow-skills_atlassian__confluence_search({
+  query: "title ~ \"API 명세\" AND space = \"TECH\""
 })
 ```
 
@@ -344,21 +342,21 @@ jq '.vulnerabilities | to_entries[] | select(.value.severity == "critical" or .v
 
 ```typescript
 // 취약점 발견 시
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "axios@0.21.0에서 CVE-2021-3749 (SSRF) 취약점 발견. severity: CRITICAL. 영향: Server-Side Request Forgery 가능",
   thoughtNumber: 1,
   totalThoughts: 3,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "해결 방법: axios@0.21.2 이상으로 업데이트. Breaking changes 없음 (CHANGELOG 확인). 즉시 적용 권장",
   thoughtNumber: 2,
   totalThoughts: 3,
   nextThoughtNeeded: true
 })
 
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "영향 범위: src/api/*.ts 파일 11개에서 사용. 프로덕션 환경 포함. 긴급 수정 필요",
   thoughtNumber: 3,
   totalThoughts: 3,
@@ -533,7 +531,7 @@ npm audit fix --force  # 자동 수정 시도
 
 **해결 방법**:
 1. Serena memory 디렉토리 확인
-2. `mcp__serena__list_memories()` 실행하여 사용 가능한 메모리 확인
+2. `mcp__plugin_workflow-skills_serena__list_memories()` 실행하여 사용 가능한 메모리 확인
 3. 필요한 메모리 파일 생성 (architecture_decisions.md, code_patterns.md, known_issues.md)
 
 ---

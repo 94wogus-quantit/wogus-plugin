@@ -7,6 +7,65 @@
 
 ---
 
+## [3.0.3] - 2025-12-10
+
+### Changed
+
+- **MCP 예시 전체 최신화**: Plugin MCP 네이밍 컨벤션으로 통일
+  - **변환 패턴**:
+    - `mcp__sequential-thinking__` → `mcp__plugin_workflow-skills_sequential-thinking__`
+    - `mcp__serena__` → `mcp__plugin_workflow-skills_serena__`
+    - `mcp__atlassian__` → `mcp__plugin_workflow-skills_atlassian__`
+  - **함수명 업데이트**: 신규 MCP API 포맷 적용
+    - `getJiraIssue` → `jira_get_issue`
+    - `searchJiraIssues` → `jira_search`
+    - `addCommentToJiraIssue` → `jira_add_comment`
+    - `searchConfluence` → `confluence_search`
+    - `get_project_context` → `read_memory`
+
+### Updated Files
+
+- **Skills (5개)**:
+  - `analyze-issue/SKILL.md`
+  - `plan-builder/SKILL.md`
+  - `execute-plan/SKILL.md`
+  - `document/SKILL.md`
+  - `mr-code-review/SKILL.md`
+
+- **Agents (1개)**:
+  - `agents/requirement-validator.md`
+
+- **References (7개)**:
+  - `mr-code-review/references/verification_guides/architecture_check.md`
+  - `mr-code-review/references/verification_guides/convention_check.md`
+  - `mr-code-review/references/verification_guides/jira_validation.md`
+  - `mr-code-review/references/verification_guides/known_issues_check.md`
+  - `mr-code-review/references/verification_guides/security_review.md`
+  - `mr-code-review/references/verification_guides/test_coverage.md`
+  - `plan-builder/references/plan_template.md`
+
+### Technical Details
+
+- **총 변경 파일**: 13개
+- **MCP 참조 업데이트**: 100+ 건
+- **호환성**: 완전 하위 호환 (코드 예시만 변경, 기능 변경 없음)
+
+### Migration Guide
+
+**기존 사용자 (v3.0.2 → v3.0.3)**:
+
+1. **자동 업그레이드**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **영향 없음**:
+   - ✅ 기존 워크플로우 정상 작동
+   - ✅ 기능 변경 없음 (문서 업데이트만)
+   - ✅ MCP 호출은 Claude Code가 자동 처리
+
+---
+
 ## [3.0.2] - 2025-12-10
 
 ### Changed

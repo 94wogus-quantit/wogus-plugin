@@ -45,7 +45,7 @@ Use this skill when:
 Gather comprehensive context from all available sources:
 
 **1. JIRA Issue Analysis** (if JIRA link/ID provided)
-- Use `mcp__atlassian__getJiraIssue` to fetch issue details
+- Use `mcp__plugin_workflow-skills_atlassian__jira_get_issue` to fetch issue details
 - Extract:
   - Issue summary and description
   - Reproduction steps
@@ -64,7 +64,7 @@ Gather comprehensive context from all available sources:
 ```typescript
 // Search for errors related to the issue description
 // Use natural language queries based on the issue
-mcp__sentry__search_events({
+mcp__plugin_workflow-skills_sentry__search_events({
   organizationSlug: 'your-org',
   naturalLanguageQuery: 'database connection timeout errors in the last 7 days'
   // or: 'authentication failures for user login'
@@ -76,13 +76,13 @@ mcp__sentry__search_events({
 
 ```typescript
 // If you have error message or stack trace
-mcp__sentry__search_events({
+mcp__plugin_workflow-skills_sentry__search_events({
   organizationSlug: 'your-org',
   naturalLanguageQuery: 'TypeError Cannot read property of undefined in checkout.js'
 })
 
 // Search by time range
-mcp__sentry__search_events({
+mcp__plugin_workflow-skills_sentry__search_events({
   organizationSlug: 'your-org',
   naturalLanguageQuery: 'all errors in payment-service from last 24 hours'
 })
@@ -92,12 +92,12 @@ mcp__sentry__search_events({
 
 ```typescript
 // If Sentry URL provided (e.g., https://sentry.io/issues/PROJECT-123/)
-mcp__sentry__get_issue_details({
+mcp__plugin_workflow-skills_sentry__get_issue_details({
   issueUrl: 'https://sentry.io/issues/PROJECT-123/'
 })
 
 // Or use issue ID
-mcp__sentry__get_issue_details({
+mcp__plugin_workflow-skills_sentry__get_issue_details({
   organizationSlug: 'your-org',
   issueId: 'PROJECT-123'
 })
@@ -107,13 +107,13 @@ mcp__sentry__get_issue_details({
 
 ```typescript
 // Count frequency of specific errors
-mcp__sentry__search_events({
+mcp__plugin_workflow-skills_sentry__search_events({
   organizationSlug: 'your-org',
   naturalLanguageQuery: 'count of database timeout errors today'
 })
 
 // Check error trends
-mcp__sentry__search_events({
+mcp__plugin_workflow-skills_sentry__search_events({
   organizationSlug: 'your-org',
   naturalLanguageQuery: 'total errors in authentication module this week'
 })
@@ -158,7 +158,7 @@ From Sentry results, extract:
 
 ### Phase 2: Hypothesis Generation
 
-Use `mcp__sequential-thinking__sequentialthinking` to systematically explore multiple perspectives:
+Use `mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking` to systematically explore multiple perspectives:
 
 **Generate Initial Hypotheses**
 
@@ -193,10 +193,10 @@ Use logical reasoning to eliminate unlikely causes:
 Use Serena tools efficiently for targeted code exploration:
 
 **1. Targeted Code Exploration**
-- `mcp__serena__get_symbols_overview` - Understand file structure
-- `mcp__serena__find_symbol` - Locate specific functions/classes
-- `mcp__serena__find_referencing_symbols` - Trace execution flow
-- `mcp__serena__search_for_pattern` - Find error messages or patterns
+- `mcp__plugin_workflow-skills_serena__get_symbols_overview` - Understand file structure
+- `mcp__plugin_workflow-skills_serena__find_symbol` - Locate specific functions/classes
+- `mcp__plugin_workflow-skills_serena__find_referencing_symbols` - Trace execution flow
+- `mcp__plugin_workflow-skills_serena__search_for_pattern` - Find error messages or patterns
 
 **2. Execution Flow Tracing**
 - Map the path from user action to error
@@ -223,7 +223,7 @@ Use Serena tools efficiently for targeted code exploration:
 
 ```typescript
 // 영향받는 파일의 심볼 정보 가져오기
-mcp__serena__find_symbol({
+mcp__plugin_workflow-skills_serena__find_symbol({
   name_path_pattern: "UserService/login",
   relative_path: "src/services/UserService.ts",
   include_body: true
@@ -234,7 +234,7 @@ mcp__serena__find_symbol({
 
 ```typescript
 // Step 1: 복잡도 측정
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "UserService/login 함수의 Cyclomatic complexity 측정: if문 8개, for문 2개, switch문 1개 → complexity = 11 (임계값 10 초과)",
   thoughtNumber: 1,
   totalThoughts: 5,
@@ -242,7 +242,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 2: 함수 길이 분석
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "함수 길이 측정: 총 85줄 → 임계값(50줄) 초과. 가독성 저하, 여러 책임 담당 가능성",
   thoughtNumber: 2,
   totalThoughts: 5,
@@ -250,7 +250,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 3: 책임 분석 (SRP)
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "책임 분석: 1) 사용자 인증, 2) 세션 관리, 3) 로깅, 4) 에러 처리 → 4개 책임 (SRP 위반)",
   thoughtNumber: 3,
   totalThoughts: 5,
@@ -258,7 +258,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 4: Code Smells 탐지
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "Code Smells 탐지: 중복 코드 3회 발견 (validateUser 로직), Magic Number 2개 (3.14, 0.05)",
   thoughtNumber: 4,
   totalThoughts: 5,
@@ -266,7 +266,7 @@ mcp__sequential-thinking__sequentialthinking({
 })
 
 // Step 5: 리팩토링 전략 결정
-mcp__sequential-thinking__sequentialthinking({
+mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
   thought: "리팩토링 전략: 1) Extract Method로 validateUser() 분리, 2) Extract Class로 SessionManager 분리, 3) Replace Magic Number with Named Constant",
   thoughtNumber: 5,
   totalThoughts: 5,

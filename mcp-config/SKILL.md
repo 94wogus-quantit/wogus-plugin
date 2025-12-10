@@ -1,16 +1,18 @@
 ---
 name: mcp-config
-description: workflow-skills 플러그인의 MCP 서버를 활성화/비활성화하고 환경 변수 설정을 안내합니다. "MCP 상태 보여줘", "sentry 비활성화해줘", "MCP 환경변수 설정", "amplitude API 키 어디서 발급" 등의 요청에 사용합니다.
+description: workflow-skills 플러그인의 MCP 서버를 활성화/비활성화하고, MCP 도구 권한(allow/deny/ask)을 관리하며, 환경 변수 설정을 안내합니다. "MCP 상태 보여줘", "sentry 비활성화해줘", "MCP 도구 목록", "serena allow해줘", "serena의 write_memory deny해줘", "MCP 권한 상태" 등의 요청에 사용합니다.
 tools: Read, Edit, Write, Bash
 ---
 
 # MCP Config
 
-workflow-skills 플러그인의 8개 MCP 서버를 관리하고 활성화/비활성화하는 Skill입니다.
+workflow-skills 플러그인의 8개 MCP 서버를 관리하고 활성화/비활성화하며, MCP 도구별 권한을 설정하는 Skill입니다.
 
 ## When to Use
 
 이 skill을 사용하는 상황:
+
+**MCP 서버 관리 (Phase 1-4)**:
 - MCP 서버 상태를 확인하고 싶을 때 ("MCP 상태 보여줘")
 - 특정 MCP 서버를 비활성화하고 싶을 때 ("sentry 비활성화해줘")
 - 비활성화된 MCP 서버를 다시 활성화하고 싶을 때 ("atlassian 활성화해줘")
@@ -18,7 +20,14 @@ workflow-skills 플러그인의 8개 MCP 서버를 관리하고 활성화/비활
 - MCP 환경 변수 설정 방법을 알고 싶을 때 ("MCP 환경변수 설정 방법")
 - 특정 MCP의 API 키 발급처를 알고 싶을 때 ("amplitude API 키 어디서 발급해?")
 
-**트리거 키워드**: MCP, 상태, 비활성화, 활성화, 끄기, disable, enable, 환경변수, API 키, 설정
+**MCP 도구 권한 관리 (Phase 5)**:
+- MCP 도구 목록을 확인하고 싶을 때 ("MCP 도구 목록 보여줘")
+- 특정 MCP 서버 전체를 allow/deny/ask 하고 싶을 때 ("serena allow해줘")
+- 특정 MCP 도구만 allow/deny/ask 하고 싶을 때 ("serena의 write_memory deny해줘")
+- MCP 도구 권한 상태를 확인하고 싶을 때 ("MCP 권한 상태")
+- MCP 도구 권한을 제거하고 싶을 때 ("serena 제거해줘")
+
+**트리거 키워드**: MCP, 상태, 비활성화, 활성화, 끄기, disable, enable, 환경변수, API 키, 설정, 도구, tool, 권한, permission, allow, deny, ask, 제거
 
 ---
 
@@ -430,9 +439,226 @@ npx -y @modelcontextprotocol/server-sequential-thinking --version
 
 ---
 
+### Phase 5: MCP 도구 권한 관리
+
+MCP 도구별 권한(allow/deny/ask)을 설정합니다.
+
+**트리거 키워드**: 도구, tool, 권한, permission, allow, deny, ask
+
+#### Step 1: 현재 권한 상태 파악
+
+1. Read 도구로 **현재 프로젝트의** `.claude/settings.local.json` 읽기
+2. `permissions.allow`, `permissions.deny`, `permissions.ask` 배열에서 MCP 관련 항목 필터링
+3. `mcp__plugin_workflow-skills_*` 패턴 추출
+
+**필터링 예시**:
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_workflow-skills_sequential-thinking",  // ← MCP 항목
+      "Bash(mkdir:*)"  // ← MCP 아님
+    ]
+  }
+}
+```
+
+#### Step 2: 사용자 요청 파싱
+
+**1. 요청 유형**
+
+| 키워드 | 작업 |
+|--------|------|
+| "도구 목록", "tool list", "MCP 도구" | 도구 목록 조회 |
+| "권한 상태", "permission status" | 권한 상태 조회 |
+| "allow", "허용" | allow 배열에 추가 |
+| "deny", "거부" | deny 배열에 추가 |
+| "ask", "확인" | ask 배열에 추가 |
+| "제거", "삭제", "remove" | 모든 배열에서 제거 |
+
+**2. 대상 파싱**
+
+| 패턴 | 의미 | 생성되는 Permission 패턴 |
+|------|------|-------------------------|
+| "serena" | 전체 서버 | `mcp__plugin_workflow-skills_serena` |
+| "serena의 write_memory" | 개별 도구 | `mcp__plugin_workflow-skills_serena__write_memory` |
+| "atlassian의 jira_get_issue" | 개별 도구 | `mcp__plugin_workflow-skills_atlassian__jira_get_issue` |
+
+**3. MCP ID 유효성 검사**
+
+유효한 MCP ID: `sequential-thinking`, `context7`, `serena`, `sentry`, `atlassian`, `terraform`, `amplitude`, `chrome-devtools`
+
+도구 이름은 `references/mcp_tools.md`를 참조하여 검증합니다.
+
+#### Step 3: 권한 설정 수정
+
+**도구 목록 조회**:
+- `references/mcp_tools.md` 파일의 내용을 출력합니다
+- 각 MCP 서버별 도구 목록과 Permission 패턴을 보여줍니다
+
+**권한 상태 조회**:
+- 수정 없이 Step 4로 이동
+
+**allow/deny/ask 설정**:
+
+1. **중복 확인**: 대상이 이미 같은 배열에 있는지 확인
+   - 이미 존재하면: "이미 {배열}에 있습니다" 메시지 출력, 종료
+
+2. **다른 배열에서 제거**: 대상이 다른 배열에 있으면 제거 (권한 이동)
+   - allow에서 deny로 이동 시: allow에서 제거 후 deny에 추가
+   - deny에서 ask로 이동 시: deny에서 제거 후 ask에 추가
+
+3. **새 배열에 추가**: 대상을 요청된 배열에 추가
+
+4. Edit 도구로 JSON 업데이트
+
+**권한 제거**:
+
+1. **존재 확인**: 대상이 allow/deny/ask 중 어디에 있는지 확인
+   - 어디에도 없으면: "권한 설정에 없습니다" 메시지 출력, 종료
+
+2. **모든 배열에서 제거**: 해당 항목을 모든 배열에서 제거
+   - 다른 배열에 추가하지 않음
+
+3. Edit 도구로 JSON 업데이트
+
+**전체 서버 vs 개별 도구**:
+- 전체 서버: `mcp__plugin_workflow-skills_{mcp_id}`
+- 개별 도구: `mcp__plugin_workflow-skills_{mcp_id}__{tool_name}`
+
+#### Step 4: 결과 확인
+
+**도구 목록 출력 형식**:
+
+```
+## MCP 도구 목록
+
+상세 목록: `mcp-config/references/mcp_tools.md`
+
+### 요약
+| MCP 서버 | 도구 수 | 전체 서버 패턴 |
+|----------|--------|----------------|
+| sequential-thinking | 1 | `mcp__plugin_workflow-skills_sequential-thinking` |
+| context7 | 2 | `mcp__plugin_workflow-skills_context7` |
+| serena | 24 | `mcp__plugin_workflow-skills_serena` |
+| sentry | 6+ | `mcp__plugin_workflow-skills_sentry` |
+| atlassian | 41 | `mcp__plugin_workflow-skills_atlassian` |
+| terraform | 33 | `mcp__plugin_workflow-skills_terraform` |
+| amplitude | 7+ | `mcp__plugin_workflow-skills_amplitude` |
+| chrome-devtools | 26 | `mcp__plugin_workflow-skills_chrome-devtools` |
+
+**총 도구 수**: 140+ 개
+
+### 사용 방법
+- 전체 서버 allow: "serena allow해줘"
+- 개별 도구 deny: "serena의 write_memory deny해줘"
+- 권한 상태 확인: "MCP 권한 상태"
+```
+
+**권한 상태 출력 형식**:
+
+```
+## MCP 도구 권한 상태
+
+### Allow (자동 허용)
+| 패턴 | 대상 |
+|------|------|
+| `mcp__plugin_workflow-skills_sequential-thinking` | sequential-thinking 전체 |
+| `mcp__plugin_workflow-skills_serena__find_symbol` | serena의 find_symbol |
+
+### Deny (거부)
+| 패턴 | 대상 |
+|------|------|
+| (없음) | |
+
+### Ask (매번 확인)
+| 패턴 | 대상 |
+|------|------|
+| (없음) | |
+
+### 변경 방법
+- 전체 allow: "serena 전체 allow해줘"
+- 개별 deny: "serena의 write_memory deny해줘"
+- 권한 제거: "serena 제거해줘"
+
+설정 파일: .claude/settings.local.json
+```
+
+**권한 변경 출력 형식**:
+
+```
+## MCP 도구 권한 변경
+
+변경 사항:
+- `mcp__plugin_workflow-skills_serena`: (없음) → ✅ allow
+
+`.claude/settings.local.json` 업데이트 완료.
+```
+
+**권한 이동 출력 형식**:
+
+```
+## MCP 도구 권한 변경
+
+변경 사항:
+- `mcp__plugin_workflow-skills_serena`: ✅ allow → ❌ deny
+
+`.claude/settings.local.json` 업데이트 완료.
+```
+
+**권한 제거 출력 형식**:
+
+```
+## MCP 도구 권한 변경
+
+변경 사항:
+- `mcp__plugin_workflow-skills_serena`: ✅ allow → (제거됨)
+
+`.claude/settings.local.json` 업데이트 완료.
+```
+
+**이미 해당 상태일 때**:
+
+```
+ℹ️ `mcp__plugin_workflow-skills_serena`는 이미 allow에 있습니다.
+```
+
+**존재하지 않는 권한 제거 시**:
+
+```
+ℹ️ `mcp__plugin_workflow-skills_serena`는 권한 설정에 없습니다.
+```
+
+---
+
+## Phase 5 예외 처리 시나리오
+
+### 1. 존재하지 않는 MCP ID
+
+```
+'{invalid-id}'은(는) 유효한 MCP ID가 아닙니다.
+유효한 MCP: sequential-thinking, context7, serena, sentry, atlassian, terraform, amplitude, chrome-devtools
+```
+
+### 2. 존재하지 않는 도구 이름
+
+```
+'{tool-name}'은(는) '{mcp-id}'의 유효한 도구가 아닙니다.
+도구 목록: `mcp-config/references/mcp_tools.md` 참조
+```
+
+### 3. permissions 객체 없음
+
+기존 settings.local.json에 `permissions` 객체가 없으면:
+1. 기본 구조 추가: `{ "allow": [], "deny": [], "ask": [] }`
+2. 이후 권한 설정 작업 수행
+
+---
+
 ## Tips
 
 - **재시작 필요**: MCP 설정 변경 후 Claude Code를 재시작해야 적용됩니다
 - **serverCommand 정확성**: 값이 정확히 일치해야 비활성화가 됩니다
 - **marketplace.json 참고**: MCP 서버 args 변경 시 이 skill의 참조 테이블도 업데이트해야 합니다
 - **실제 상태 확인**: `claude mcp list` 명령어로 실제 MCP 상태 확인 가능
+- **도구 권한 우선순위**: Deny > Ask > Allow (Claude Code 기본 동작)

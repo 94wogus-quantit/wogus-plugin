@@ -7,6 +7,53 @@
 
 ---
 
+## [3.3.0] - 2025-12-10
+
+### Added
+
+- **mcp-config skill에 MCP 도구 권한 관리 기능 추가 (Phase 5)**
+  - MCP 도구 목록 조회 ("MCP 도구 목록 보여줘")
+  - MCP 도구 권한 상태 조회 ("MCP 권한 상태")
+  - 전체 MCP 서버 allow/deny/ask 설정 ("serena allow해줘")
+  - 개별 MCP 도구 allow/deny/ask 설정 ("serena의 write_memory deny해줘")
+  - 권한 제거 기능 ("serena 제거해줘")
+  - 권한 이동 자동 처리 (allow → deny 이동 시 allow에서 자동 제거)
+
+- **MCP 도구 참조 문서 추가**: `mcp-config/references/mcp_tools.md`
+  - 8개 MCP 서버의 140+ 도구 목록
+  - Permission 패턴 규칙 및 예시
+  - 전체 서버 vs 개별 도구 패턴 설명
+
+### Technical Details
+
+- **새로운 파일**:
+  - `mcp-config/references/mcp_tools.md`: MCP 도구 참조 문서 (~500 lines)
+
+- **수정된 파일**:
+  - `mcp-config/SKILL.md`: Phase 5 추가, description/When to Use 업데이트 (~220 lines 추가)
+  - `.claude-plugin/marketplace.json`: version 3.2.2 → 3.3.0
+
+### Migration Guide
+
+**기존 사용자 (v3.2.2 → v3.3.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **호환성**:
+   - ✅ 완전 하위 호환 (Breaking Change 없음)
+   - ✅ 기존 Phase 1-4 기능 그대로 유지
+   - ✅ Phase 5는 새로운 트리거 키워드로만 활성화
+
+3. **새 기능 사용**:
+   - "MCP 도구 목록" - 8개 MCP 서버의 모든 도구 확인
+   - "serena allow해줘" - 전체 서버 권한 설정
+   - "serena의 write_memory deny해줘" - 개별 도구 권한 설정
+
+---
+
 ## [3.2.2] - 2025-12-10
 
 ### Fixed

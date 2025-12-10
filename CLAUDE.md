@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.2.1):**
+**Key Artifacts (v3.3.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.2.1)
+wogus-plugin/  (v3.3.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -44,13 +44,19 @@ Systematic root cause analysis for bugs and issues.
 **Output**: `[ISSUE_ID]_REPORT.md` with root cause, affected code, and recommendations
 **Integration**: First step in `/analyze-issue → /plan → /execute-plan → /document` workflow
 
-### mcp-config (v3.1.0 NEW)
+### mcp-config (v3.3.0 Updated)
 
-workflow-skills 플러그인의 MCP 서버를 활성화/비활성화합니다.
+workflow-skills 플러그인의 MCP 서버를 활성화/비활성화하고, MCP 도구별 권한을 관리합니다.
 
-**When to use**: MCP 서버 상태 확인, 특정 MCP 비활성화/활성화
-**Trigger phrases**: "MCP 상태 보여줘", "sentry 비활성화해줘", "atlassian 끄기", "모든 MCP 활성화"
-**Configuration file**: `.claude/settings.local.json`의 `deniedMcpServers` 배열 관리
+**When to use**:
+- MCP 서버 상태 확인, 특정 MCP 비활성화/활성화 (Phase 1-4)
+- MCP 도구 목록 조회, 도구별 권한(allow/deny/ask) 설정 (Phase 5)
+
+**Trigger phrases**:
+- 서버 관리: "MCP 상태 보여줘", "sentry 비활성화해줘", "atlassian 끄기"
+- 도구 권한: "MCP 도구 목록", "serena allow해줘", "serena의 write_memory deny해줘"
+
+**Configuration file**: `.claude/settings.local.json`의 `deniedMcpServers` 배열 및 `permissions.allow/deny/ask` 배열 관리
 
 ## Available Agents (v3.0.0)
 
@@ -403,6 +409,53 @@ git push
 The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
+
+### 2025-12-10 - v3.3.0 MCP 도구 권한 관리 기능 추가
+
+**컨텍스트**:
+v3.2.2까지 mcp-config는 MCP 서버 활성화/비활성화(`deniedMcpServers`)만 관리했습니다. 사용자가 개별 MCP 도구의 권한(allow/deny/ask)을 설정하려면 `settings.local.json`을 직접 편집해야 했고, permission 패턴 문법을 알아야 했습니다.
+
+**문제점**:
+- **도구 목록 조회 불가**: MCP 서버별 제공 도구를 확인할 방법이 없음
+- **권한 패턴 불명확**: `mcp__plugin_workflow-skills_serena__find_symbol` 같은 패턴을 사용자가 직접 작성해야 함
+- **권한 관리 복잡**: allow/deny/ask 간 이동 시 이전 배열에서 수동 제거 필요
+
+**결정**: Phase 5 추가 (MCP 도구 권한 관리)
+
+1. **MCP 도구 참조 문서 생성** (`references/mcp_tools.md`):
+   - 8개 MCP 서버의 140+ 도구 목록 문서화
+   - Permission 패턴 규칙 및 예시 제공
+   - 전체 서버 vs 개별 도구 패턴 설명
+
+2. **Phase 5 워크플로우**:
+   - Step 1: 현재 권한 상태 파악 (permissions 배열 필터링)
+   - Step 2: 사용자 요청 파싱 (자연어 → permission 패턴)
+   - Step 3: 권한 설정 수정 (중복 확인, 권한 이동, 제거)
+   - Step 4: 결과 확인 (상태 테이블 출력)
+
+3. **자동 권한 이동**:
+   - allow → deny 이동 시 allow에서 자동 제거
+   - 권한 제거 시 모든 배열에서 제거 (다른 배열에 추가하지 않음)
+
+**영향**:
+- **사용자 경험 개선**: 자연어로 도구 권한 관리 가능
+- **도구 목록 가시성**: 140+ 도구를 한눈에 확인
+- **권한 충돌 방지**: 권한 이동 시 이전 배열에서 자동 제거
+- **Breaking Change**: 없음 (새 기능 추가)
+
+**대안**:
+1. ~~README에 수동 설정 방법만 문서화~~ → 복잡성 그대로, 오류 발생 가능
+2. ~~별도 skill 생성~~ → mcp-config와 기능 중복
+3. ✅ **Phase 5로 mcp-config 확장** → 채택 (일관성 + 점진적 확장)
+
+**관련 파일**:
+- [mcp-config/SKILL.md](mcp-config/SKILL.md) - Phase 5 추가
+- [mcp-config/references/mcp_tools.md](mcp-config/references/mcp_tools.md) - 새 파일
+- [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) - 버전 업데이트
+
+**버전**: v3.2.2 → v3.3.0
+
+---
 
 ### 2025-12-10 - v3.2.1 amplitude MCP 환경 변수 전달 방식 수정
 

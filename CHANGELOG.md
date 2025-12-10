@@ -7,6 +7,124 @@
 
 ---
 
+## [3.0.0] - 2025-12-10
+
+### ⚠️ Breaking Changes
+
+- **Agents 시스템 축소**: 5개 → 1개 (requirement-validator만 유지)
+  - 삭제된 Agent: code-refactorer, test-generator, code-reviewer, performance-analyzer
+  - 영향: 기존에 Agent를 직접 호출하던 코드/명령은 더 이상 작동하지 않음
+  - 대안: Skills(analyze-issue, execute-plan)의 Phase에서 동일 기능 직접 제공
+
+### Removed
+
+- **agents/code-refactorer.md**: analyze-issue Phase 3D에 통합
+- **agents/test-generator.md**: execute-plan Phase 5에 통합
+- **agents/code-reviewer.md**: 미사용으로 삭제 (Skills에서 호출 없음)
+- **agents/performance-analyzer.md**: 미사용으로 삭제 (Skills에서 호출 없음)
+
+### Enhanced
+
+- **analyze-issue skill**: Phase 3D "선택적" → "조건부 필수"로 강화
+  - code-refactorer 핵심 로직 직접 통합
+  - Sequential Thinking 패턴으로 복잡도 분석
+  - Cyclomatic complexity > 10, 함수 길이 > 50줄 기준 명시
+  - Extract Method/Extract Class 리팩토링 가이드 제공
+  - 위치: `analyze-issue/SKILL.md:211-310`
+
+- **execute-plan skill**: Phase 5 "선택적" → "조건부 필수"로 강화
+  - test-generator 핵심 로직 직접 통합
+  - AAA 패턴 (Arrange-Act-Assert) 코드 예시 추가
+  - Given/When/Then BDD 스타일 예시 추가
+  - Happy path/Edge cases/Error handling 테스트 케이스 분류표 추가
+  - "test-generator agent" 참조 완전 제거
+  - 위치: `execute-plan/SKILL.md:440-614`
+
+### Changed
+
+- **marketplace.json**: v2.4.0 → v3.0.0
+  - `metadata.version` 업데이트
+  - `agents` 배열: 5개 → 1개 (requirement-validator.md만 유지)
+  - 위치: `.claude-plugin/marketplace.json`
+
+- **CLAUDE.md**: v3.0.0 아키텍처 결정사항 추가
+  - "Agents 시스템 축소 리팩토링" 섹션 추가
+  - Repository Structure 업데이트 (agents/ 1개만 표시)
+  - Available Agents 섹션 전면 개편
+  - Skills vs Agents 비교표 업데이트
+  - 위치: `CLAUDE.md`
+
+- **README.md**: v3.0.0 반영
+  - Plugin 정의 업데이트 (Agents 역할 변경)
+  - Available Agents 섹션 전면 개편
+  - 표준 워크플로우 다이어그램 업데이트
+  - Repository Structure 업데이트
+  - 위치: `README.md`
+
+### Technical Details
+
+- **Dead Code 제거**: 72% → 0%
+  - 5개 Agent 중 Skills에서 미사용되는 4개 삭제
+  - 핵심 로직은 Skills의 Phase에 직접 통합
+
+- **삭제된 파일 (4개)**:
+  - `agents/code-refactorer.md` (~8KB)
+  - `agents/test-generator.md` (~6KB)
+  - `agents/code-reviewer.md` (~6KB)
+  - `agents/performance-analyzer.md` (~7KB)
+
+- **유지된 파일 (1개)**:
+  - `agents/requirement-validator.md` (4개 Skills에서 활발히 사용)
+
+- **검증 지표**:
+  - marketplace.json JSON 파싱 ✅
+  - agents/ 디렉토리 1개 파일 ✅
+  - code-refactorer 참조 제거 (grep 0건) ✅
+  - test-generator 참조 제거 (grep 0건) ✅
+
+### Development Process
+
+이 기능은 다음 워크플로우로 개발되었습니다:
+
+1. **분석**: Skills에서 Agents 활용도 분석 → 5개 중 1개만 실사용 발견
+2. **계획**: Option A 선택 (requirement-validator만 유지, 나머지 Skills에 통합)
+3. **plan-builder**: `AGENTS_REFACTOR_PLAN.md` (2차 검토 완료, 7개 이슈 해결)
+4. **execute-plan**: 8개 태스크 완료 (현재 단계)
+
+### Migration Guide
+
+**기존 사용자 (v2.4.0 → v3.0.0)**:
+
+1. **마켓플레이스 갱신**:
+   ```bash
+   /marketplace refresh
+   ```
+
+2. **Breaking Change 확인**:
+   - ❌ `code-refactorer agent로 ...` → 더 이상 작동 안 함
+   - ❌ `test-generator agent로 ...` → 더 이상 작동 안 함
+   - ❌ `code-reviewer agent로 ...` → 더 이상 작동 안 함
+   - ❌ `performance-analyzer agent로 ...` → 더 이상 작동 안 함
+   - ✅ `requirement-validator agent로 ...` → 정상 작동
+
+3. **대안**:
+   - **리팩토링 필요 시**: `analyze-issue` skill 실행 → Phase 3D에서 자동 제공
+   - **테스트 생성 필요 시**: `execute-plan` skill 실행 → Phase 5에서 자동 생성
+   - **코드 리뷰 필요 시**: `mr-code-review` skill 사용
+   - **성능 분석 필요 시**: 수동으로 분석 또는 별도 도구 사용
+
+4. **호환성**:
+   - ⚠️ **Breaking Change**: Agent 직접 호출 불가
+   - ✅ **Skills 워크플로우**: 정상 작동 (오히려 강화됨)
+   - ✅ **requirement-validator**: 정상 작동
+
+### Related Files
+
+- 구현 계획: `AGENTS_REFACTOR_PLAN.md`
+- 계획 리뷰: `AGENTS_REFACTOR_PLAN_REVIEW_v2.md`
+
+---
+
 ## [2.4.0] - 2025-12-10
 
 ### Added

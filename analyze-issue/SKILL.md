@@ -209,11 +209,13 @@ Use Serena tools efficiently for targeted code exploration:
 - Correlate timing with issue occurrence
 - Review related code modifications
 
-### Phase 3D: Code Complexity Assessment (선택적)
+### Phase 3D: Code Complexity Assessment (조건부 필수)
 
-**목적**: 복잡한 코드를 탐지하여 리팩토링 필요성 판단
+**목적**: 복잡한 코드를 탐지하여 리팩토링 제안 생성
 
-**실행 조건**: Phase 3에서 affected files 확인 완료 후
+**실행 조건**:
+- Phase 3에서 affected files 확인 완료 후
+- **조건부 필수**: Cyclomatic complexity > 10 OR 함수 길이 > 50줄인 코드 발견 시
 
 **Steps**:
 
@@ -228,52 +230,110 @@ mcp__serena__find_symbol({
 })
 ```
 
-**2. Sequential Thinking으로 복잡도 측정**
+**2. Sequential Thinking으로 복잡도 측정 및 리팩토링 전략 수립**
 
 ```typescript
+// Step 1: 복잡도 측정
 mcp__sequential-thinking__sequentialthinking({
-  thought: "UserService/login 함수의 복잡도 분석: cyclomatic complexity 12 (if문 8개, for문 2개), 함수 길이 95줄. 임계값 초과 (complexity > 10, length > 50)",
+  thought: "UserService/login 함수의 Cyclomatic complexity 측정: if문 8개, for문 2개, switch문 1개 → complexity = 11 (임계값 10 초과)",
   thoughtNumber: 1,
-  totalThoughts: 3,
+  totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
+// Step 2: 함수 길이 분석
 mcp__sequential-thinking__sequentialthinking({
-  thought: "책임 분석: 1) 사용자 인증, 2) 세션 관리, 3) 로깅, 4) 에러 처리 → 4개 책임 (SRP 위반 가능성)",
+  thought: "함수 길이 측정: 총 85줄 → 임계값(50줄) 초과. 가독성 저하, 여러 책임 담당 가능성",
   thoughtNumber: 2,
-  totalThoughts: 3,
+  totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
+// Step 3: 책임 분석 (SRP)
 mcp__sequential-thinking__sequentialthinking({
-  thought: "리팩토링 필요 판단: complexity 12 > 10 (임계값), length 95 > 50 (임계값) → code-refactorer agent 권장",
+  thought: "책임 분석: 1) 사용자 인증, 2) 세션 관리, 3) 로깅, 4) 에러 처리 → 4개 책임 (SRP 위반)",
   thoughtNumber: 3,
-  totalThoughts: 3,
+  totalThoughts: 5,
+  nextThoughtNeeded: true
+})
+
+// Step 4: Code Smells 탐지
+mcp__sequential-thinking__sequentialthinking({
+  thought: "Code Smells 탐지: 중복 코드 3회 발견 (validateUser 로직), Magic Number 2개 (3.14, 0.05)",
+  thoughtNumber: 4,
+  totalThoughts: 5,
+  nextThoughtNeeded: true
+})
+
+// Step 5: 리팩토링 전략 결정
+mcp__sequential-thinking__sequentialthinking({
+  thought: "리팩토링 전략: 1) Extract Method로 validateUser() 분리, 2) Extract Class로 SessionManager 분리, 3) Replace Magic Number with Named Constant",
+  thoughtNumber: 5,
+  totalThoughts: 5,
   nextThoughtNeeded: false
 })
 ```
 
-**3. 리팩토링 필요 판단**
+**3. 리팩토링 필요 판단 기준**
 
-임계값 기준:
-- **Cyclomatic complexity > 10**: 조건문/반복문이 너무 많아 테스트 복잡도 증가
-- **함수 길이 > 50줄**: 가독성 저하, 여러 책임 담당 가능성
-- **SRP 위반**: 하나의 함수/클래스가 여러 책임 수행
+| 지표 | 임계값 | 설명 |
+|------|--------|------|
+| **Cyclomatic complexity** | > 10 | 조건문/반복문이 너무 많아 테스트 복잡도 증가 |
+| **함수 길이** | > 50줄 | 가독성 저하, 여러 책임 담당 가능성 |
+| **SRP 위반** | > 2책임 | 하나의 함수/클래스가 여러 책임 수행 |
+| **중복 코드** | > 2회 | 동일 로직 반복 → Extract Method 필요 |
+| **Magic Numbers** | > 0개 | 하드코딩된 상수 → Named Constant 필요 |
 
-**4. 보고서에 권장사항 추가**
+**4. 리팩토링 기법 선택 가이드**
+
+| 문제 | 기법 | 적용 조건 |
+|------|------|----------|
+| 긴 함수 | **Extract Method** | 함수 > 50줄 또는 논리적 블록 분리 가능 |
+| 여러 책임 | **Extract Class** | 클래스가 2개 이상 책임 담당 |
+| 중복 코드 | **Extract Method** | 동일 로직 2회 이상 반복 |
+| Magic Numbers | **Replace with Constant** | 하드코딩된 숫자/문자열 |
+| 복잡한 조건문 | **Decompose Conditional** | 복잡한 if/else 체인 |
+
+**5. 보고서에 리팩토링 제안 추가**
 
 복잡도가 높은 파일이 발견되면 보고서의 "Recommendations" 섹션에 다음 형식으로 추가:
 
 ```markdown
-## 🔧 리팩토링 권장
+## 🔧 리팩토링 제안
 
-### 복잡도 높은 파일
+### 복잡도 분석 결과
 
-#### `src/services/UserService.ts:15-110` (complexity: 12, length: 95줄)
-- **문제**: Cyclomatic complexity 12 (임계값: 10), 함수 길이 95줄 (임계값: 50), SRP 위반 (4개 책임)
-- **권장**: code-refactorer agent 사용
-- **명령 예시**: "UserService.ts의 login 함수 리팩토링해줘"
-- **예상 효과**: 복잡도 감소, 테스트 가능성 향상, 유지보수성 개선
+#### `src/services/UserService.ts:15-110` - `login()` 함수
+
+**메트릭**:
+| 지표 | 현재 | 임계값 | 상태 |
+|------|------|--------|------|
+| Cyclomatic Complexity | 12 | 10 | ⚠️ 초과 |
+| 함수 길이 | 95줄 | 50줄 | ⚠️ 초과 |
+| 책임 수 (SRP) | 4개 | 2개 | ⚠️ 위반 |
+
+**탐지된 Code Smells**:
+- 중복 코드: `validateUser` 로직 3회 반복
+- Magic Numbers: `3.14`, `0.05` 하드코딩
+
+**권장 리팩토링**:
+
+1. **Extract Method: `validateUser()`**
+   - 중복된 검증 로직을 별도 함수로 추출
+   - 예상 효과: 중복 제거, 테스트 가능성 향상
+
+2. **Extract Class: `SessionManager`**
+   - 세션 관리 로직을 별도 클래스로 분리
+   - 예상 효과: SRP 준수, 응집도 향상
+
+3. **Replace Magic Numbers**
+   - `3.14` → `SESSION_TIMEOUT_HOURS`
+   - `0.05` → `RETRY_INTERVAL_SECONDS`
+
+**예상 개선 효과**:
+- Complexity: 12 → 5 (-58%)
+- 함수 길이: 95줄 → 40줄 (-58%)
+- 테스트 가능성: 향상 (작은 단위로 분리)
 ```
 
 ### Phase 3E: Requirement Reverse Tracing (선택적)

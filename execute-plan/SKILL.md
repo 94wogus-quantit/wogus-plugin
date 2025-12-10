@@ -45,7 +45,7 @@ This skill executes approved implementation plans through a 7-phase systematic p
 2. **TodoList Setup**: Create comprehensive TodoList from all plan tasks
 3. **Task Execution**: Execute tasks sequentially, respecting dependencies
 4. **Handle Dependencies**: Manage task dependencies and execution order
-5. **Automated Test Generation** (선택적): Detect missing tests and auto-generate using test-generator agent
+5. **Automated Test Generation** (조건부 필수): 테스트 누락 파일 탐지 및 직접 생성
 6. **Testing & Verification**: Run tests and verify success criteria
 7. **Documentation**: Update code documentation and save learnings
 
@@ -398,11 +398,13 @@ grep -rE 'CREATE INDEX(?! CONCURRENTLY)' migrations/
 
 ---
 
-### Phase 5: Automated Test Generation (선택적)
+### Phase 5: Automated Test Generation (조건부 필수)
 
-**목적**: 테스트 누락된 파일 탐지 및 자동 생성
+**목적**: 테스트 누락된 파일 탐지 및 직접 생성
 
-**실행 조건**: Phase 3 (Task Execution) 완료 후, Phase 6 (Testing) 이전
+**실행 조건**:
+- Phase 3 (Task Execution) 완료 후, Phase 6 (Testing) 이전
+- **조건부 필수**: 변경된 파일에 대한 테스트 파일이 없을 때
 
 **Steps**:
 
@@ -417,43 +419,8 @@ git diff --name-only HEAD~1..HEAD
 
 **2. 테스트 파일 존재 확인**
 
-각 변경된 파일에 대해 테스트 파일이 존재하는지 확인:
-
-```typescript
-// 변경된 파일 목록
-const modifiedFiles = ["src/api/payment.ts", "src/utils/validator.ts"];
-
-// 각 파일에 대해 테스트 파일 찾기
-for (const file of modifiedFiles) {
-  // 패턴: *.test.ts, *.spec.ts, *.test.js, *.spec.js
-  const testPatterns = [
-    file.replace(/\.(ts|js)$/, '.test.$1'),
-    file.replace(/\.(ts|js)$/, '.spec.$1'),
-    file.replace(/^src\//, 'tests/').replace(/\.(ts|js)$/, '.test.$1')
-  ];
-
-  let testFileExists = false;
-  for (const pattern of testPatterns) {
-    if (fileExists(pattern)) {
-      testFileExists = true;
-      break;
-    }
-  }
-
-  if (!testFileExists) {
-    console.log(`⚠️ 테스트 누락: ${file}`);
-    missingTests.push(file);
-  }
-}
-```
-
-**3. Glob/Grep으로 실제 탐지**
-
 ```bash
-# 변경된 파일 목록
-git diff --name-only HEAD | grep -E '\.(ts|js)$' | grep -v '.test.' | grep -v '.spec.'
-
-# 각 파일에 대해 테스트 파일 존재 확인
+# 변경된 파일 목록 중 테스트 파일 없는 것 찾기
 for file in $(git diff --name-only HEAD | grep -E 'src/.*\.(ts|js)$'); do
   testfile=$(echo $file | sed 's/\.ts$/.test.ts/' | sed 's/\.js$/.test.js/')
   if [ ! -f "$testfile" ]; then
@@ -462,27 +429,153 @@ for file in $(git diff --name-only HEAD | grep -E 'src/.*\.(ts|js)$'); do
 done
 ```
 
-**4. test-generator Agent 자동 호출**
+**3. Sequential Thinking으로 테스트 케이스 설계**
 
-테스트가 누락된 파일이 발견되면 test-generator agent를 자동으로 호출:
+테스트가 누락된 파일이 발견되면 Sequential Thinking으로 체계적으로 분석:
 
-```markdown
-🤖 **test-generator agent 자동 실행 중...**
+```typescript
+// Step 1: 함수 시그니처 분석
+mcp__sequential-thinking__sequentialthinking({
+  thought: "processPayment 함수 분석: 입력은 amount (number), 출력은 Promise<PaymentResult>",
+  thoughtNumber: 1,
+  totalThoughts: 6,
+  nextThoughtNeeded: true
+})
 
-**파일**: src/api/payment.ts
-**프레임워크**: Jest (package.json에서 자동 탐지)
-**예상 테스트 케이스**: 8-12개
-**테스트 유형**: Happy path, Edge cases, Error handling
+// Step 2: 입력 제약 조건 분석
+mcp__sequential-thinking__sequentialthinking({
+  thought: "입력 제약: amount는 0 이상이어야 함, 1,000,000 이하여야 함",
+  thoughtNumber: 2,
+  totalThoughts: 6,
+  nextThoughtNeeded: true
+})
 
-[test-generator agent 실행 중...]
+// Step 3: 의존성 분석
+mcp__sequential-thinking__sequentialthinking({
+  thought: "의존성: PaymentAPI.process() 호출 → 모킹 필요",
+  thoughtNumber: 3,
+  totalThoughts: 6,
+  nextThoughtNeeded: true
+})
+
+// Step 4: Edge Cases 식별
+mcp__sequential-thinking__sequentialthinking({
+  thought: "Edge cases: 1) amount = 0 (경계값), 2) amount = 1000000 (최대값), 3) amount = -1 (음수), 4) amount = 1000001 (초과)",
+  thoughtNumber: 4,
+  totalThoughts: 6,
+  nextThoughtNeeded: true
+})
+
+// Step 5: Error Cases 식별
+mcp__sequential-thinking__sequentialthinking({
+  thought: "Error cases: 1) API 호출 실패, 2) 네트워크 타임아웃, 3) 잘못된 응답 형식",
+  thoughtNumber: 5,
+  totalThoughts: 6,
+  nextThoughtNeeded: true
+})
+
+// Step 6: 테스트 케이스 설계 완료
+mcp__sequential-thinking__sequentialthinking({
+  thought: "테스트 케이스 설계 완료: Happy path (2개), Edge cases (4개), Error cases (2개) 총 8개",
+  thoughtNumber: 6,
+  totalThoughts: 6,
+  nextThoughtNeeded: false
+})
 ```
 
-Agent 호출 예시:
-```
-"test-generator agent를 사용하여 src/api/payment.ts에 대한 테스트를 생성해줘"
+**4. 테스트 케이스 분류**
+
+| 카테고리 | 테스트 케이스 | 설명 |
+|----------|--------------|------|
+| **Happy path** | 정상 금액 처리 | 유효한 입력으로 기대 결과 반환 |
+| **Happy path** | 최소 금액 처리 | 최소 유효 값으로 성공 |
+| **Edge cases** | 경계값 (0) | 최소 경계값 테스트 |
+| **Edge cases** | 최대값 (1000000) | 최대 허용값 테스트 |
+| **Edge cases** | 음수 (-1) | 음수 입력 거부 테스트 |
+| **Edge cases** | 초과 (1000001) | 최대값 초과 거부 테스트 |
+| **Error handling** | API 실패 | 외부 API 실패 시 에러 처리 |
+| **Error handling** | 타임아웃 | 네트워크 타임아웃 처리 |
+
+**5. AAA 패턴으로 테스트 코드 작성**
+
+**AAA 패턴 (Arrange-Act-Assert)**:
+- **Arrange**: 테스트에 필요한 객체와 데이터 준비
+- **Act**: 테스트 대상 함수/메서드 실행
+- **Assert**: 결과가 기대값과 일치하는지 확인
+
+```typescript
+// 테스트 코드 예시 (Jest)
+describe('processPayment', () => {
+  // ========== Happy Path ==========
+  describe('정상 처리', () => {
+    it('정상 금액(100)으로 결제 성공', async () => {
+      // Arrange: 테스트 데이터 준비
+      const amount = 100;
+      const expectedResult = { success: true, transactionId: 'TX123' };
+      (PaymentAPI.process as jest.Mock).mockResolvedValue(expectedResult);
+
+      // Act: 함수 실행
+      const result = await processPayment(amount);
+
+      // Assert: 결과 검증
+      expect(result).toEqual(expectedResult);
+      expect(PaymentAPI.process).toHaveBeenCalledWith(expect.objectContaining({
+        amount: 100
+      }));
+    });
+  });
+
+  // ========== Edge Cases ==========
+  describe('경계값 테스트', () => {
+    it('음수 금액(-1)으로 에러 발생', async () => {
+      // Arrange
+      const amount = -1;
+
+      // Act & Assert
+      await expect(processPayment(amount))
+        .rejects
+        .toThrow('Invalid amount');
+    });
+  });
+
+  // ========== Error Cases ==========
+  describe('에러 처리', () => {
+    it('API 호출 실패 시 에러 전파', async () => {
+      // Arrange
+      const amount = 100;
+      const apiError = new Error('API Error');
+      (PaymentAPI.process as jest.Mock).mockRejectedValue(apiError);
+
+      // Act & Assert
+      await expect(processPayment(amount))
+        .rejects
+        .toThrow('API Error');
+    });
+  });
+});
 ```
 
-**5. 생성된 테스트 검증**
+**6. Given/When/Then 형식 (대안)**
+
+```typescript
+// BDD 스타일 테스트
+describe('processPayment', () => {
+  it('정상 금액으로 결제 성공', async () => {
+    // Given: 정상적인 금액이 주어지면
+    const amount = 100;
+    const expectedResult = { success: true };
+    mockPaymentAPI(expectedResult);
+
+    // When: 결제 처리를 실행하면
+    const result = await processPayment(amount);
+
+    // Then: 성공 결과가 반환된다
+    expect(result).toEqual(expectedResult);
+  });
+});
+```
+
+**7. 생성된 테스트 검증**
 
 ```bash
 # 생성된 테스트 파일 실행
@@ -492,7 +585,7 @@ npm test -- payment.test.ts
 npm test -- payment.test.ts --coverage
 ```
 
-**6. 보고서 업데이트**
+**8. 보고서 업데이트**
 
 생성된 테스트 결과를 실행 보고서에 추가:
 
@@ -518,7 +611,7 @@ npm test -- payment.test.ts --coverage
 **Best Practices**:
 - Phase 5는 Phase 3 (Implementation) 직후, Phase 6 (Testing) 이전에 실행
 - 테스트 누락이 없으면 이 Phase는 skip
-- test-generator agent가 실패하면 warning만 출력하고 진행 (blocking하지 않음)
+- 테스트 생성이 실패하면 warning만 출력하고 진행 (blocking하지 않음)
 - 생성된 테스트는 반드시 실행하여 검증
 
 ---

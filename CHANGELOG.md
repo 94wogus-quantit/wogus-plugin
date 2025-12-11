@@ -7,6 +7,63 @@
 
 ---
 
+## [3.4.1] - 2025-12-11
+
+### Changed
+
+- **Phase 0 강제 실행 보장**: 4개 스킬의 Phase 0에 CRITICAL 강제 블록 추가
+  - **analyze-issue**: Phase 0 시작 부분에 "⚠️ CRITICAL: DO NOT SKIP PHASE 0" 블록 추가
+  - **plan-builder**: Phase 0 시작 부분에 CRITICAL 블록 추가
+  - **execute-plan**: Phase 0 시작 부분에 CRITICAL 블록 추가
+  - **document**: Phase 0 시작 부분에 CRITICAL 블록 추가
+- **문서 강제력 확보 패턴 재적용**: plan-builder v1.6.0의 MANDATORY 패턴을 Phase 0에 적용
+  - 서술적 지침 ("Objective", "Steps") → 명시적 명령 ("MUST", "DO NOT", "NEVER")
+  - bash 코드 예시로 오해하던 문제 해결
+  - Phase 전환 명확화: "Phase 0를 완료하지 않고는 Phase 1 시작 불가"
+
+### Fixed
+
+- **Phase 0 건너뛰기 문제 해결**: Claude가 Phase 0를 건너뛰고 바로 Phase 1을 실행하던 문제 수정
+  - v3.4.0에서 Phase 0를 추가했지만 강제력이 약해 실제로 실행되지 않던 문제
+  - 명시적 금지 표현으로 Phase 0 실행 보장
+
+### Technical Details
+
+- **CRITICAL 블록 구조**:
+  ```markdown
+  ⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
+
+  > **MANDATORY REQUIREMENT**:
+  > - Phase 0 is the **FIRST step** of this skill
+  > - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
+  > - **DO NOT** assume you are in the correct environment
+  > - **ALWAYS** verify worktree status explicitly
+  > - **NEVER** start [next phase] without completing Phase 0
+  ```
+
+- **Skill별 강조 메시지**:
+  - analyze-issue: "NEVER start analysis (Phase 1) without completing Phase 0"
+  - plan-builder: "NEVER start plan creation (Phase 1) without completing Phase 0"
+  - execute-plan: "NEVER start code modification (Phase 1) without completing Phase 0"
+  - document: "NEVER start documentation (Phase 1) without completing Phase 0"
+
+- **수정된 파일**:
+  - `analyze-issue/SKILL.md`: Phase 0에 CRITICAL 블록 추가 (14 lines)
+  - `plan-builder/SKILL.md`: Phase 0에 CRITICAL 블록 추가 (14 lines)
+  - `execute-plan/SKILL.md`: Phase 0에 CRITICAL 블록 추가 (14 lines)
+  - `document/SKILL.md`: Phase 0에 CRITICAL 블록 추가 (14 lines)
+  - `CLAUDE.md`: ADR v3.4.1 추가 (상세한 문제점, 결정, 영향 문서화)
+  - `.claude-plugin/marketplace.json`: version 3.4.0 → 3.4.1
+
+- **패턴**: 문서 강제력 확보 패턴 (재적용)
+  - 이 패턴은 plan-builder의 "Feedback Loop Until Perfect" (v1.6.0)에서 검증됨
+  - 서술적 지침은 Claude에게 "권장사항"으로 해석되어 강제력 부족
+  - 명시적 구조 + 구체적 명령으로 강제력 확보
+
+- **Breaking Change**: 없음 (기존 로직 유지, 표현 강화만)
+
+---
+
 ## [3.4.0] - 2025-12-11
 
 ### Added

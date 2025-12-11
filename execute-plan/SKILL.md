@@ -60,6 +60,21 @@ This skill executes approved implementation plans through an 8-phase systematic 
 
 ### Phase 0: Worktree Validation
 
+⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
+
+> **MANDATORY REQUIREMENT**:
+>
+> - Phase 0 is the **FIRST step** of this skill
+> - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
+> - **DO NOT** assume you are in a worktree
+> - **ALWAYS** verify worktree status explicitly by running the bash commands below
+> - **NEVER** start code modification (Phase 1) without completing Phase 0
+>
+> **Why this matters**:
+> - Code changes in main repo can cause branch conflicts
+> - Modifying main repo while switching tasks is dangerous
+> - Worktree isolation prevents accidental overwrites
+
 **Objective**: Worktree 내에서 실행 중인지 확인합니다.
 
 **Steps**:

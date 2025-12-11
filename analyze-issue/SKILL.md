@@ -42,6 +42,21 @@ Use this skill when:
 
 ### Phase 0: Worktree Validation and Setup
 
+⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
+
+> **MANDATORY REQUIREMENT**:
+>
+> - Phase 0 is the **FIRST step** of this skill
+> - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
+> - **DO NOT** assume you are in the correct environment
+> - **ALWAYS** verify worktree status explicitly by running the bash commands below
+> - **NEVER** start analysis (Phase 1) without completing Phase 0
+>
+> **Why this matters**:
+> - Prevents branch conflicts when switching between JIRA tasks
+> - Isolates work in separate worktrees (saves 10 minutes per context switch)
+> - Ensures clean separation between multiple parallel tasks
+
 **Objective**: Main repo에서 실행 시 worktree를 생성하고 이동하여 작업을 격리합니다.
 
 **Steps**:

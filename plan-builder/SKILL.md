@@ -66,6 +66,21 @@ Use this skill when:
 
 ### Phase 0: Worktree Validation
 
+⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
+
+> **MANDATORY REQUIREMENT**:
+>
+> - Phase 0 is the **FIRST step** of this skill
+> - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
+> - **DO NOT** assume you are in a worktree
+> - **ALWAYS** verify worktree status explicitly by running the bash commands below
+> - **NEVER** start plan creation (Phase 1) without completing Phase 0
+>
+> **Why this matters**:
+> - Plan files (PLAN.md) should be committed in worktree branches, not main repo
+> - Running in main repo may cause merge conflicts later
+> - Worktree isolation ensures clean separation of work
+
 **Objective**: Worktree 내에서 실행 중인지 확인합니다.
 
 **Steps**:

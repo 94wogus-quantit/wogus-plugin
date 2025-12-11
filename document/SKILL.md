@@ -84,6 +84,21 @@ analyze-issue → plan-builder → execute-plan → **document**
 
 ### Phase 0: Worktree Validation
 
+⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
+
+> **MANDATORY REQUIREMENT**:
+>
+> - Phase 0 is the **FIRST step** of this skill
+> - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
+> - **DO NOT** assume you are in a worktree
+> - **ALWAYS** verify worktree status explicitly by running the bash commands below
+> - **NEVER** start documentation (Phase 1) without completing Phase 0
+>
+> **Why this matters**:
+> - Verifies git status before committing final changes
+> - Worktree cleanup (Phase 9) requires knowing the worktree location
+> - Ensures proper git push and branch deletion
+
 **Objective**: Worktree 내에서 실행 중인지 확인합니다.
 
 **Steps**:

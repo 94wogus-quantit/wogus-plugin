@@ -11,12 +11,13 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 - **⚙️ Custom Commands**: 워크플로우 자동화 커맨드 (별도 설치 필요)
 - **🔗 MCP Servers**: 외부 도구/서비스 통합 (별도 설정 필요)
 
-이 저장소는 **Skills + Agents (v3.4.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
+이 저장소는 **Skills + Agents (v3.4.1)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
 
-**v3.4.0 주요 기능**:
+**v3.4.1 주요 기능**:
 - 🔧 **Git Worktree 지원**: 병렬 작업 및 빠른 브랜치 전환 (10분 → 5초)
 - 🤖 **자동화**: Worktree 생성/정리 자동화
 - 🔀 **작업 격리**: 각 JIRA 작업이 독립적인 worktree에서 진행
+- ⚠️ **Phase 0 강제 실행**: CRITICAL 블록으로 Phase 0 건너뛰기 방지 (v3.4.1)
 
 ## 🌐 언어 정책
 

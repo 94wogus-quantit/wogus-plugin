@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.4.1):**
+**Key Artifacts (v3.5.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.4.1)
+wogus-plugin/  (v3.5.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -37,27 +37,28 @@ wogus-plugin/  (v3.4.1)
 
 ## Available Skills
 
-### analyze-issue (v3.4.1)
-Systematic root cause analysis with Git Worktree support.
-- **Worktree 자동 생성** (`../worktrees/[branch-name]`)
+### analyze-issue (v3.5.0)
+Systematic root cause analysis with branch validation.
+- **브랜치 자동 생성** (main/master/staging 감지 시)
 - **Output**: `[ISSUE_ID]_REPORT.md`
 - **Integration**: First step in workflow
 
-### plan-builder (v3.4.1)
+### plan-builder (v3.5.0)
 Create high-quality, thoroughly reviewed implementation plans.
 - **Iterative review loop** (ZERO 이슈까지 반복)
+- **브랜치 검증** (feature 브랜치 확인)
 - **Output**: `[FEATURE]_PLAN.md`
 - **Integration**: Second step in workflow
 
-### execute-plan (v3.4.1)
+### execute-plan (v3.5.0)
 Execute approved implementation plans with TodoList tracking.
-- **Worktree 환경 확인** (브랜치 충돌 경고)
+- **브랜치 검증** (보호된 브랜치 경고)
 - **Output**: Code implementation + test results
 - **Integration**: Third step in workflow
 
-### document (v3.4.1)
+### document (v3.5.0)
 Consolidate workflow artifacts and update project documentation.
-- **Worktree 정리** (삭제/유지/아카이브 옵션)
+- **브랜치 검증** + Git commit/push
 - **Output**: Updated README, CHANGELOG, CLAUDE docs
 - **Integration**: Final step in workflow
 
@@ -154,7 +155,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### Configuration
 
 - **File**: `.claude-plugin/marketplace.json`
-- **Version**: Semantic versioning (current: v3.4.1)
+- **Version**: Semantic versioning (current: v3.5.0)
 - **MCP Servers**: 8개 자동 통합 (sequential-thinking, context7, serena, sentry, atlassian, terraform, amplitude, chrome-devtools)
 
 ### Publishing Workflow
@@ -199,82 +200,64 @@ This repository is distributed as a **Claude Code Marketplace**.
 
 ---
 
-### v3.4.1 - Phase 0 강제 실행 보장 (CRITICAL 블록 추가) (2025-12-11)
+### v3.5.0 - 브랜치 검증으로 단순화 (Worktree 제거) (2025-12-11)
 
 **컨텍스트**:
-v3.4.0에서 4개 스킬에 Phase 0 (Worktree Validation/Setup)를 추가했지만, Claude가 Phase 0를 건너뛰고 바로 Phase 1을 실행하는 문제 발생.
+v3.4.x에서 도입한 Git Worktree 자동 관리 기능이 실무 워크플로우와 맞지 않음. 사용자는 브랜치 분리만으로 충분하며, Worktree는 오히려 복잡도를 증가시킴.
 
 **문제점**:
-- **서술적 지침의 약한 강제력**: "Objective", "Steps" 같은 서술형 표현은 "권장사항"으로 해석
-- **bash 스크립트 예시로 오해**: 코드 블록이 "참고용 예시"로 인식
-- **Phase 전환 불명확**: "Phase 1로 진행" 표현은 Phase 0 실행 여부와 무관하게 진행 가능하다고 해석
-- **일관성 부족**: plan-builder의 "⛔ MANDATORY" 스타일과 달리 Phase 0는 약한 표현 사용
+- **불필요한 복잡도**: Worktree 생성/관리/삭제 로직이 복잡하고 디버깅 어려움
+- **사용자 혼란**: Worktree 디렉토리 구조가 낯설고 이해하기 어려움
+- **브랜치 보호 부족**: Worktree는 있지만 main/master/staging 브랜치 직접 수정 방지는 부족
+- **실무 미스매치**: 대부분 사용자는 브랜치만 분리하면 충분
 
-**결정**: 모든 4개 스킬의 Phase 0에 CRITICAL 강제 블록 추가 (plan-builder v1.6.0 패턴 적용)
+**결정**: Worktree 기능 완전 제거, 브랜치 검증으로 대체
 
-```markdown
-⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
+**Phase 0 변경사항** (4개 스킬 모두):
+- **이전**: Worktree 생성/확인/이동
+- **이후**: 보호된 브랜치 (main/master/staging) 검증
 
-> **MANDATORY REQUIREMENT**:
-> - Phase 0 is the **FIRST step** of this skill
-> - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
-> - **DO NOT** assume you are in the correct environment
-> - **ALWAYS** verify worktree status explicitly
-> - **NEVER** start [next phase] without completing Phase 0
+**브랜치 검증 로직**:
+```bash
+# main, master, staging 브랜치인지 확인
+if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
+  echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
+  echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
+  # 사용자 확인 후 진행 또는 중단
+fi
 ```
 
-**영향**:
-- Phase 0 실행 보장: 명시적 금지 표현으로 Phase 0 건너뛰기 방지
-- 사용자 경험 개선: Worktree 생성/확인 누락 없음 → 브랜치 충돌 위험 감소
-- 일관성 확보: plan-builder의 MANDATORY 패턴과 동일한 강제력
-- Breaking Change: 없음 (기존 로직 유지, 표현 강화만)
+**Skill별 Phase 0 동작**:
+- **analyze-issue**: 보호된 브랜치 감지 시 새 feature 브랜치 자동 생성
+- **plan-builder**: 보호된 브랜치 경고 및 권장 워크플로우 안내
+- **execute-plan**: 보호된 브랜치 경고 (코드 수정 위험 강조)
+- **document**: 보호된 브랜치 경고 (문서 커밋 위험)
 
-**패턴**: 문서 강제력 확보 패턴 (재적용)
-- 서술적 지침 ("Objective", "Steps") → 약한 강제력
-- 명시적 구조 + 구체적 명령 ("⚠️ CRITICAL", "MUST", "DO NOT", "NEVER") → 강한 강제력
-- 이 패턴은 plan-builder의 "Feedback Loop Until Perfect" (v1.6.0)에서 검증됨
+**영향**:
+- **단순화**: Worktree 관련 코드 500+ 라인 제거
+- **명확성**: 브랜치 검증만으로 충분한 안전장치 제공
+- **보호 강화**: main/master/staging 3개 브랜치 모두 보호
+- **사용자 친화**: 익숙한 브랜치 워크플로우 유지
+- **Breaking Change**: Worktree 의존 워크플로우는 영향받음 (소수 사용자)
+
+**제거된 기능**:
+- analyze-issue Phase 0: Worktree 자동 생성
+- document Phase 9: Worktree 정리 (삭제/아카이브)
+- Git commit 강제 로직 (Phase 6 직후)
+
+**유지된 기능**:
+- 브랜치 검증 (보호된 브랜치 경고)
+- Git commit/push 옵션 (document Phase 9)
+- CRITICAL 강제 블록 (Phase 0 건너뛰기 방지)
 
 **관련 파일**:
-- analyze-issue/SKILL.md:45-58 - CRITICAL 블록
-- plan-builder/SKILL.md:69-82 - CRITICAL 블록
-- execute-plan/SKILL.md:63-76 - CRITICAL 블록
-- document/SKILL.md:87-100 - CRITICAL 블록
+- analyze-issue/SKILL.md:43-122 - Phase 0 브랜치 검증
+- plan-builder/SKILL.md:67-116 - Phase 0 브랜치 검증
+- execute-plan/SKILL.md:61-112 - Phase 0 브랜치 검증
+- document/SKILL.md:85-131 - Phase 0 브랜치 검증
+- document/SKILL.md:790-834 - Phase 9 Git commit/push (Worktree 제거)
 
-**버전**: v3.4.0 → v3.4.1
-
----
-
-### v3.4.0 - Git Worktree 워크플로우 통합 (2025-12-11)
-
-**컨텍스트**:
-workflow-skills의 4개 스킬은 단일 작업 흐름을 가정. 실무에서는 긴급 핫픽스, 병렬 작업 등으로 여러 JIRA 작업을 동시에 진행해야 하는 경우가 많음.
-
-**문제점**:
-- **작업 전환 비용**: 브랜치 전환 시 stash/unstash + 의존성 재설치 (10분 소요)
-- **작업 격리 부족**: 여러 작업을 병렬로 진행할 때 브랜치 충돌 발생
-- **수동 관리 부담**: 사용자가 직접 worktree 생성/전환/삭제 명령어 실행
-
-**결정**: 모든 4개 스킬에 Phase 0 추가 (Worktree Lifecycle Management)
-
-**Skill별 Phase 0 동작**:
-- **analyze-issue**: Worktree 자동 생성 및 이동 (PROACTIVE)
-- **plan-builder**: Worktree 확인 및 권장 메시지 (DEFENSIVE)
-- **execute-plan**: Worktree 확인 및 브랜치 충돌 경고 (DEFENSIVE)
-- **document**: Worktree 확인 (Phase 0) + 정리 옵션 (Phase 9)
-
-**Worktree 생명 주기**:
-- **생성**: analyze-issue Phase 0에서 자동 생성 (`../worktrees/[branch-name]`)
-- **사용**: plan-builder, execute-plan에서 검증 및 경고
-- **정리**: document Phase 9에서 Git 커밋/푸시 확인 + 삭제 옵션
-- **이름 규칙**: `../worktrees/feature/JIRA-123`
-
-**영향**:
-- 시간 절약: 브랜치 전환 10분 → worktree 전환 5초 (하루 3회 전환 시 30분 절약)
-- 작업 격리: 여러 JIRA 작업 동시 진행 가능 (병렬 작업 지원)
-- 자동화: Worktree 생성/삭제 자동화로 수동 명령어 불필요
-- Breaking Change: 없음
-
-**버전**: v3.3.0 → v3.4.0
+**버전**: v3.4.1 → v3.5.0
 
 ---
 

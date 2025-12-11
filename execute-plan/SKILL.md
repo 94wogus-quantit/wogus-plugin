@@ -58,7 +58,7 @@ This skill executes approved implementation plans through an 8-phase systematic 
 
 ## Workflow: 8-Phase Execution Process
 
-### Phase 0: Worktree Validation
+### Phase 0: Branch Validation
 
 ⚠️ **CRITICAL: DO NOT SKIP PHASE 0**
 
@@ -66,48 +66,51 @@ This skill executes approved implementation plans through an 8-phase systematic 
 >
 > - Phase 0 is the **FIRST step** of this skill
 > - You **MUST** execute Phase 0 **BEFORE** proceeding to Phase 1
-> - **DO NOT** assume you are in a worktree
-> - **ALWAYS** verify worktree status explicitly by running the bash commands below
+> - **DO NOT** assume you are on the correct branch
+> - **ALWAYS** verify branch status explicitly by running the bash commands below
 > - **NEVER** start code modification (Phase 1) without completing Phase 0
 >
 > **Why this matters**:
-> - Code changes in main repo can cause branch conflicts
-> - Modifying main repo while switching tasks is dangerous
-> - Worktree isolation prevents accidental overwrites
+> - Code changes in main/master branch can cause merge conflicts
+> - Modifying main/master while working on features is dangerous
+> - Branch isolation prevents accidental commits to production branches
 
-**Objective**: Worktree 내에서 실행 중인지 확인합니다.
+**Objective**: Feature 브랜치에서 작업 중인지 확인합니다.
 
 **Steps**:
 
-**1. Worktree 확인**
+**1. 현재 브랜치 확인**
 
 ```bash
-if [ -f .git ]; then
-  echo "✅ Worktree에서 실행 중: $(pwd)"
-else
-  echo "⚠️ Main repo에서 실행 중입니다"
+CURRENT_BRANCH=$(git branch --show-current)
+echo "📍 현재 브랜치: $CURRENT_BRANCH"
+
+# main, master, staging 브랜치인지 확인
+if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
+  echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
+  echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
   echo ""
   echo "🔧 권장 워크플로우:"
-  echo "  1. 먼저 /analyze-issue [JIRA-ID]를 실행하여 worktree 생성"
+  echo "  1. 먼저 /analyze-issue [JIRA-ID]를 실행하여 feature 브랜치 생성"
   echo "  2. 그 후 /plan 및 /execute-plan을 실행"
   echo ""
-  echo "⚠️ Main repo에서 코드 수정 시 브랜치 충돌 위험이 있습니다"
+  echo "⚠️ 보호된 브랜치에서 코드 수정 시 브랜치 충돌 위험이 있습니다"
   echo ""
-  read -p "Main repo에서 계속 실행하시겠습니까? [y/N] " -n 1 -r
+  read -p "계속 실행하시겠습니까? [y/N] " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "❌ 중단됨"
     exit 1
   fi
+else
+  echo "✅ Feature 브랜치에서 작업 중입니다"
 fi
 ```
 
 **2. Phase 1로 진행**
 
 - 기존 Phase 1-7 실행
-- 코드 수정은 worktree에서 자동으로 이루어짐
-
-**Note**: Worktree 정리는 `document` skill의 Phase 9에서 처리됩니다.
+- 코드 수정은 현재 feature 브랜치에서 이루어짐
 
 ---
 

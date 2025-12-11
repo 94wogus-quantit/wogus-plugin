@@ -7,6 +7,66 @@
 
 ---
 
+## [3.5.0] - 2025-12-11
+
+### Changed
+
+- **Worktree 기능 제거 → 브랜치 검증으로 단순화**: 4개 스킬의 Phase 0 완전 재설계
+  - **이전**: Git Worktree 자동 생성/관리/삭제
+  - **이후**: 보호된 브랜치 (main/master/staging) 검증
+  - 복잡한 Worktree 로직 500+ 라인 제거
+  - 브랜치 보호 강화 (main/master/staging 모두 보호)
+
+### Removed
+
+- **analyze-issue Phase 0**: Worktree 자동 생성 로직 제거
+- **document Phase 9**: Worktree 정리 (삭제/아카이브) 로직 제거
+- **Git commit 강제 로직**: Phase 6 직후 자동 커밋 제거
+
+### Added
+
+- **브랜치 검증 강화**: main/master/staging 3개 브랜치 보호
+  - **analyze-issue**: 보호된 브랜치 감지 시 새 feature 브랜치 자동 생성
+  - **plan-builder**: 보호된 브랜치 경고 + 권장 워크플로우 안내
+  - **execute-plan**: 보호된 브랜치 경고 (코드 수정 위험 강조)
+  - **document**: 보호된 브랜치 경고 (문서 커밋 위험)
+
+### Fixed
+
+- **사용자 혼란 해소**: Worktree 디렉토리 구조가 낯설고 복잡하던 문제 해결
+- **워크플로우 단순화**: 익숙한 브랜치 워크플로우로 회귀
+- **디버깅 용이성**: Worktree 관련 복잡한 에러 제거
+
+### Technical Details
+
+- **브랜치 검증 로직**:
+  ```bash
+  # main, master, staging 브랜치인지 확인
+  if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
+    echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
+    echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
+  fi
+  ```
+
+- **유지된 기능**:
+  - CRITICAL 강제 블록 (Phase 0 건너뛰기 방지)
+  - Git commit/push 옵션 (document Phase 9D)
+  - 브랜치 자동 생성 (analyze-issue)
+
+- **수정된 파일**:
+  - `analyze-issue/SKILL.md`: Phase 0 브랜치 검증으로 변경 (80 lines)
+  - `plan-builder/SKILL.md`: Phase 0 브랜치 검증으로 변경 (50 lines)
+  - `execute-plan/SKILL.md`: Phase 0 브랜치 검증으로 변경 (50 lines)
+  - `document/SKILL.md`: Phase 0, Phase 9 브랜치 검증으로 변경 (100+ lines)
+  - `CLAUDE.md`: ADR v3.5.0 추가, v3.4.0/v3.4.1 제거
+  - `.claude-plugin/marketplace.json`: version 3.4.1 → 3.5.0
+
+- **Breaking Change**: Worktree 의존 워크플로우는 영향받음 (소수 사용자)
+  - Worktree 자동 생성 기능 사용 중이던 사용자는 수동으로 브랜치 관리 필요
+  - 대부분 사용자는 브랜치 워크플로우를 이미 사용 중이므로 영향 최소화
+
+---
+
 ## [3.4.1] - 2025-12-11
 
 ### Changed

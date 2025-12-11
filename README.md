@@ -11,7 +11,12 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 - **⚙️ Custom Commands**: 워크플로우 자동화 커맨드 (별도 설치 필요)
 - **🔗 MCP Servers**: 외부 도구/서비스 통합 (별도 설정 필요)
 
-이 저장소는 **Skills + Agents (v3.0.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
+이 저장소는 **Skills + Agents (v3.4.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
+
+**v3.4.0 주요 기능**:
+- 🔧 **Git Worktree 지원**: 병렬 작업 및 빠른 브랜치 전환 (10분 → 5초)
+- 🤖 **자동화**: Worktree 생성/정리 자동화
+- 🔀 **작업 격리**: 각 JIRA 작업이 독립적인 worktree에서 진행
 
 ## 🌐 언어 정책
 
@@ -23,6 +28,57 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 - 🔄 예외: 사용자가 다른 언어로 작성하면 해당 언어로 응답
 
 이는 모든 스킬에 강제 적용되는 **필수 정책**입니다.
+
+## 🔧 Git Worktree 지원
+
+workflow-skills는 Git worktree를 사용하여 여러 JIRA 작업을 병렬로 진행할 수 있습니다.
+
+### 기본 워크플로우
+
+```bash
+# 1. Main repo에서 시작
+cd /path/to/main/repo
+
+# 2. analyze-issue → 자동으로 worktree 생성 및 이동
+/analyze-issue JIRA-123
+pwd  # /path/to/worktrees/feature/JIRA-123
+
+# 3. 이후 Skills는 worktree에서 실행
+/plan JIRA-123_REPORT.md
+/execute-plan JIRA-123_PLAN.md
+/document
+
+# 4. document Phase 9에서 worktree 정리 옵션 제공
+# [Y] 선택 시 worktree 삭제 및 main repo로 복귀
+```
+
+### 병렬 작업
+
+```bash
+# JIRA-123 작업 중 JIRA-456 긴급 핫픽스 필요 시
+cd /path/to/main/repo
+/analyze-issue JIRA-456  # 새 worktree 생성
+/plan JIRA-456_REPORT.md
+/execute-plan JIRA-456_PLAN.md
+/document
+
+# JIRA-123으로 돌아가기
+cd /path/to/worktrees/feature/JIRA-123
+# 이전 작업 그대로 유지됨
+```
+
+### 주요 이점
+
+- ⚡ **시간 절약**: 브랜치 전환 10분 → worktree 전환 5초
+- 🔀 **병렬 작업**: 여러 JIRA 작업 동시 진행 가능
+- 🔒 **작업 격리**: 각 작업의 아티팩트(REPORT, PLAN, 코드)가 독립적으로 관리됨
+- 🤖 **자동화**: Worktree 생성/삭제 자동화로 수동 명령어 불필요
+
+### 주의사항
+
+- 모든 아티팩트(REPORT, PLAN, 코드, 문서)는 worktree에 저장됩니다
+- Worktree 삭제 전 반드시 Git 커밋/푸시하세요 (document Phase 9에서 자동 확인)
+- README/CHANGELOG 동시 수정 시 Merge Conflict 발생 가능 (수동 해결 필요)
 
 ## 🚀 Getting Started
 
@@ -231,7 +287,7 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 
 ## 📦 Available Skills
 
-### analyze-issue
+### analyze-issue (v3.4.0 Updated)
 
 버그와 이슈의 근본 원인을 체계적으로 분석하는 스킬입니다.
 
@@ -240,6 +296,11 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 - 다각도 가설 수립 및 검증
 - 코드베이스 탐색을 통한 문제 지점 파악
 - 상세한 분석 리포트 자동 생성 (`*_REPORT.md`)
+
+**v3.4.0 신규 기능:**
+- 🔧 **Worktree 자동 생성**: Main repo에서 실행 시 `../worktrees/feature/JIRA-123` 자동 생성 및 이동
+- 💾 **자동 Git 커밋**: REPORT 파일 생성 후 자동 커밋
+- 🚀 **작업 격리**: 각 JIRA 작업이 독립적인 worktree에서 진행
 
 **사용 시점:**
 - JIRA 이슈나 버그 리포트 분석 시
@@ -284,9 +345,11 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 /plugin install mr-code-review.zip
 ```
 
-### plan-builder
+### plan-builder (v3.4.0 Updated)
 
 자동 반복 검토를 통해 고품질 구현 계획을 생성하는 스킬입니다.
+
+⚠️ **v3.4.0 신규 기능**: Worktree 확인 및 권장 메시지 (Main repo 실행 시 경고)
 
 ⚠️ **v2.2.0 주요 개선**: 각 리뷰 iteration마다 **새로운 문제를 탐색**하여 계획 품질을 극대화합니다.
 
@@ -329,16 +392,20 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 /plugin install plan-builder.zip
 ```
 
-### execute-plan
+### execute-plan (v3.4.0 Updated)
 
 승인된 구현 계획을 체계적으로 실행하는 스킬입니다.
 
 **주요 기능:**
 - TodoList 자동 생성 및 진행 추적
-- 6단계 체계적 실행 프로세스 (로드 → TodoList 설정 → 실행 → 테스트 → 문서화 → 요약)
+- 8단계 체계적 실행 프로세스 (Phase 0 추가: Worktree 확인)
 - 자동 테스트 실행 및 검증
 - 코드 문서화 및 Serena 메모리 저장
 - **순수 구현에만 집중** (문서 정리는 document 스킬에서 처리)
+
+**v3.4.0 신규 기능:**
+- ⚠️ **Phase 0**: Worktree 확인 및 브랜치 충돌 경고 (Main repo 코드 수정 시 위험 경고)
+- 📊 **8-Phase 워크플로우**: Phase 0 추가로 7-phase → 8-phase
 
 **사용 시점:**
 - 승인된 `*_PLAN.md` 파일 실행 시
@@ -430,17 +497,23 @@ workflow-skills 플러그인의 MCP 서버를 쉽게 활성화/비활성화하�
 
 ---
 
-### document
+### document (v3.4.0 Updated)
 
 워크플로우 아티팩트를 수집하여 프로젝트 문서를 종합적으로 업데이트하는 스킬입니다.
 
 **주요 기능:**
-- 9단계 체계적 문서화 프로세스
+- 10단계 체계적 문서화 프로세스 (Phase 0 추가: Worktree 확인)
 - **README, CHANGELOG, CLAUDE 문서 자동 업데이트**
 - **JIRA 이슈에 구현 완료 사항 정리 및 코멘트**
 - Serena 메모리에 기술 인사이트 저장
 - 워크플로우 아티팩트 아카이브/정리
 - Keep a Changelog 형식 준수
+
+**v3.4.0 신규 기능:**
+- ✅ **Phase 0**: Worktree 확인 (정보성 메시지)
+- 💾 **Phase 9D**: Git 커밋/푸시 자동 확인 (커밋 안 된 변경사항 감지 및 푸시 안 된 커밋 확인)
+- 🧹 **Phase 9E**: Worktree 정리 옵션 ([Y] 삭제 및 main repo 복귀 / [N] 유지 / [A] 아카이브)
+- 📊 **10-Phase 워크플로우**: Phase 0, 9D, 9E 추가
 
 **사용 시점:**
 - **`execute-plan` 완료 후 반드시 실행** (README/CHANGELOG 업데이트)
@@ -545,7 +618,7 @@ mr-code-review [Branch/MR URL]
   },
   "metadata": {
     "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화 + Agents (한국어 기본)",
-    "version": "3.2.0",
+    "version": "3.4.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
@@ -627,7 +700,7 @@ mr-code-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.2.0)
+wogus-plugin/  (v3.4.0)
 ├── .claude-plugin/         # Marketplace 설정
 │   ├── marketplace.json    # 플러그인 목록 및 메타데이터
 │   └── plugin.json         # Plugin manifest (Skills + Agents)

@@ -7,6 +7,50 @@
 
 ---
 
+## [3.4.0] - 2025-12-11
+
+### Added
+
+- **Git Worktree 지원**: 4개 Skills에 Phase 0 추가
+  - **analyze-issue**: Worktree 자동 생성 및 이동 (Phase 0)
+  - **plan-builder**: Worktree 확인 및 권장 메시지 (Phase 0)
+  - **execute-plan**: Worktree 확인 및 브랜치 충돌 경고 (Phase 0)
+  - **document**: Worktree 확인 (Phase 0) + 정리 옵션 제공 (Phase 9)
+- **병렬 작업 지원**: 여러 JIRA 작업 동시 진행 가능
+- **자동화**: Worktree 생성/삭제 자동화로 수동 명령어 불필요
+- **Testing Guide**: WORKTREE_INTEGRATION_TESTING_GUIDE.md 추가 (수동 테스트 가이드)
+
+### Changed
+
+- **analyze-issue**: Phase 6 끝에 Git 커밋 로직 추가 (REPORT 파일 자동 커밋)
+- **plan-builder**: Phase 3 끝에 Git 커밋 로직 추가 (PLAN 파일 자동 커밋)
+- **document**: Phase 9에 Git 커밋/푸시 확인 및 Worktree 정리 로직 추가 (9D, 9E)
+- **execute-plan**: Phase count 7-phase → 8-phase (Phase 0 추가)
+- **document**: Phase count 9-Phase → 10-Phase (Phase 0 추가)
+
+### Technical Details
+
+- **Worktree 생명 주기**:
+  - 생성: analyze-issue Phase 0에서 자동 생성 (`../worktrees/[branch-name]`)
+  - 사용: plan-builder, execute-plan에서 검증 및 경고
+  - 정리: document Phase 9D/9E에서 Git 커밋/푸시 + 삭제 옵션
+  - 이름 규칙: `../worktrees/feature/JIRA-123`
+
+- **감지 로직**: `.git`이 파일이면 worktree, 디렉터리면 main repo
+- **성능 개선**: 브랜치 전환 10분 → worktree 전환 5초
+- **Breaking Change**: 없음 (Phase 0 추가는 기존 로직에 영향 없음)
+
+- **수정된 파일**:
+  - `analyze-issue/SKILL.md`: Phase 0 추가 (93 lines), Phase 6 Git 커밋 (13 lines)
+  - `plan-builder/SKILL.md`: Phase 0 추가 (59 lines), Phase 3 Git 커밋 (9 lines)
+  - `execute-plan/SKILL.md`: Phase 0 추가 (35 lines), overview 업데이트
+  - `document/SKILL.md`: Phase 0 추가 (28 lines), Phase 9D/9E 추가 (100 lines)
+  - `CLAUDE.md`: ADR v3.4.0 추가
+  - `README.md`: "🔧 Git Worktree 지원" 섹션 추가
+  - `WORKTREE_INTEGRATION_TESTING_GUIDE.md`: 수동 테스트 가이드 생성
+
+---
+
 ## [3.3.2] - 2025-12-11
 
 ### Changed

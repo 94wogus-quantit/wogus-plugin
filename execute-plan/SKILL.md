@@ -39,8 +39,9 @@ analyze-issue → plan-builder → **execute-plan** → document
 
 ## Overview
 
-This skill executes approved implementation plans through a 7-phase systematic process:
+This skill executes approved implementation plans through an 8-phase systematic process:
 
+0. **Worktree Validation**: Worktree 내에서 실행 중인지 확인하고 경고 안내
 1. **Plan Loading & Validation**: Load plan file, parse tasks, verify prerequisites
 2. **TodoList Setup**: Create comprehensive TodoList from all plan tasks
 3. **Task Execution**: Execute tasks sequentially, respecting dependencies
@@ -55,7 +56,45 @@ This skill executes approved implementation plans through a 7-phase systematic p
 
 ---
 
-## Workflow: 7-Phase Execution Process
+## Workflow: 8-Phase Execution Process
+
+### Phase 0: Worktree Validation
+
+**Objective**: Worktree 내에서 실행 중인지 확인합니다.
+
+**Steps**:
+
+**1. Worktree 확인**
+
+```bash
+if [ -f .git ]; then
+  echo "✅ Worktree에서 실행 중: $(pwd)"
+else
+  echo "⚠️ Main repo에서 실행 중입니다"
+  echo ""
+  echo "🔧 권장 워크플로우:"
+  echo "  1. 먼저 /analyze-issue [JIRA-ID]를 실행하여 worktree 생성"
+  echo "  2. 그 후 /plan 및 /execute-plan을 실행"
+  echo ""
+  echo "⚠️ Main repo에서 코드 수정 시 브랜치 충돌 위험이 있습니다"
+  echo ""
+  read -p "Main repo에서 계속 실행하시겠습니까? [y/N] " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "❌ 중단됨"
+    exit 1
+  fi
+fi
+```
+
+**2. Phase 1로 진행**
+
+- 기존 Phase 1-7 실행
+- 코드 수정은 worktree에서 자동으로 이루어짐
+
+**Note**: Worktree 정리는 `document` skill의 Phase 9에서 처리됩니다.
+
+---
 
 ### Phase 1: Plan Loading and Validation
 

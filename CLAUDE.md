@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.3.0):**
+**Key Artifacts (v3.4.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.3.0)
+wogus-plugin/  (v3.4.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -36,13 +36,65 @@ wogus-plugin/  (v3.3.0)
 
 ## Available Skills
 
-### analyze-issue
+### analyze-issue (v3.4.0 Updated)
 
-Systematic root cause analysis for bugs and issues.
+Systematic root cause analysis for bugs and issues with Git Worktree support.
 
 **When to use**: Analyzing JIRA issues, Sentry errors, or investigating bug reports
 **Output**: `[ISSUE_ID]_REPORT.md` with root cause, affected code, and recommendations
 **Integration**: First step in `/analyze-issue → /plan → /execute-plan → /document` workflow
+
+**v3.4.0 Features**:
+- **Phase 0**: Worktree 자동 생성 및 이동 (`../worktrees/feature/JIRA-123`)
+- **Phase 6**: REPORT 파일 자동 Git 커밋
+- **Role**: PROACTIVE - 워크플로우 시작점에서 작업 격리 환경 생성
+
+### plan-builder (v3.4.0 Updated)
+
+Create high-quality, thoroughly reviewed implementation plans with Worktree validation.
+
+**When to use**: After analyze-issue, creating implementation plans from analysis reports
+**Output**: `[FEATURE]_PLAN.md` with detailed task breakdown
+**Integration**: Second step in workflow
+
+**v3.4.0 Features**:
+- **Phase 0**: Worktree 확인 및 권장 메시지 (main repo 실행 시 경고)
+- **Phase 3**: PLAN 파일 자동 Git 커밋
+- **Role**: DEFENSIVE - Main repo 실행 시 worktree 사용 권장
+
+### execute-plan (v3.4.0 Updated)
+
+Execute approved implementation plans with Worktree validation.
+
+**When to use**: After plan approval, implementing code changes
+**Output**: Code implementation + test results
+**Integration**: Third step in workflow
+
+**v3.4.0 Features**:
+- **Phase 0**: Worktree 확인 및 브랜치 충돌 경고 (main repo 코드 수정 시 위험 경고)
+- **Role**: DEFENSIVE - 코드 수정 전 worktree 환경 확인
+
+### document (v3.4.0 Updated)
+
+Consolidate workflow artifacts and update project documentation with Worktree cleanup.
+
+**When to use**: After execute-plan, consolidating all documentation
+**Output**: Updated README, CHANGELOG, CLAUDE docs
+**Integration**: Final step in workflow
+
+**v3.4.0 Features**:
+- **Phase 0**: Worktree 확인 (정보성 메시지)
+- **Phase 9D**: Git 커밋/푸시 자동 확인
+- **Phase 9E**: Worktree 정리 옵션 ([Y] 삭제 / [N] 유지 / [A] 아카이브)
+- **Role**: INFORMATIONAL + CLEANUP - 워크플로우 종료 시 작업 정리
+
+### mr-code-review
+
+GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행합니다.
+
+**When to use**: GitLab MR 생성 후 코드 리뷰 필요 시
+**Output**: `MR_CODE_REVIEW.md` with comprehensive review
+**Integration**: Independent or after document step
 
 ### mcp-config (v3.3.0 Updated)
 
@@ -409,6 +461,63 @@ git push
 The packaging script automatically validates before creating the zip file.
 
 ## 아키텍처 결정사항
+
+### 2025-12-11 - v3.4.0 Git Worktree 워크플로우 통합
+
+**컨텍스트**:
+workflow-skills의 4개 스킬(analyze-issue, plan-builder, execute-plan, document)은 단일 작업 흐름을 가정하고 설계되었습니다. 실무에서는 긴급 핫픽스, 병렬 작업 등으로 인해 여러 JIRA 작업을 동시에 진행해야 하는 경우가 많습니다.
+
+**문제점**:
+- **작업 전환 비용**: 브랜치 전환 시 stash/unstash 및 의존성 재설치 필요 (10분 소요)
+- **작업 격리 부족**: 여러 작업을 병렬로 진행할 때 브랜치 충돌 발생
+- **수동 관리 부담**: 사용자가 직접 worktree 생성/전환/삭제 명령어 실행
+
+**결정**: 모든 4개 스킬에 Phase 0 추가 (Worktree Lifecycle Management)
+
+1. **Skill별 Phase 0 동작**:
+   - **analyze-issue**: Worktree 자동 생성 및 이동 (PROACTIVE)
+   - **plan-builder**: Worktree 확인 및 권장 메시지 (DEFENSIVE)
+   - **execute-plan**: Worktree 확인 및 브랜치 충돌 경고 (DEFENSIVE)
+   - **document**: Worktree 확인 (Phase 0) + 정리 옵션 제공 (Phase 9)
+
+2. **Worktree 생명 주기**:
+   - **생성**: analyze-issue Phase 0에서 자동 생성 (`../worktrees/[branch-name]`)
+   - **사용**: plan-builder, execute-plan에서 검증 및 경고
+   - **정리**: document Phase 9에서 Git 커밋/푸시 확인 + 삭제 옵션
+   - **이름 규칙**: `../worktrees/feature/JIRA-123`
+
+3. **Git 커밋 로직**:
+   - analyze-issue Phase 6 끝: REPORT 파일 자동 커밋
+   - plan-builder Phase 3 끝: PLAN 파일 자동 커밋
+   - document Phase 9D: 모든 변경사항 커밋/푸시 확인
+
+**영향**:
+- **시간 절약**: 브랜치 전환 10분 → worktree 전환 5초 (하루 3회 전환 시 30분 절약)
+- **작업 격리**: 여러 JIRA 작업을 동시에 진행 가능 (병렬 작업 지원)
+- **자동화**: Worktree 생성/삭제 자동화로 수동 명령어 불필요
+- **Breaking Change**: 없음 (Phase 0 추가는 기존 로직에 영향 없음)
+
+**대안**:
+1. ~~사용자에게 수동 worktree 관리 위임~~ → 복잡도 높음, 실수 가능성
+2. ~~execute-plan에서 worktree 생성~~ → 너무 늦음, REPORT/PLAN이 main repo에 저장됨
+3. ✅ **analyze-issue Phase 0에서 자동 생성** → 채택 (워크플로우 시작점에서 격리)
+
+**관련 파일**:
+- [analyze-issue/SKILL.md](analyze-issue/SKILL.md) - Phase 0 추가 (Worktree 생성)
+- [plan-builder/SKILL.md](plan-builder/SKILL.md) - Phase 0 추가 (Worktree 확인)
+- [execute-plan/SKILL.md](execute-plan/SKILL.md) - Phase 0 추가 (Worktree 확인)
+- [document/SKILL.md](document/SKILL.md) - Phase 0/9 추가 (Worktree 확인 및 정리)
+- [WORKTREE_INTEGRATION_PLAN.md](WORKTREE_INTEGRATION_PLAN.md) - 구현 계획
+- [WORKTREE_INTEGRATION_TESTING_GUIDE.md](WORKTREE_INTEGRATION_TESTING_GUIDE.md) - 테스트 가이드
+
+**재발 방지**:
+- 새로운 workflow-oriented 기능 추가 시 전체 스킬 수명 주기 고려
+- 작업 격리가 필요한 기능은 워크플로우 시작점(analyze-issue)에서 처리
+- Worktree 삭제 전 Git 커밋/푸시 확인 로직 강제 (데이터 손실 방지)
+
+**버전**: v3.3.0 → v3.4.0
+
+---
 
 ### 2025-12-10 - v3.3.0 MCP 도구 권한 관리 기능 추가
 
@@ -1154,4 +1263,4 @@ plan-builder 스킬의 핵심 원칙인 "계획서 생성 → 리뷰 → 수정 
 - Reference files loaded on-demand to manage context efficiently
 - Marketplace distribution requires GitHub public repository
 - Version updates are reflected when users refresh marketplace
-- Current version: **v2.0.0** (Skills + Agents)
+- Current version: **v3.4.0** (Skills + Agents + Git Worktree Integration)

@@ -1,6 +1,6 @@
 ---
 name: mr-code-review
-description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행하고 INLINE_DISCUSSION.json과 SUMMARY_DISCUSSION.md 리포트를 생성합니다. Sequential Thinking과 Serena Context7 MCP를 활용하여 아키텍처 일관성, 비즈니스 로직 정확성, 과거 이슈 패턴, JIRA 요구사항, 보안, 테스트를 검증합니다.
+description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행하고 INLINE_DISCUSSION.json과 SUMMARY_COMMENT.md 리포트를 생성합니다. Sequential Thinking과 Serena Context7 MCP를 활용하여 아키텍처 일관성, 비즈니스 로직 정확성, 과거 이슈 패턴, JIRA 요구사항, 보안, 테스트를 검증합니다.
 ---
 
 # MR Code Review
@@ -11,7 +11,7 @@ description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종�
 
 ALL outputs, reports, analysis, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
 
-- ✅ **INLINE_DISCUSSION.json / SUMMARY_DISCUSSION.md**: Write in Korean
+- ✅ **INLINE_DISCUSSION.json / SUMMARY_COMMENT.md**: Write in Korean
 - ✅ **Issue descriptions**: Write in Korean
 - ✅ **Improvement suggestions**: Write in Korean
 - ✅ **Analysis comments**: Write in Korean
@@ -27,7 +27,7 @@ ALL outputs, reports, analysis, and communications MUST be in **KOREAN** unless 
 
 GitLab MR(Merge Request)의 변경사항을 분석하여 단순 문법 체크를 넘어선 맥락 기반 종합 코드 리뷰를 수행하고 **2개의 리포트**를 생성합니다:
 - `INLINE_DISCUSSION.json` - GitLab Inline Discussion 자동화용
-- `SUMMARY_DISCUSSION.md` - 전체 요약
+- `SUMMARY_COMMENT.md` - 전체 요약
 
 **핵심 차별점**: 프로젝트 문서(README, CHANGELOG, CLAUDE.md), Serena memory, JIRA, Confluence를 활용한 심층 분석
 
@@ -365,7 +365,7 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    // Output: AC별 상세 검증 리포트 (코드 품질, 보안, 테스트 포함)
    ```
 
-   **4-2. 리포트를 SUMMARY_DISCUSSION.md에 통합**
+   **4-2. 리포트를 SUMMARY_COMMENT.md에 통합**
 
    requirement-validator의 출력을 그대로 포함:
 
@@ -603,7 +603,7 @@ mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
 
 **출력 파일**:
 - `INLINE_DISCUSSION.json` - GitLab Inline Discussion 자동화용 JSON
-- `SUMMARY_DISCUSSION.md` - 전체 요약 마크다운
+- `SUMMARY_COMMENT.md` - 전체 요약 마크다운
 
 **프로세스**:
 
@@ -638,11 +638,11 @@ Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배�
 
 **정렬 순서**: severity 기준 (Critical → High → Medium)
 
-#### Step 2: SUMMARY_DISCUSSION.md 생성
+#### Step 2: SUMMARY_COMMENT.md 생성
 
 > ⚠️ **CRITICAL**: 이 파일은 **요약**입니다. 상세 내용은 `INLINE_DISCUSSION.json`에 있으므로 여기서는 **한 줄 요약**만 작성합니다.
 
-전체 리뷰 요약을 마크다운으로 작성합니다 (references/summary_discussion_template.md 참조):
+전체 리뷰 요약을 마크다운으로 작성합니다 (references/summary_comment_template.md 참조):
 
 **작성 원칙**:
 - 각 이슈는 **제목 + 파일:라인 + 한 줄 요약**만 작성
@@ -692,7 +692,7 @@ Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배�
    - JSON 배열 형식
    - 모든 이슈 포함
 
-2. Write SUMMARY_DISCUSSION.md
+2. Write SUMMARY_COMMENT.md
    - 마크다운 형식
    - 전체 요약 포함
 ```
@@ -701,7 +701,7 @@ Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배�
 
 **출력 파일**:
 - `INLINE_DISCUSSION.json` - GitLab API로 discussion 자동 생성 가능
-- `SUMMARY_DISCUSSION.md` - MR description 또는 일반 코멘트용
+- `SUMMARY_COMMENT.md` - MR description 또는 일반 코멘트용
 
 ---
 
@@ -714,7 +714,7 @@ Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배�
 문서 및 가이드:
 
 - `inline_discussion_template.json`: INLINE_DISCUSSION.json 템플릿 (GitLab Inline Discussion용)
-- `summary_discussion_template.md`: SUMMARY_DISCUSSION.md 템플릿 (전체 요약용)
+- `summary_comment_template.md`: SUMMARY_COMMENT.md 템플릿 (전체 요약용)
 - `review_checklist.md`: 7가지 검증 항목별 체크리스트
 - `inline_comment_format.md`: GitLab discussion 포맷 가이드 (선택적 사용)
 

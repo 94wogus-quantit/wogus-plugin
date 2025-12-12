@@ -93,7 +93,7 @@
 ## 📎 관련 파일
 
 - **Inline Discussion**: `INLINE_DISCUSSION.json` - GitLab discussion 자동화용
-- **이 파일**: `SUMMARY_DISCUSSION.md` - 전체 요약
+- **이 파일**: `SUMMARY_COMMENT.md` - 전체 요약
 
 ---
 

@@ -15,7 +15,7 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 
 **v3.6.0 주요 기능**:
 - 🎯 **mr-code-review 7가지 검증**: 비즈니스 로직 정확성 검증 추가
-- 📄 **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_DISCUSSION.md`
+- 📄 **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_COMMENT.md`
 - 🔒 **범용 보안 스캔**: Trivy로 모든 언어 지원
 - 💾 **Phase별 중간 산출물**: Context 손실 방지를 위한 `.mr-review/` 파일 저장
 - ⚠️ **브랜치 보호**: main/master/staging 브랜치 직접 작업 방지
@@ -298,7 +298,7 @@ GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 
 
 **주요 기능:**
 - **7가지 종합 검증**: 아키텍처, 비즈니스 로직, 컨벤션, 이슈 패턴, JIRA 요구사항, 보안, 테스트
-- **2개 파일 출력**: `INLINE_DISCUSSION.json` (GitLab 자동화용) + `SUMMARY_DISCUSSION.md` (요약)
+- **2개 파일 출력**: `INLINE_DISCUSSION.json` (GitLab 자동화용) + `SUMMARY_COMMENT.md` (요약)
 - **범용 보안 스캔**: Trivy로 모든 언어 지원 (JS, Python, Go, Java, Rust 등)
 - **Phase별 중간 산출물**: `.mr-review/` 디렉토리에 각 Phase 결과 저장 (Context 손실 방지)
 - **MCP 기반 심화 분석**: Sequential Thinking + Serena Context7 + Atlassian 적극 활용
@@ -572,7 +572,7 @@ mr-code-review [Branch/MR URL]
 ├─> Phase 3: 보안 분석 (Trivy) → .mr-review/3_SECURITY_ANALYSIS.md
 └─> Phase 4: 리포트 생성
     ├─> INLINE_DISCUSSION.json (GitLab Inline Discussion용)
-    └─> SUMMARY_DISCUSSION.md (요약 리포트)
+    └─> SUMMARY_COMMENT.md (요약 리포트)
 
 7가지 종합 검증:
 1. 아키텍처 일관성

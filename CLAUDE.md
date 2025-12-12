@@ -65,7 +65,7 @@ Consolidate workflow artifacts and update project documentation.
 ### mr-code-review (v3.6.0)
 GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰 수행.
 - **7가지 검증**: 아키텍처, 비즈니스 로직, 컨벤션, 이슈 패턴, JIRA, 보안, 테스트
-- **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_DISCUSSION.md`
+- **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_COMMENT.md`
 - **Trivy 범용 보안 스캔**: 모든 언어 지원
 - **Phase별 중간 산출물**: `.mr-review/` 디렉토리
 
@@ -219,7 +219,7 @@ mr-code-review가 단일 파일(MR_CODE_REVIEW.md) 출력, 6가지 검증, 언�
 
 1. **2개 파일 출력**:
    - `INLINE_DISCUSSION.json`: GitLab Inline Discussion 자동화용
-   - `SUMMARY_DISCUSSION.md`: 전체 요약 마크다운
+   - `SUMMARY_COMMENT.md`: 전체 요약 마크다운
 
 2. **7가지 검증으로 확장**:
    - 기존 6가지 + "비즈니스 로직 정확성 검증" 추가

@@ -26,9 +26,9 @@
 
 - **mr-code-review: 2개 파일 출력으로 변경**
   - **이전**: `MR_CODE_REVIEW.md` 단일 파일
-  - **이후**: `INLINE_DISCUSSION.json` + `SUMMARY_DISCUSSION.md`
+  - **이후**: `INLINE_DISCUSSION.json` + `SUMMARY_COMMENT.md`
   - `INLINE_DISCUSSION.json`: GitLab Inline Discussion 자동화용 JSON
-  - `SUMMARY_DISCUSSION.md`: 전체 요약 마크다운
+  - `SUMMARY_COMMENT.md`: 전체 요약 마크다운
 
 - **mr-code-review: Phase별 중간 산출물 저장**
   - Context 손실 방지를 위해 각 Phase 결과를 파일로 저장
@@ -77,7 +77,7 @@
   Phase 1 → .mr-review/1_CONTEXT.md
   Phase 2 → .mr-review/2_CODE_ANALYSIS.md
   Phase 3 → .mr-review/3_SECURITY_ANALYSIS.md
-  Phase 4 → INLINE_DISCUSSION.json + SUMMARY_DISCUSSION.md
+  Phase 4 → INLINE_DISCUSSION.json + SUMMARY_COMMENT.md
   ```
 
 ---

@@ -5,6 +5,24 @@ description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종�
 
 # MR Code Review
 
+## ⚠️ CRITICAL LANGUAGE POLICY
+
+**DEFAULT LANGUAGE: KOREAN (한국어)**
+
+ALL outputs, reports, analysis, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
+
+- ✅ **MR_CODE_REVIEW.md**: Write in Korean
+- ✅ **Issue descriptions**: Write in Korean
+- ✅ **Improvement suggestions**: Write in Korean
+- ✅ **Analysis comments**: Write in Korean
+- ✅ **User communication**: Respond in Korean
+
+**Exception**: If the user writes in another language, match that language for responses.
+
+**This is a MANDATORY requirement. Do NOT default to English.**
+
+---
+
 ## Overview
 
 GitLab MR(Merge Request)의 변경사항을 분석하여 단순 문법 체크를 넘어선 맥락 기반 종합 코드 리뷰를 수행하고 **MR_CODE_REVIEW.md** 리포트를 생성합니다.

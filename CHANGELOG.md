@@ -7,6 +7,29 @@
 
 ---
 
+## [3.5.1] - 2025-12-12
+
+### Fixed
+
+- **mr-code-review 한국어 출력 정책 누락 수정**: 코드 리뷰 결과가 영어로 출력되던 문제 해결
+  - `CRITICAL LANGUAGE POLICY` 섹션 추가 (`mr-code-review/SKILL.md:8-24`)
+  - MR_CODE_REVIEW.md 리포트 한국어 작성 강제
+  - 이슈 설명, 개선 제안, 분석 코멘트 한국어로 출력
+  - 다른 스킬들(analyze-issue, plan-builder, execute-plan, document)과 동일한 언어 정책 적용
+
+### Technical Details
+
+- **수정된 파일**: `mr-code-review/SKILL.md`
+- **추가된 섹션**: `## ⚠️ CRITICAL LANGUAGE POLICY` (18 lines)
+- **언어 정책 항목**:
+  - ✅ MR_CODE_REVIEW.md: 한국어 작성
+  - ✅ Issue descriptions: 한국어 작성
+  - ✅ Improvement suggestions: 한국어 작성
+  - ✅ Analysis comments: 한국어 작성
+  - ✅ User communication: 한국어 응답
+
+---
+
 ## [3.5.0] - 2025-12-11
 
 ### Changed

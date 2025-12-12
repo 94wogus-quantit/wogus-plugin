@@ -1,6 +1,6 @@
 # MR Code Review Summary
 
-**Date**: [YYYY-MM-DD]
+**Date**: [YYYY-MM-DD HH:MM:SS TZ]
 **MR ID**: ![MR IID]
 **Branch**: [source-branch] → [target-branch]
 **Reviewer**: Claude Code (mr-code-review skill)

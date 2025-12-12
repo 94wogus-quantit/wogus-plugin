@@ -172,6 +172,17 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 
 **프로세스**:
 
+0. **현재 시각 확인 (Timestamp)**
+
+   > 리뷰 시작 전 현재 시각을 확인하여 리포트에 기록합니다.
+
+   ```bash
+   date '+%Y-%m-%d %H:%M:%S %Z'
+   ```
+
+   **리포트 헤더에 기록**:
+   - **리뷰 시작 시각**: `2025-12-12 20:58:20 KST`
+
 1. **브랜치 목표 파악 (Branch Objective) - 최우선**
 
    > ⚠️ **CRITICAL**: 코드 분석 전에 반드시 "이 브랜치가 무엇을 달성해야 하는지"를 먼저 파악해야 합니다.
@@ -233,6 +244,9 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 
 ```markdown
 # Phase 1: Context Gathering
+
+## 리뷰 메타데이터
+- **리뷰 시작 시각**: 2025-12-12 20:58:20 KST
 
 ## 브랜치 정보
 - **브랜치명**: feature/PROJ-123-user-auth

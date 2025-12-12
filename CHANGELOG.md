@@ -7,6 +7,27 @@
 
 ---
 
+## [3.5.2] - 2025-12-12
+
+### Changed
+
+- **atlassian MCP: Docker → uvx 전환**: 더 가볍고 빠른 실행 환경으로 변경
+  - `docker run ghcr.io/sooperset/mcp-atlassian` → `uvx mcp-atlassian`
+  - 환경변수 방식 유지 (`env` 블록)
+  - Docker 의존성 제거로 설치/실행 간소화
+
+### Technical Details
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: atlassian MCP 설정 변경
+  - `mcp-config/references/mcp_tools.md`: 환경 변수 문서 업데이트
+- **환경 변수 매핑**:
+  - `ATLASSIAN_URL` → `JIRA_URL`, `CONFLUENCE_URL`
+  - `ATLASSIAN_USERNAME` → `JIRA_USERNAME`, `CONFLUENCE_USERNAME`
+  - `ATLASSIAN_API_TOKEN` → `JIRA_API_TOKEN`, `CONFLUENCE_API_TOKEN`
+
+---
+
 ## [3.5.1] - 2025-12-12
 
 ### Fixed

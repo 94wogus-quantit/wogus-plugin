@@ -187,8 +187,9 @@ mcp__plugin_workflow-skills_sentry__get_issue_details
 
 ## atlassian
 
-**설명**: JIRA/Confluence 연동
-**환경 변수**: `ATLASSIAN_URL`, `ATLASSIAN_USERNAME`, `ATLASSIAN_API_TOKEN`
+**설명**: JIRA/Confluence 연동 (uvx mcp-atlassian)
+**환경 변수**: `JIRA_URL`, `JIRA_USERNAME`, `JIRA_API_TOKEN`, `CONFLUENCE_URL`, `CONFLUENCE_USERNAME`, `CONFLUENCE_API_TOKEN`
+**매핑**: `ATLASSIAN_URL` → `JIRA_URL`, `CONFLUENCE_URL`
 
 ### 도구 목록 (41개)
 

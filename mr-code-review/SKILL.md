@@ -1,6 +1,6 @@
 ---
 name: mr-code-review
-description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행하고 MR_CODE_REVIEW.md 리포트를 생성합니다. Sequential Thinking과 Serena Context7 MCP를 활용하여 아키텍처 일관성, 과거 이슈 패턴, JIRA 요구사항, 보안, 테스트를 검증합니다.
+description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행하고 INLINE_DISCUSSION.json과 SUMMARY_DISCUSSION.md 리포트를 생성합니다. Sequential Thinking과 Serena Context7 MCP를 활용하여 아키텍처 일관성, 비즈니스 로직 정확성, 과거 이슈 패턴, JIRA 요구사항, 보안, 테스트를 검증합니다.
 ---
 
 # MR Code Review
@@ -25,15 +25,18 @@ ALL outputs, reports, analysis, and communications MUST be in **KOREAN** unless 
 
 ## Overview
 
-GitLab MR(Merge Request)의 변경사항을 분석하여 단순 문법 체크를 넘어선 맥락 기반 종합 코드 리뷰를 수행하고 **MR_CODE_REVIEW.md** 리포트를 생성합니다.
+GitLab MR(Merge Request)의 변경사항을 분석하여 단순 문법 체크를 넘어선 맥락 기반 종합 코드 리뷰를 수행하고 **2개의 리포트**를 생성합니다:
+- `INLINE_DISCUSSION.json` - GitLab Inline Discussion 자동화용
+- `SUMMARY_DISCUSSION.md` - 전체 요약
 
 **핵심 차별점**: 프로젝트 문서(README, CHANGELOG, CLAUDE.md), Serena memory, JIRA, Confluence를 활용한 심층 분석
 
 **주요 기능**:
-- 📋 **6가지 종합 검증**: 아키텍처, 컨벤션, 이슈 패턴, JIRA 요구사항, 보안, 테스트
+- 📋 **7가지 종합 검증**: 아키텍처, 비즈니스 로직, 컨벤션, 이슈 패턴, JIRA 요구사항, 보안, 테스트
+- 🎯 **비즈니스 로직 검증**: JIRA 목표 대비 구현 정확성 검증 (잘못된 로직, 엣지케이스 누락 탐지)
 - 🔐 **의존성 보안 분석** (선택적): npm audit 기반 CRITICAL/HIGH 취약점 자동 탐지
 - 🤖 **MCP 기반 심화 분석**: Sequential Thinking + Serena Context7 + Atlassian 적극 활용
-- 📝 **리포트 생성**: MR_CODE_REVIEW.md (3단계 위험도: 🔴 Critical, 🟡 High, 🟢 Medium)
+- 📝 **2개 리포트 생성**: JSON (inline discussion) + MD (요약) (3단계 위험도: 🔴 Critical, 🟡 High, 🟢 Medium)
 - 💡 **개선 제안**: 각 이슈별 위치, 설명, 개선 방법 제공
 
 ---
@@ -226,15 +229,47 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    - Atlassian MCP로 관련 기술 문서 검색
    - Sequential Thinking으로 기술 명세 추출
 
+**출력 파일**: `.mr-review/1_CONTEXT.md`
+
+```markdown
+# Phase 1: Context Gathering
+
+## 브랜치 정보
+- **브랜치명**: feature/PROJ-123-user-auth
+- **MR ID**: !456
+- **Target Branch**: main
+
+## JIRA 이슈
+- **이슈 키**: PROJ-123
+- **제목**: 사용자 이메일 로그인 구현
+- **유형**: Story
+- **스프린트**: Sprint 15
+
+## Acceptance Criteria
+1. AC#1: 이메일 형식 validation
+2. AC#2: 5회 실패 시 계정 잠금
+3. AC#3: JWT 토큰 발급
+
+## 변경 파일 목록
+- src/services/auth.ts (Modified)
+- src/api/login.ts (Added)
+- tests/auth.test.ts (Modified)
+
+## 프로젝트 컨텍스트
+- 아키텍처: Clean Architecture
+- 인증 방식: JWT
+- 관련 Serena Memory: architecture_decisions.md, known_issues.md
+```
+
 ---
 
 ### Phase 2: Code Analysis (코드 분석)
 
-**목표**: 6가지 검증 항목을 체계적으로 분석
+**목표**: 7가지 검증 항목을 체계적으로 분석
 
 **주요 MCP**: Sequential Thinking (필수), Serena
 
-**6가지 검증 항목**:
+**7가지 검증 항목**:
 
 각 검증 항목의 상세 프로세스는 `references/verification_guides/`에 분리되어 있습니다:
 
@@ -243,17 +278,73 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    - Sequential Thinking으로 레이어 분리 원칙 검증
    - Serena로 의존성 관계 확인
 
-2. **[컨벤션 준수 확인](references/verification_guides/convention_check.md)**
+2. **비즈니스 로직 정확성 검증** ⭐ NEW
+
+   **목적**: JIRA 목표 대비 구현이 정확한지 검증 (잘못된 로직, 엣지케이스 누락 탐지)
+
+   **프로세스**:
+
+   **2-1. JIRA에서 비즈니스 요구사항 추출**
+
+   Phase 1에서 수집한 JIRA 정보 활용:
+   - Acceptance Criteria (AC)
+   - 비즈니스 규칙 설명
+   - 예상 동작 시나리오
+
+   **2-2. Sequential Thinking으로 로직 분석**
+
+   ```typescript
+   mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
+     thought: "AC#1 '5회 실패 시 계정 잠금' 분석: 현재 코드에서 실패 횟수를 어떻게 카운트하는가? 5회 정확히 체크하는가? 리셋 조건은?",
+     thoughtNumber: 1,
+     totalThoughts: 5,
+     nextThoughtNeeded: true
+   })
+
+   mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
+     thought: "엣지케이스 검토: 동시 로그인 시도, 4회 실패 후 성공 시 카운트 리셋, 잠금 해제 조건 누락 여부",
+     thoughtNumber: 2,
+     totalThoughts: 5,
+     nextThoughtNeeded: true
+   })
+   ```
+
+   **2-3. 검증 체크리스트**
+
+   | 검증 항목 | 설명 |
+   |----------|------|
+   | **로직 정확성** | AC에 명시된 조건이 코드에 정확히 구현되었는가? |
+   | **경계값 처리** | 경계값(5회 = 정확히 5? 5 이상?) 처리가 올바른가? |
+   | **엣지케이스** | 예외 상황(동시성, 타임아웃, null)이 고려되었는가? |
+   | **부정 케이스** | "~하면 안 된다" 조건이 구현되었는가? |
+   | **데이터 정합성** | 계산, 집계, 상태 변경이 정확한가? |
+
+   **2-4. 이슈 발견 시 JSON 형식으로 기록**
+
+   ```json
+   {
+     "file": "src/services/auth.ts",
+     "line": 45,
+     "severity": "🔴 Critical",
+     "title": "잠금 해제 조건 누락",
+     "description": "AC에 따르면 30분 후 자동 해제되어야 하나, 해제 로직이 없음",
+     "current_code": "if (failCount >= 5) { lockAccount(userId); }",
+     "suggested_code": "if (failCount >= 5) {\n  lockAccount(userId, { unlockAfter: 30 * 60 * 1000 });\n}",
+     "reason": "AC#1에 명시된 '30분 후 자동 해제' 요구사항 충족 필요"
+   }
+   ```
+
+3. **[컨벤션 준수 확인](references/verification_guides/convention_check.md)**
    - README와 CLAUDE.md의 코딩 컨벤션 준수 확인
    - Sequential Thinking으로 네이밍, 스타일 체계적 검증
    - Serena로 유사 코드 패턴 검색
 
-3. **[알려진 이슈 패턴 대조](references/verification_guides/known_issues_check.md)**
+4. **[알려진 이슈 패턴 대조](references/verification_guides/known_issues_check.md)**
    - Serena memory에서 known_issues 읽기
    - Sequential Thinking으로 과거 버그 패턴 대조
    - Serena로 과거 버그와 유사 패턴 검색
 
-4. **JIRA 요구사항 검증 (자동화)**
+5. **JIRA 요구사항 검증 (자동화)**
 
    **목적**: MR이 JIRA AC를 충족하는지 자동 검증
 
@@ -306,94 +397,127 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    - 코드 컨벤션 준수
    - 테스트 커버리지
 
-   이들은 기존 Phase 2-5, 2-6에서 계속 수행
+   이들은 기존 Phase 2-6, 2-7에서 계속 수행
 
-5. **[보안 및 품질 리뷰](references/verification_guides/security_review.md)**
+6. **[보안 및 품질 리뷰](references/verification_guides/security_review.md)**
    - Sequential Thinking으로 OWASP Top 10 체계적 분석
    - Serena로 보안 패턴 및 취약점 검색
    - 주요 보안 항목: SQL Injection, XSS, CSRF, Authentication, Authorization
 
-6. **[테스트 커버리지 평가](references/verification_guides/test_coverage.md)**
+7. **[테스트 커버리지 평가](references/verification_guides/test_coverage.md)**
    - Sequential Thinking으로 테스트 품질 평가
    - Serena로 테스트 파일 및 미테스트 함수 찾기
    - 변경된 코드의 테스트 커버리지 확인
 
+**출력 파일**: `.mr-review/2_CODE_ANALYSIS.md`
+
+```markdown
+# Phase 2: Code Analysis
+
+## 검증 요약
+- **총 이슈**: 5개
+- 🔴 Critical: 1개
+- 🟡 High: 2개
+- 🟢 Medium: 2개
+
+## 1. 아키텍처 일관성 ✅
+- 레이어 분리 준수
+- 의존성 방향 정상
+
+## 2. 비즈니스 로직 정확성 ❌
+### 이슈 #1: 잠금 해제 조건 누락
+- **파일**: src/services/auth.ts:45
+- **심각도**: 🔴 Critical
+- **설명**: AC#2에 따르면 30분 후 자동 해제되어야 하나, 해제 로직이 없음
+- **현재 코드**: `if (failCount >= 5) { lockAccount(userId); }`
+- **권장 코드**: `lockAccount(userId, { unlockAfter: 30 * 60 * 1000 });`
+- **이유**: AC#2 요구사항 충족 필요
+
+## 3. 컨벤션 준수 ⚠️
+### 이슈 #2: 네이밍 컨벤션 미준수
+- **파일**: src/api/login.ts:12
+- **심각도**: 🟢 Medium
+- **설명**: 함수명이 camelCase가 아닌 snake_case 사용
+...
+
+## 4. 알려진 이슈 패턴 ✅
+- known_issues.md 패턴과 매칭되는 항목 없음
+
+## 5. JIRA 요구사항 ❌
+- AC#1: ✅ 구현 완료
+- AC#2: ❌ 미구현 (잠금 해제 로직)
+- AC#3: ✅ 구현 완료
+
+## 6. 보안 및 품질 ⚠️
+### 이슈 #3: SQL Injection 가능성
+- **파일**: src/services/user.ts:78
+- **심각도**: 🟡 High
+...
+
+## 7. 테스트 커버리지 ⚠️
+### 이슈 #4: 테스트 누락
+- **파일**: src/services/auth.ts
+- **심각도**: 🟡 High
+- **설명**: lockAccount 함수에 대한 테스트 없음
+```
+
 ---
 
-### Phase 3: Report Generation (리포트 생성)
+### Phase 3: Dependency Security Analysis
 
-**목표**: MR_CODE_REVIEW.md 리포트 생성
-
-**프로세스**:
-1. **리뷰 요약 작성**
-   - 총 리뷰 항목 개수
-   - 위험도별 분류: 🔴 Critical, 🟡 High, 🟢 Medium
-
-2. **상세 분석 결과 작성**
-   - 각 이슈별 제목, 설명, 위치, 개선 제안 포함
-   - 위치 표기: `[src/api/user.ts:42](src/api/user.ts#L42)`
-
-3. **리포트 구조** (references/review_template.md 참조):
-   ```markdown
-   # MR Code Review: [MR 제목]
-
-   ## 요약
-   - 총 리뷰 항목: N개
-   - 🔴 Critical: N개 - 반드시 수정 필요
-   - 🟡 High: N개 - 수정 강력 권장
-   - 🟢 Medium: N개 - 개선 권장
-
-   ## 🔴 Critical Issues
-
-   ### 1. [이슈 제목]
-   **위치**: [file_path.ts:123](path/to/file.ts#L123)
-   **설명**: ...
-   **개선 제안**: ...
-
-   ## 🟡 High Priority Issues
-   ...
-
-   ## 🟢 Medium Priority Issues
-   ...
-
-   ## ✅ 잘된 점
-   ...
-   ```
-
-**출력**: `MR_CODE_REVIEW.md`
-
----
-
-### Phase 4: Dependency Security Analysis (선택적)
-
-**목적**: 의존성 취약점 자동 탐지 및 보고
-
-**실행 조건**: MR에 package.json, package-lock.json, yarn.lock 변경 포함 시
+**목적**: 의존성 취약점 자동 탐지
 
 **주요 MCP**: Sequential Thinking
 
 **프로세스**:
 
-**1. package.json 변경 확인**
+**1. 범용 보안 스캔 실행**
+
+언어에 관계없이 모든 의존성을 스캔할 수 있는 도구를 사용합니다:
+
+**권장 도구: Trivy** (무료, 오픈소스, 모든 언어 지원)
 
 ```bash
-# Git diff로 의존성 파일 변경 확인
-git diff --name-only | grep -E "package\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml"
+# Trivy로 프로젝트 전체 스캔 (자동 언어 감지)
+trivy fs --scanners vuln --format json -o trivy-result.json .
+
+# Critical/High 취약점만 필터링
+trivy fs --scanners vuln --severity CRITICAL,HIGH --format json -o trivy-result.json .
 ```
 
-변경이 있으면 Phase 4 실행, 없으면 skip.
+**지원 언어/패키지 매니저**:
+- JavaScript/Node.js: npm, yarn, pnpm
+- Python: pip, pipenv, poetry
+- Go: go mod
+- Java/Kotlin: Maven, Gradle
+- Ruby: Bundler
+- Rust: Cargo
+- PHP: Composer
+- .NET: NuGet
+- 그 외 다수
 
-**2. npm audit 실행**
+**대안 도구**:
 
+| 도구 | 특징 | 명령어 |
+|------|------|--------|
+| **Trivy** | 무료, 빠름, CI/CD 친화적 | `trivy fs --format json .` |
+| **Snyk** | 상세한 수정 가이드 | `snyk test --json` |
+| **Grype** | 경량, SBOM 지원 | `grype dir:. -o json` |
+| **OSV-Scanner** | Google 제공, 무료 | `osv-scanner --format json -r .` |
+
+**Trivy 미설치 시 설치 방법**:
 ```bash
-# npm audit 실행 및 JSON 결과 저장
-npm audit --json > audit-result.json
+# macOS
+brew install trivy
 
-# Critical/High 취약점 필터링
-jq '.vulnerabilities | to_entries[] | select(.value.severity == "critical" or .value.severity == "high")' audit-result.json
+# Linux
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+# Docker (설치 없이 사용)
+docker run --rm -v $(pwd):/app aquasec/trivy fs --format json /app
 ```
 
-**3. 취약점 분석 (Sequential Thinking 활용)**
+**2. 취약점 분석 (Sequential Thinking 활용)**
 
 각 취약점을 Sequential Thinking으로 분석:
 
@@ -421,67 +545,140 @@ mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
 })
 ```
 
-**4. 보고서 섹션 추가**
-
-MR_CODE_REVIEW.md에 다음 섹션 추가:
-
-```markdown
-## 🔐 의존성 보안 분석
-
-### CRITICAL 취약점 (즉시 수정 필요 🔴)
-
-#### 1. axios@0.21.0: CVE-2021-3749 (SSRF)
-**위치**: package.json:15
-**영향**: Server-Side Request Forgery 공격 가능. 공격자가 임의의 내부 서버에 요청을 보낼 수 있음
-**해결 방법**:
-- `npm install axios@latest` (v0.21.2 이상)
-- Breaking changes 없음
-- 프로덕션 배포 전 반드시 수정 필요
-
-**영향 범위**:
-- src/api/user.ts:12
-- src/api/payment.ts:8
-- src/utils/http-client.ts:5
-(총 11개 파일)
-
----
-
-### HIGH 취약점 (우선 수정 권장 🟡)
-
-#### 1. lodash@4.17.19: Prototype Pollution
-**위치**: package.json:18
-**영향**: 객체 프로토타입 오염 가능. 애플리케이션 로직 변조 가능
-**해결 방법**:
-- `npm install lodash@4.17.21`
-- Breaking changes 없음
-- 24시간 내 수정 권장
-
-**영향 범위**:
-- src/utils/data.ts:7
-- src/services/transform.ts:12
-(총 5개 파일)
-
----
-
-### 권장사항
-
-1. **즉시 조치**: CRITICAL 취약점 0개 될 때까지 MR merge 금지
-2. **24시간 내**: HIGH 취약점 모두 수정
-3. **정기 점검**: 매주 `npm audit` 실행 권장
-4. **CI/CD 통합**: 취약점 발견 시 자동으로 PR 실패하도록 설정 권장
-
-**Dependencies Updated**:
-```bash
-npm install axios@latest lodash@latest
-npm audit fix --force  # 자동 수정 시도
-```
-```
-
 **Best Practices**:
-- Phase 4는 Phase 3 (Report Generation) 직후 실행
-- 의존성 파일 변경이 없으면 이 Phase는 skip
 - CRITICAL 취약점 발견 시 MR 승인 보류 권장
 - HIGH 취약점은 warning으로 표시하되 blocking하지 않음
+
+**출력 파일**: `.mr-review/3_SECURITY_ANALYSIS.md`
+
+```markdown
+# Phase 3: Dependency Security Analysis
+
+## 스캔 도구
+- **도구**: Trivy v0.48.0
+- **스캔 시간**: 2024-01-15 14:30:00 UTC
+
+## 취약점 요약
+- **총 취약점**: 3개
+- 🔴 CRITICAL: 1개
+- 🟡 HIGH: 1개
+- 🟢 MEDIUM: 1개
+
+## 🔴 CRITICAL 취약점
+
+### CVE-2021-3749: axios SSRF
+- **패키지**: axios@0.21.0
+- **위치**: package.json:15
+- **영향**: Server-Side Request Forgery 공격 가능
+- **수정 버전**: 0.21.2 이상
+- **영향 범위**:
+  - src/api/user.ts:12
+  - src/api/payment.ts:8
+  - src/utils/http-client.ts:5
+  - (총 11개 파일)
+
+## 🟡 HIGH 취약점
+
+### CVE-2021-23337: lodash Prototype Pollution
+- **패키지**: lodash@4.17.19
+- **위치**: package.json:18
+- **영향**: 객체 프로토타입 오염
+- **수정 버전**: 4.17.21 이상
+
+## 권장사항
+1. `npm install axios@latest lodash@latest`
+2. CRITICAL 취약점 0개 될 때까지 MR merge 금지
+```
+
+---
+
+### Phase 4: Report Generation (리포트 생성)
+
+**목표**: Phase 1~3의 중간 산출물을 읽어 최종 2개 리포트 파일 생성
+
+**입력 파일** (Phase 1~3 산출물):
+- `.mr-review/1_CONTEXT.md` - 맥락 정보
+- `.mr-review/2_CODE_ANALYSIS.md` - 코드 분석 결과
+- `.mr-review/3_SECURITY_ANALYSIS.md` - 보안 분석 결과
+
+**출력 파일**:
+- `INLINE_DISCUSSION.json` - GitLab Inline Discussion 자동화용 JSON
+- `SUMMARY_DISCUSSION.md` - 전체 요약 마크다운
+
+**프로세스**:
+
+#### Step 1: INLINE_DISCUSSION.json 생성
+
+Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배열로 구조화합니다 (references/inline_discussion_template.json 참조):
+
+```json
+[
+  {
+    "file": "app/services/cognito.py",
+    "line": 116,
+    "severity": "🔴 Critical",
+    "title": "이슈 제목",
+    "description": "이슈에 대한 상세 설명. 왜 이것이 문제인지, 어떤 영향을 미치는지",
+    "current_code": "// 문제가 되는 코드 (있는 경우)",
+    "suggested_code": "// 권장하는 코드 (있는 경우)",
+    "reason": "왜 이렇게 수정해야 하는지 설명"
+  }
+]
+```
+
+**필드 설명**:
+- `file`: 파일 경로 (프로젝트 루트 기준 상대 경로)
+- `line`: 이슈가 발생한 라인 번호
+- `severity`: 위험도 (`🔴 Critical`, `🟡 High`, `🟢 Medium`)
+- `title`: 이슈 제목 (간결하게)
+- `description`: 상세 설명 (문제점, 영향 등)
+- `current_code`: 현재 문제가 되는 코드 (선택적)
+- `suggested_code`: 권장하는 수정 코드 (선택적)
+- `reason`: 수정 이유 설명
+
+**정렬 순서**: severity 기준 (Critical → High → Medium)
+
+#### Step 2: SUMMARY_DISCUSSION.md 생성
+
+전체 리뷰 요약을 마크다운으로 작성합니다 (references/summary_discussion_template.md 참조):
+
+```markdown
+# MR Code Review Summary
+
+## 🎯 브랜치 목표
+- JIRA 이슈 연결
+- AC 달성 현황
+
+## 📋 리뷰 요약
+| 위험도 | 개수 |
+|--------|------|
+| 🔴 Critical | N개 |
+| 🟡 High | N개 |
+| 🟢 Medium | N개 |
+
+## 🔴 Critical Issues 요약
+1. **[이슈 제목]** - `file.ts:123`
+
+## 🔐 의존성 보안 분석
+### CRITICAL 취약점
+- axios@0.21.0: CVE-2021-3749 (SSRF)
+
+### HIGH 취약점
+- lodash@4.17.19: Prototype Pollution
+
+## ✅ 잘된 점
+...
+
+## 다음 단계
+...
+
+## 📎 관련 파일
+- **Inline Discussion**: `INLINE_DISCUSSION.json`
+```
+
+**출력 파일**:
+- `INLINE_DISCUSSION.json` - GitLab API로 discussion 자동 생성 가능
+- `SUMMARY_DISCUSSION.md` - MR description 또는 일반 코멘트용
 
 ---
 
@@ -493,20 +690,22 @@ npm audit fix --force  # 자동 수정 시도
 
 문서 및 가이드:
 
-- `review_template.md`: MR_CODE_REVIEW.md 리포트 템플릿
-- `review_checklist.md`: 6가지 검증 항목별 체크리스트
+- `inline_discussion_template.json`: INLINE_DISCUSSION.json 템플릿 (GitLab Inline Discussion용)
+- `summary_discussion_template.md`: SUMMARY_DISCUSSION.md 템플릿 (전체 요약용)
+- `review_checklist.md`: 7가지 검증 항목별 체크리스트
 - `inline_comment_format.md`: GitLab discussion 포맷 가이드 (선택적 사용)
 
 ### references/verification_guides/
 
-6가지 검증 로직의 상세 프로세스 (각각 별도 파일):
+7가지 검증 로직의 상세 프로세스 (각각 별도 파일):
 
 1. `architecture_check.md`: 아키텍처 일관성 검증 프로세스
-2. `convention_check.md`: 컨벤션 준수 확인 프로세스
-3. `known_issues_check.md`: 알려진 이슈 패턴 대조 프로세스
-4. `jira_validation.md`: JIRA 요구사항 검증 프로세스
-5. `security_review.md`: 보안 및 품질 리뷰 프로세스
-6. `test_coverage.md`: 테스트 커버리지 평가 프로세스
+2. `business_logic_check.md`: 비즈니스 로직 정확성 검증 프로세스 ⭐ NEW
+3. `convention_check.md`: 컨벤션 준수 확인 프로세스
+4. `known_issues_check.md`: 알려진 이슈 패턴 대조 프로세스
+5. `jira_validation.md`: JIRA 요구사항 검증 프로세스
+6. `security_review.md`: 보안 및 품질 리뷰 프로세스
+7. `test_coverage.md`: 테스트 커버리지 평가 프로세스
 
 각 파일에는 다음이 포함됩니다:
 - Sequential Thinking MCP 사용 예시 (최소 3개)

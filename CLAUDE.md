@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.5.0):**
+**Key Artifacts (v3.6.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.5.0)
+wogus-plugin/  (v3.6.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -62,8 +62,12 @@ Consolidate workflow artifacts and update project documentation.
 - **Output**: Updated README, CHANGELOG, CLAUDE docs
 - **Integration**: Final step in workflow
 
-### mr-code-review
+### mr-code-review (v3.6.0)
 GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰 수행.
+- **7가지 검증**: 아키텍처, 비즈니스 로직, 컨벤션, 이슈 패턴, JIRA, 보안, 테스트
+- **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_DISCUSSION.md`
+- **Trivy 범용 보안 스캔**: 모든 언어 지원
+- **Phase별 중간 산출물**: `.mr-review/` 디렉토리
 
 ### mcp-config (v3.3.0)
 MCP 서버 활성화/비활성화 및 도구별 권한 관리.
@@ -155,7 +159,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### Configuration
 
 - **File**: `.claude-plugin/marketplace.json`
-- **Version**: Semantic versioning (current: v3.5.0)
+- **Version**: Semantic versioning (current: v3.6.0)
 - **MCP Servers**: 8개 자동 통합 (sequential-thinking, context7, serena, sentry, atlassian, terraform, amplitude, chrome-devtools)
 
 ### Publishing Workflow
@@ -197,6 +201,54 @@ This repository is distributed as a **Claude Code Marketplace**.
 
 이 섹션에는 최신 3개의 아키텍처 결정사항만 포함합니다.
 이전 버전의 ADR은 **[docs/architecture/decisions/](docs/architecture/decisions/)** 디렉토리를 참조하세요.
+
+---
+
+### v3.6.0 - mr-code-review 대규모 개선 (2025-12-12)
+
+**컨텍스트**:
+mr-code-review가 단일 파일(MR_CODE_REVIEW.md) 출력, 6가지 검증, 언어별 보안 도구 사용으로 제한적이었음.
+
+**문제점**:
+- **출력 형식 제한**: 마크다운 단일 파일로 GitLab Inline Discussion 자동화 어려움
+- **비즈니스 로직 검증 부재**: JIRA 목표 대비 구현 정확성 검증 누락
+- **언어별 보안 도구**: npm audit은 JavaScript 전용, 다른 언어 지원 필요
+- **Context 손실**: 긴 리뷰에서 Phase 간 맥락 손실 발생
+
+**결정**: 4가지 주요 개선
+
+1. **2개 파일 출력**:
+   - `INLINE_DISCUSSION.json`: GitLab Inline Discussion 자동화용
+   - `SUMMARY_DISCUSSION.md`: 전체 요약 마크다운
+
+2. **7가지 검증으로 확장**:
+   - 기존 6가지 + "비즈니스 로직 정확성 검증" 추가
+   - JIRA 목표 대비 구현 정확성, 엣지케이스, 경계값 검증
+
+3. **Trivy 범용 보안 스캔**:
+   - npm audit, pip-audit 등 언어별 도구 → Trivy로 통합
+   - JavaScript, Python, Go, Java, Rust 등 모든 언어 지원
+
+4. **Phase별 중간 산출물**:
+   - `.mr-review/1_CONTEXT.md`: 맥락 수집 결과
+   - `.mr-review/2_CODE_ANALYSIS.md`: 코드 분석 결과
+   - `.mr-review/3_SECURITY_ANALYSIS.md`: 보안 분석 결과
+   - Phase 4에서 중간 파일 읽어 최종 리포트 생성
+
+**영향**:
+- GitLab Inline Discussion 자동화 가능
+- 비즈니스 로직 정확성 검증으로 품질 향상
+- 모든 언어 프로젝트에서 보안 스캔 가능
+- Context 손실 없이 긴 리뷰 수행 가능
+- Breaking Change: 출력 파일 변경 (MR_CODE_REVIEW.md → 2개 파일)
+
+**관련 파일**:
+- mr-code-review/SKILL.md: 전체 재구성
+- mr-code-review/references/inline_discussion_template.json: 신규
+- mr-code-review/references/summary_discussion_template.md: 신규
+- mr-code-review/references/verification_guides/business_logic_check.md: 신규
+
+**버전**: v3.5.3 → v3.6.0
 
 ---
 
@@ -312,7 +364,7 @@ v3.0.0 ~ v3.2.1, v2.0.0 ~ v2.4.0, v1.6.0 등의 아키텍처 결정사항은 다
 
 ## Notes
 
-- **Current version**: v3.4.1 (Skills + Agents + Git Worktree + Phase 0 강제)
+- **Current version**: v3.6.0 (Skills + Agents + 브랜치 보호 + mr-code-review 개선)
 - Skills use MCP servers (serena, atlassian, sentry, context7, sequential-thinking, terraform, amplitude, chrome-devtools)
 - Agents use MCP servers (serena, sequential-thinking, context7, atlassian)
 - All skills and agents designed for Korean language output

@@ -245,7 +245,7 @@ mr-code-review가 단일 파일(MR_CODE_REVIEW.md) 출력, 6가지 검증, 언�
 **관련 파일**:
 - mr-code-review/SKILL.md: 전체 재구성
 - mr-code-review/references/inline_discussion_template.json: 신규
-- mr-code-review/references/summary_discussion_template.md: 신규
+- mr-code-review/references/summary_comment_template.md: 신규
 - mr-code-review/references/verification_guides/business_logic_check.md: 신규
 
 **버전**: v3.5.3 → v3.6.0

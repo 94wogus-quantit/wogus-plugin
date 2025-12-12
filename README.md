@@ -702,7 +702,7 @@ wogus-plugin/  (v3.6.0)
 │   ├── SKILL.md           # 7가지 검증, 4-Phase 워크플로우
 │   └── references/
 │       ├── inline_discussion_template.json  # GitLab 자동화용 JSON
-│       ├── summary_discussion_template.md   # 요약 리포트 템플릿
+│       ├── summary_comment_template.md      # 요약 리포트 템플릿
 │       └── verification_guides/
 │           ├── architecture_check.md
 │           ├── business_logic_check.md      # NEW: 비즈니스 로직 검증

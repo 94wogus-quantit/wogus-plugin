@@ -62,7 +62,7 @@
 
 - **새로운 파일**:
   - `mr-code-review/references/inline_discussion_template.json`
-  - `mr-code-review/references/summary_discussion_template.md`
+  - `mr-code-review/references/summary_comment_template.md`
   - `mr-code-review/references/verification_guides/business_logic_check.md`
   - `changelogs/v3.0-v3.4.md`
   - `changelogs/v2.x.md`

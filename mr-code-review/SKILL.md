@@ -163,25 +163,64 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 
 ### Phase 1: Context Gathering (맥락 수집)
 
-**목표**: MR과 관련된 모든 맥락 정보 수집
+**목표**: MR과 관련된 모든 맥락 정보 수집 및 **브랜치 목표 명확화**
 
 **주요 MCP**: Serena (Context7, Memory), Atlassian
 
 **프로세스**:
-1. **Git 변경사항 분석**
+
+1. **브랜치 목표 파악 (Branch Objective) - 최우선**
+
+   > ⚠️ **CRITICAL**: 코드 분석 전에 반드시 "이 브랜치가 무엇을 달성해야 하는지"를 먼저 파악해야 합니다.
+
+   **1-1. 브랜치명에서 JIRA 이슈 추출**
+   ```bash
+   # 브랜치명 패턴: feature/PROJ-123-description, bugfix/PROJ-456
+   git branch --show-current | grep -oE '[A-Z]+-[0-9]+'
+   ```
+
+   **1-2. MR description에서 JIRA 이슈 추출**
+   ```bash
+   # GitLab MR description 확인
+   glab mr view --json description | jq -r '.description' | grep -oE '[A-Z]+-[0-9]+'
+   ```
+
+   **1-3. JIRA 이슈 상세 조회 (Atlassian MCP)**
+   ```typescript
+   // JIRA 이슈 조회
+   mcp__plugin_workflow-skills_atlassian__jira_get_issue({
+     issue_key: "PROJ-123"
+   })
+   ```
+
+   **1-4. 브랜치 목표 정리 (Sequential Thinking)**
+   ```typescript
+   mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
+     thought: "브랜치 목표 분석: PROJ-123 이슈의 목적은 무엇인가? Acceptance Criteria는 무엇인가? 이 MR이 달성해야 할 구체적 목표는?",
+     thoughtNumber: 1,
+     totalThoughts: 3,
+     nextThoughtNeeded: true
+   })
+   ```
+
+   **1-5. 브랜치 목표 요약 작성**
+
+   다음 정보를 수집하여 리포트 최상단에 배치:
+   - **JIRA 이슈 키 및 제목**
+   - **이슈 유형** (Story / Bug / Task / Epic)
+   - **Acceptance Criteria 목록**
+   - **연관 이슈** (Parent Epic, Linked Issues)
+   - **스프린트/마일스톤** (해당 시)
+
+2. **Git 변경사항 분석**
    - `git diff` 실행하여 변경된 파일 목록 확인
    - Sequential Thinking으로 변경 범위 및 영향도 분석
    - Serena로 변경된 심볼 및 의존성 파악
 
-2. **프로젝트 문서 수집**
+3. **프로젝트 문서 수집**
    - README.md, CHANGELOG, CLAUDE.md 읽기
    - Serena Context7으로 프로젝트 전체 맥락 이해
    - Serena memory에서 모든 관련 메모리 읽기 (`architecture_decisions.md`, `code_patterns.md`, `known_issues.md`)
-
-3. **JIRA 이슈 조회** (MR과 연결된 경우)
-   - Atlassian MCP로 이슈 및 연관 이슈 조회
-   - Sequential Thinking으로 요구사항 분석
-   - Acceptance Criteria 추출
 
 4. **Confluence 문서 검색** (필요시)
    - Atlassian MCP로 관련 기술 문서 검색

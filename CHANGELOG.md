@@ -7,6 +7,35 @@
 
 ---
 
+## [3.5.3] - 2025-12-12
+
+### Added
+
+- **mr-code-review: 브랜치 목표 섹션 추가**: MR 리뷰 시 코드 품질뿐 아니라 "브랜치가 원래 목표를 달성했는지" 확인
+  - **Phase 1 개선**: "브랜치 목표 파악 (Branch Objective)" 단계를 최우선 작업으로 추가
+    - 브랜치명/MR description에서 JIRA 이슈 자동 추출
+    - JIRA 이슈 상세 조회 후 AC 추출
+    - Sequential Thinking으로 목표 분석
+  - **리포트 템플릿 개선**: `🎯 브랜치 목표 (Branch Objective)` 섹션을 리포트 최상단에 배치
+    - JIRA 이슈 정보 테이블 (이슈 키, 제목, 유형, 스프린트, Parent Epic)
+    - AC 달성 현황 테이블: 각 AC별 달성 여부 + 관련 코드 위치
+    - 목표 달성 요약: 달성률 퍼센트로 한눈에 파악
+    - 미구현 AC 있을 시 merge 비권장 경고
+
+### Technical Details
+
+- **수정된 파일**:
+  - `mr-code-review/SKILL.md:164-227`: Phase 1에 Branch Objective 단계 추가
+  - `mr-code-review/references/review_template.md:16-59`: 브랜치 목표 섹션 추가
+- **새로운 프로세스**:
+  - 1-1. 브랜치명에서 JIRA 이슈 추출
+  - 1-2. MR description에서 JIRA 이슈 추출
+  - 1-3. JIRA 이슈 상세 조회 (Atlassian MCP)
+  - 1-4. 브랜치 목표 정리 (Sequential Thinking)
+  - 1-5. 브랜치 목표 요약 작성
+
+---
+
 ## [3.5.2] - 2025-12-12
 
 ### Changed

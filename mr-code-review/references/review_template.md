@@ -11,18 +11,50 @@
 **Branch**: [source-branch] → [target-branch]
 **Reviewer**: Claude Code (mr-code-review skill)
 
-## 요약
+---
+
+## 🎯 브랜치 목표 (Branch Objective)
+
+> 이 MR이 달성해야 할 목표를 먼저 확인합니다.
+
+### 연결된 JIRA 이슈
+
+| 항목 | 내용 |
+|------|------|
+| **이슈 키** | [PROJ-123](https://your-domain.atlassian.net/browse/PROJ-123) |
+| **제목** | [이슈 제목] |
+| **유형** | Story / Bug / Task / Epic |
+| **스프린트** | Sprint XX (선택적) |
+| **Parent Epic** | [PROJ-100](link) (선택적) |
+
+### Acceptance Criteria 달성 현황
+
+| # | Acceptance Criteria | 달성 여부 | 관련 코드 |
+|---|---------------------|-----------|-----------|
+| 1 | [AC 1 설명] | ✅ 완료 / ❌ 미구현 / ⚠️ 부분 구현 | `src/file.ts:42` |
+| 2 | [AC 2 설명] | ✅ / ❌ / ⚠️ | `src/file.ts:78` |
+| 3 | [AC 3 설명] | ✅ / ❌ / ⚠️ | - |
+
+### 목표 달성 요약
+
+- **총 AC**: [N]개
+- **✅ 완료**: [N]개
+- **⚠️ 부분 구현**: [N]개
+- **❌ 미구현**: [N]개
+- **달성률**: [XX]%
+
+> ⚠️ **미구현 AC가 있는 경우**: AC가 모두 충족되지 않으면 MR merge를 권장하지 않습니다.
+
+---
+
+## 📋 리뷰 요약
 
 - **총 리뷰 항목**: [N]개
 - **🔴 Critical**: [N]개 - 반드시 수정 필요
 - **🟡 High**: [N]개 - 수정 강력 권장
 - **🟢 Medium**: [N]개 - 개선 권장
 
-## MR 목표
-
-[이 MR의 목표와 변경 사항 요약]
-
-## 작업 내용
+### 변경 파일 개요
 
 [변경된 파일 목록 및 주요 변경 사항]
 

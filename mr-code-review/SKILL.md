@@ -11,7 +11,7 @@ description: GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종�
 
 ALL outputs, reports, analysis, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
 
-- ✅ **MR_CODE_REVIEW.md**: Write in Korean
+- ✅ **INLINE_DISCUSSION.json / SUMMARY_DISCUSSION.md**: Write in Korean
 - ✅ **Issue descriptions**: Write in Korean
 - ✅ **Improvement suggestions**: Write in Korean
 - ✅ **Analysis comments**: Write in Korean
@@ -365,7 +365,7 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
    // Output: AC별 상세 검증 리포트 (코드 품질, 보안, 테스트 포함)
    ```
 
-   **4-2. 리포트를 MR_CODE_REVIEW.md에 통합**
+   **4-2. 리포트를 SUMMARY_DISCUSSION.md에 통합**
 
    requirement-validator의 출력을 그대로 포함:
 

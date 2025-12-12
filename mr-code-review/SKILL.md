@@ -640,7 +640,14 @@ Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배�
 
 #### Step 2: SUMMARY_DISCUSSION.md 생성
 
+> ⚠️ **CRITICAL**: 이 파일은 **요약**입니다. 상세 내용은 `INLINE_DISCUSSION.json`에 있으므로 여기서는 **한 줄 요약**만 작성합니다.
+
 전체 리뷰 요약을 마크다운으로 작성합니다 (references/summary_discussion_template.md 참조):
+
+**작성 원칙**:
+- 각 이슈는 **제목 + 파일:라인 + 한 줄 요약**만 작성
+- 상세 설명, 코드 예시, 수정 방법은 `INLINE_DISCUSSION.json`에만 포함
+- "상세 내용은 INLINE_DISCUSSION.json 참조" 문구 필수 포함
 
 ```markdown
 # MR Code Review Summary

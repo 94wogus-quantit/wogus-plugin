@@ -49,27 +49,28 @@
 
 ## 🔴 Critical Issues 요약
 
-1. **[이슈 제목]** - `file.ts:123`
-   - [한 줄 요약]
+<!-- ⚠️ 한 줄 요약만! 상세 내용/코드 예시/수정 방법은 INLINE_DISCUSSION.json에 -->
 
-2. **[이슈 제목]** - `file.ts:456`
-   - [한 줄 요약]
+1. **[이슈 제목]** - `file.ts:123` - [15자 이내 한 줄 요약]
+2. **[이슈 제목]** - `file.ts:456` - [15자 이내 한 줄 요약]
 
-> 상세 내용은 `INLINE_DISCUSSION.json` 참조
+> 📎 상세 내용은 `INLINE_DISCUSSION.json` 참조
 
 ---
 
 ## 🟡 High Priority 요약
 
-1. **[이슈 제목]** - `file.ts:789`
-   - [한 줄 요약]
+1. **[이슈 제목]** - `file.ts:789` - [15자 이내 한 줄 요약]
+
+> 📎 상세 내용은 `INLINE_DISCUSSION.json` 참조
 
 ---
 
 ## 🟢 Medium Priority 요약
 
-1. **[이슈 제목]** - `file.ts:101`
-   - [한 줄 요약]
+1. **[이슈 제목]** - `file.ts:101` - [15자 이내 한 줄 요약]
+
+> 📎 상세 내용은 `INLINE_DISCUSSION.json` 참조
 
 ---
 

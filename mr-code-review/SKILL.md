@@ -676,6 +676,22 @@ Phase 2 (코드 분석) + Phase 3 (보안 분석)의 모든 이슈를 JSON 배�
 - **Inline Discussion**: `INLINE_DISCUSSION.json`
 ```
 
+#### Step 3: 파일 생성 (MANDATORY)
+
+⚠️ **CRITICAL**: 두 파일 모두 반드시 Write 도구로 생성해야 합니다.
+
+```
+1. Write INLINE_DISCUSSION.json
+   - JSON 배열 형식
+   - 모든 이슈 포함
+
+2. Write SUMMARY_DISCUSSION.md
+   - 마크다운 형식
+   - 전체 요약 포함
+```
+
+**검증**: 두 파일이 모두 생성되었는지 확인 후 Phase 4 완료
+
 **출력 파일**:
 - `INLINE_DISCUSSION.json` - GitLab API로 discussion 자동 생성 가능
 - `SUMMARY_DISCUSSION.md` - MR description 또는 일반 코멘트용

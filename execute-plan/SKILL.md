@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: Systematically execute approved implementation plans by managing task flow, tracking progress with TodoList, running tests, and ensuring all success criteria are met. Focus purely on implementation and testing. Use this skill when you have an approved plan file (e.g., *_PLAN.md) and need to implement it step-by-step with comprehensive tracking and verification. Documentation and cleanup are handled by the 'document' skill.
+description: Systematically execute approved implementation plans by managing task flow, tracking progress with TodoList, running tests, and ensuring all success criteria are met. Focus purely on implementation and testing. Use this skill when you have an approved plan file (e.g., *_PLAN.md) and need to implement it step-by-step with comprehensive tracking and verification. Documentation and cleanup are handled by the 'document' skill. Also use when user requests "계획 실행", "플랜 실행", "구현 시작", "개발 시작", "코딩 시작", "작업 시작", "실행해줘", "구현해줘", "만들어줘", "개발해줘", "코드 작성", "기능 구현", "태스크 실행", or needs to start implementing an approved plan. (plugin:workflow-skills@wogus-plugins)
 ---
 
 # Execute Plan

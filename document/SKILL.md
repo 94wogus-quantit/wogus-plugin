@@ -1,6 +1,6 @@
 ---
 name: document
-description: 워크플로우 아티팩트(분석 리포트, 계획서, 구현 결과)를 수집하여 프로젝트 문서를 체계적으로 업데이트합니다. README, CHANGELOG, CLAUDE 문서를 갱신하고 Serena 메모리에 기술 인사이트를 저장합니다. Use this skill after completing implementation to consolidate all workflow artifacts into comprehensive project documentation.
+description: 워크플로우 아티팩트(분석 리포트, 계획서, 구현 결과)를 수집하여 프로젝트 문서를 체계적으로 업데이트합니다. README, CHANGELOG, CLAUDE 문서를 갱신하고 Serena 메모리에 기술 인사이트를 저장합니다. Use this skill after completing implementation to consolidate all workflow artifacts into comprehensive project documentation. Also use when user requests "문서화", "문서 작성", "문서 업데이트", "README 작성", "CHANGELOG 작성", "변경사항 기록", "릴리즈 노트", "정리해줘", "문서 정리", "커밋해줘", "푸시해줘", "마무리해줘", "완료 처리", or needs to finalize and document completed work. (plugin:workflow-skills@wogus-plugins)
 ---
 
 # Document

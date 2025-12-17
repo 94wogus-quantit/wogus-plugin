@@ -1,6 +1,6 @@
 ---
 name: plan-builder
-description: Create high-quality, thoroughly reviewed implementation plans through iterative refinement. Automatically cycles through plan creation, critical review, and feedback application until the plan meets all quality standards. Use when creating implementation plans from analysis reports or requirements, especially for complex features or critical bug fixes that need thorough planning.
+description: Create high-quality, thoroughly reviewed implementation plans through iterative refinement. Automatically cycles through plan creation, critical review, and feedback application until the plan meets all quality standards. Use when creating implementation plans from analysis reports or requirements, especially for complex features or critical bug fixes that need thorough planning. Also use when user requests "구현 계획", "실행 계획", "개발 계획", "플랜 작성", "계획 수립", "작업 계획", "태스크 분해", or needs structured planning before implementation. (plugin:workflow-skills@wogus-plugins)
 ---
 
 # Plan Builder - Iterative Plan Refinement

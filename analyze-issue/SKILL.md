@@ -1,6 +1,6 @@
 ---
 name: analyze-issue
-description: Systematically analyze the root cause of bugs and issues using multi-perspective investigation. Use this skill when analyzing JIRA issues, Sentry errors, or investigating bug reports to identify root causes and provide actionable remediation recommendations. Generates detailed analysis reports with code locations, reproduction steps, and fix recommendations.
+description: Systematically analyze the root cause of bugs and issues using multi-perspective investigation. Use this skill when analyzing JIRA issues, Sentry errors, or investigating bug reports to identify root causes and provide actionable remediation recommendations. Generates detailed analysis reports with code locations, reproduction steps, and fix recommendations. Also use when user requests "이슈 분석", "버그 분석", "원인 분석", "근본 원인", "문제 분석", "에러 분석", "장애 분석", "오류 조사", "디버깅", "분석 리포트", "분석 보고서", "조사해줘", "왜 안되지", "왜 이런거야", "뭐가 문제야", "원인 찾아줘", "버그 찾아줘", or needs pre-implementation analysis before planning. (plugin:workflow-skills@wogus-plugins)
 ---
 
 # Analyze Issue Root Cause

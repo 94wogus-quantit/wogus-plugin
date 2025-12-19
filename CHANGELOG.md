@@ -14,6 +14,54 @@
 
 ---
 
+## [3.7.0] - 2025-12-19
+
+### Changed
+
+- **Plugins 모듈화**: 단일 플러그인(`workflow-skills`)을 3개 독립 플러그인으로 분리
+  - `workflow-bundle`: 5개 skills + 1개 agent + sequential-thinking MCP
+  - `terraform`: Terraform MCP 서버만 포함
+  - `amplitude`: Amplitude MCP 서버만 포함
+  - 사용자가 필요한 기능만 선택적으로 설치 가능
+
+- **외부 MCP 분리**: serena, context7, sentry, atlassian MCP는 별도 플러그인으로 설치하도록 변경
+  - marketplace.json에서 제거
+  - 외부 플러그인 의존성 명시화
+
+### Removed
+
+- **mcp-config 스킬 제거**: 플러그인 분리로 개별 설치/제거가 가능해져 불필요
+  - `mcp-config/SKILL.md` 삭제
+  - `mcp-config/references/mcp_tools.md` 삭제
+  - `mcp-config/references/settings_template.json` 삭제
+
+- **chrome-devtools MCP 제거**: claude-in-chrome 브라우저 자동화 도구와 중복
+
+### Technical Details
+
+- **삭제된 파일**:
+  - `mcp-config/SKILL.md` (746 lines)
+  - `mcp-config/references/mcp_tools.md` (519 lines)
+  - `mcp-config/references/settings_template.json` (9 lines)
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: 3개 plugins 구조로 재설계
+  - `README.md`: 설치 방법, 구조 설명 업데이트
+  - `CLAUDE.md`: ADR v3.7.0 추가
+
+- **새로운 Plugins 구조**:
+  ```json
+  {
+    "plugins": [
+      { "name": "workflow-bundle", "skills": [...], "agents": [...], "mcpServers": {...} },
+      { "name": "terraform", "mcpServers": {...} },
+      { "name": "amplitude", "mcpServers": {...} }
+    ]
+  }
+  ```
+
+---
+
 ## [3.6.0] - 2025-12-12
 
 ### Added

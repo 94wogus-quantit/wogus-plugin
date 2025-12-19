@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.6.0):**
+**Key Artifacts (v3.7.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,7 +15,7 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.6.0)
+wogus-plugin/  (v3.7.0)
 ├── .claude-plugin/         # Plugin configuration
 │   ├── marketplace.json    # Marketplace metadata
 │   └── plugin.json         # Plugin manifest (Skills + Agents)
@@ -69,9 +69,6 @@ GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰 수
 - **Trivy 범용 보안 스캔**: 모든 언어 지원
 - **Phase별 중간 산출물**: `.mr-review/` 디렉토리
 
-### mcp-config (v3.3.0)
-MCP 서버 활성화/비활성화 및 도구별 권한 관리.
-
 ## Available Agents
 
 ### requirement-validator (v3.0.0)
@@ -93,7 +90,7 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 | **Scope** | Broad (analysis → execution) | Narrow (AC 추적 전용) |
 | **File Format** | `SKILL.md` in skill directory | `.md` files in `agents/` |
 | **Invocation** | User explicitly uses skill | Skills call automatically |
-| **Count** | 6개 | 1개 |
+| **Count** | 5개 | 1개 |
 
 ## AC Traceability Example
 
@@ -159,8 +156,9 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### Configuration
 
 - **File**: `.claude-plugin/marketplace.json`
-- **Version**: Semantic versioning (current: v3.6.0)
-- **MCP Servers**: 7개 자동 통합 (sequential-thinking, context7, serena, sentry, atlassian, terraform, amplitude)
+- **Version**: Semantic versioning (current: v3.7.0)
+- **Plugins**: 3개 독립 플러그인 (workflow-bundle, terraform, amplitude)
+- **MCP Servers**: workflow-bundle에 sequential-thinking만 포함 (외부 MCP는 별도 설치)
 
 ### Publishing Workflow
 
@@ -172,8 +170,10 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### User Installation
 
 ```bash
-/marketplace add git@github.com:94wogus-quantit/skills.git
-/plugin install workflow-skills:analyze-issue
+/marketplace add git@github.com:94wogus-quantit/wogus-plugin.git
+/plugin install wogus-plugins:workflow-bundle  # 5 skills + agent + sequential-thinking
+/plugin install wogus-plugins:terraform        # Terraform MCP만
+/plugin install wogus-plugins:amplitude        # Amplitude MCP만
 ```
 
 ## Development Best Practices
@@ -201,6 +201,47 @@ This repository is distributed as a **Claude Code Marketplace**.
 
 이 섹션에는 최신 3개의 아키텍처 결정사항만 포함합니다.
 이전 버전의 ADR은 **[docs/architecture/decisions/](docs/architecture/decisions/)** 디렉토리를 참조하세요.
+
+---
+
+### v3.7.0 - Plugins 모듈화 (2025-12-19)
+
+**컨텍스트**:
+단일 monolithic 플러그인(workflow-skills)이 모든 기능을 포함하고 있어, 사용자가 필요한 기능만 선택적으로 설치할 수 없었음.
+
+**문제점**:
+- **All-or-Nothing 설치**: 필요하지 않은 MCP 서버도 함께 설치됨
+- **의존성 복잡도**: 외부 MCP (serena, context7, sentry, atlassian)가 함께 번들되어 설치/관리 어려움
+- **mcp-config 스킬 불필요**: 플러그인 분리 후 개별 설치/제거가 가능해져 MCP 관리 스킬이 불필요해짐
+
+**결정**: 3개 독립 플러그인으로 분리
+
+1. **workflow-bundle**:
+   - 5개 Skills: analyze-issue, plan-builder, execute-plan, document, mr-code-review
+   - 1개 Agent: requirement-validator
+   - 1개 MCP: sequential-thinking
+
+2. **terraform**: Terraform MCP 서버만 포함
+
+3. **amplitude**: Amplitude MCP 서버만 포함
+
+**외부 MCP 분리**:
+- serena, context7, sentry, atlassian MCP는 별도 플러그인으로 설치하도록 변경
+- marketplace.json에서 제거
+
+**제거된 스킬**:
+- **mcp-config**: 플러그인 분리로 개별 설치/제거가 가능해져 불필요
+  - `mcp-config/SKILL.md` 삭제
+  - `mcp-config/references/mcp_tools.md` 삭제
+  - `mcp-config/references/settings_template.json` 삭제
+
+**영향**:
+- 사용자가 필요한 기능만 선택적으로 설치 가능
+- 외부 MCP 의존성 명시화
+- mcp-config 스킬 제거로 Skills 수 6개 → 5개
+- Breaking Change: 기존 workflow-skills 사용자는 workflow-bundle로 재설치 필요
+
+**버전**: v3.6.0 → v3.7.0
 
 ---
 
@@ -313,42 +354,6 @@ fi
 
 ---
 
-### v3.3.0 - MCP 도구 권한 관리 기능 추가 (2025-12-10)
-
-**컨텍스트**:
-v3.2.2까지 mcp-config는 MCP 서버 활성화/비활성화(`deniedMcpServers`)만 관리. 개별 MCP 도구의 권한(allow/deny/ask) 설정은 `settings.local.json` 직접 편집 필요.
-
-**문제점**:
-- **도구 목록 조회 불가**: MCP 서버별 제공 도구를 확인할 방법이 없음
-- **권한 패턴 불명확**: `mcp__plugin_workflow-skills_serena__find_symbol` 같은 패턴을 사용자가 직접 작성
-- **권한 관리 복잡**: allow/deny/ask 간 이동 시 이전 배열에서 수동 제거 필요
-
-**결정**: Phase 5 추가 (MCP 도구 권한 관리)
-
-1. **MCP 도구 참조 문서 생성** (`references/mcp_tools.md`):
-   - 8개 MCP 서버의 140+ 도구 목록 문서화
-   - Permission 패턴 규칙 및 예시 제공
-
-2. **Phase 5 워크플로우**:
-   - Step 1: 현재 권한 상태 파악
-   - Step 2: 사용자 요청 파싱 (자연어 → permission 패턴)
-   - Step 3: 권한 설정 수정 (중복 확인, 권한 이동)
-   - Step 4: 결과 확인 (상태 테이블 출력)
-
-3. **자동 권한 이동**:
-   - allow → deny 이동 시 allow에서 자동 제거
-   - 권한 제거 시 모든 배열에서 제거
-
-**영향**:
-- 자연어로 도구 권한 관리 가능
-- 140+ 도구를 한눈에 확인
-- 권한 충돌 방지
-- Breaking Change: 없음
-
-**버전**: v3.2.2 → v3.3.0
-
----
-
 ## 이전 버전 ADRs
 
 v3.0.0 ~ v3.2.1, v2.0.0 ~ v2.4.0, v1.6.0 등의 아키텍처 결정사항은 다음 디렉토리에서 확인하세요:
@@ -364,9 +369,10 @@ v3.0.0 ~ v3.2.1, v2.0.0 ~ v2.4.0, v1.6.0 등의 아키텍처 결정사항은 다
 
 ## Notes
 
-- **Current version**: v3.6.1 (Skills + Agents + 브랜치 보호 + mr-code-review 개선)
-- Skills use MCP servers (serena, atlassian, sentry, context7, sequential-thinking, terraform, amplitude)
-- Agents use MCP servers (serena, sequential-thinking, context7, atlassian)
+- **Current version**: v3.7.0 (Plugins 모듈화 - 3개 독립 플러그인)
+- **workflow-bundle**: sequential-thinking MCP 포함
+- **terraform/amplitude**: 독립 MCP 플러그인
+- 외부 MCP (serena, context7, sentry, atlassian)는 별도 플러그인으로 설치
 - All skills and agents designed for Korean language output
 - Reference files loaded on-demand to manage context efficiently
 - Marketplace distribution requires GitHub public repository

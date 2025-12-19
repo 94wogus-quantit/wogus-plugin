@@ -11,14 +11,15 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 - **⚙️ Custom Commands**: 워크플로우 자동화 커맨드 (별도 설치 필요)
 - **🔗 MCP Servers**: 외부 도구/서비스 통합 (별도 설정 필요)
 
-이 저장소는 **Skills + Agents (v3.6.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
+이 저장소는 **Skills + Agents (v3.7.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
 
-**v3.6.0 주요 기능**:
-- 🎯 **mr-code-review 7가지 검증**: 비즈니스 로직 정확성 검증 추가
-- 📄 **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_COMMENT.md`
-- 🔒 **범용 보안 스캔**: Trivy로 모든 언어 지원
-- 💾 **Phase별 중간 산출물**: Context 손실 방지를 위한 `.mr-review/` 파일 저장
-- ⚠️ **브랜치 보호**: main/master/staging 브랜치 직접 작업 방지
+**v3.7.0 주요 변경**:
+- 📦 **Plugins 모듈화**: 단일 플러그인 → 3개 독립 플러그인으로 분리
+  - `workflow-bundle`: 5 skills + 1 agent + sequential-thinking
+  - `terraform`: Terraform MCP 서버
+  - `amplitude`: Amplitude MCP 서버
+- 🗑️ **mcp-config 스킬 제거**: 플러그인 분리로 개별 설치/제거 가능해짐
+- 🔌 **외부 MCP 분리**: serena, context7, sentry, atlassian은 별도 플러그인으로 설치
 
 ## 🌐 언어 정책
 
@@ -69,13 +70,14 @@ glab mr create --title "feat: JIRA-123 구현"
    /marketplace add git@github.com:94wogus-quantit/wogus-plugin.git
    ```
 
-2. 원하는 스킬 설치:
+2. 원하는 플러그인 설치:
    ```bash
-   /plugin install analyze-issue
-   /plugin install plan-builder
-   /plugin install execute-plan
-   /plugin install document
-   /plugin install mr-code-review
+   # 워크플로우 전체 (5 skills + agent + sequential-thinking)
+   /plugin install wogus-plugins:workflow-bundle
+
+   # 또는 개별 MCP만
+   /plugin install wogus-plugins:terraform
+   /plugin install wogus-plugins:amplitude
    ```
 
 3. 설치 확인:
@@ -118,29 +120,12 @@ glab mr create --title "feat: JIRA-123 구현"
    - **atlassian**: Docker 기반 API 토큰 인증
      - [Atlassian API 토큰 생성](https://id.atlassian.com/manage-profile/security/api-tokens)에서 토큰 발급
      - Docker가 설치되어 있어야 함 (`docker --version`으로 확인)
-   - **terraform** (v3.2.0 NEW): HashiCorp Terraform IaC 자동화 (별도 설정 불필요, Docker 필요)
-   - **amplitude** (v3.2.0 NEW): [Amplitude](https://amplitude.com)에서 API 키 발급 필요
-   - **chrome-devtools** (v3.2.0 NEW): Chrome DevTools 연동 (별도 설정 불필요)
+   - **terraform**: HashiCorp Terraform IaC 자동화 (별도 설정 불필요, Docker 필요)
+   - **amplitude**: [Amplitude](https://amplitude.com)에서 API 키 발급 필요
 
 5. **MCP 서버 비활성화** (선택사항):
 
-   특정 MCP 서버를 사용하지 않으려면 **mcp-config skill** 또는 수동으로 `.claude/settings.local.json`을 편집합니다.
-
-   **방법 1: mcp-config skill 사용 (권장)**
-   ```bash
-   # MCP 상태 확인
-   "MCP 상태 보여줘"
-
-   # 특정 MCP 비활성화
-   "sentry 비활성화해줘"
-   "atlassian이랑 serena 끄기"
-
-   # 모든 MCP 활성화 (리셋)
-   "모든 MCP 활성화"
-   ```
-
-   **방법 2: 수동 편집**
-   `.claude/settings.local.json`에서 `deniedMcpServers`를 사용합니다.
+   특정 MCP 서버를 사용하지 않으려면 `.claude/settings.local.json`에서 `deniedMcpServers`를 사용합니다.
 
    **주의**:
    - `serverCommand`는 전체 명령어 배열을 **정확히 일치**시켜야 합니다.
@@ -214,20 +199,11 @@ glab mr create --title "feat: JIRA-123 구현"
      ]
    }
 
-   // amplitude 비활성화 (v3.2.0+)
+   // amplitude 비활성화
    {
      "deniedMcpServers": [
        {
          "serverCommand": ["npx", "-y", "amplitude-mcp-server"]
-       }
-     ]
-   }
-
-   // chrome-devtools 비활성화 (v3.2.0+)
-   {
-     "deniedMcpServers": [
-       {
-         "serverCommand": ["npx", "-y", "chrome-devtools-mcp@latest"]
        }
      ]
    }
@@ -440,42 +416,6 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 
 ---
 
-### mcp-config
-
-workflow-skills 플러그인의 MCP 서버를 쉽게 활성화/비활성화하는 스킬입니다.
-
-**주요 기능:**
-- MCP 서버 상태 조회 (8개 MCP 한눈에 확인)
-- 단일/다중/전체 MCP 비활성화
-- 비활성화된 MCP 활성화 (리셋)
-- `settings.local.json` 자동 관리
-
-**사용 시점:**
-- MCP 서버 상태를 확인하고 싶을 때
-- 특정 MCP 서버를 임시로 비활성화하고 싶을 때
-- 비활성화된 MCP를 다시 활성화하고 싶을 때
-
-**사용 예시:**
-```bash
-# MCP 상태 조회
-"MCP 상태 보여줘"
-
-# 특정 MCP 비활성화
-"sentry 비활성화해줘"
-"atlassian이랑 serena 끄기"
-
-# MCP 활성화
-"sentry 활성화해줘"
-"모든 MCP 활성화"  # 리셋
-```
-
-**설치:**
-```bash
-/plugin install mcp-config
-```
-
----
-
 ### document (v3.5.0 Updated)
 
 워크플로우 아티팩트를 수집하여 프로젝트 문서를 종합적으로 업데이트하는 스킬입니다.
@@ -596,29 +536,26 @@ mr-code-review [Branch/MR URL]
 ```json
 {
   "name": "wogus-plugins",
-  "owner": {
-    "name": "94wogus",
-    "email": "94wogus@quantit.io"
-  },
   "metadata": {
-    "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 + Agents - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화, AC 요구사항 추적, MCP 자동 통합 (한국어 기본)",
-    "version": "3.6.0",
-    "repository": "https://github.com/94wogus-quantit/wogus-plugin",
-    "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
-    "license": "Private"
+    "version": "3.7.0"
   },
   "plugins": [
     {
-      "name": "workflow-skills",
-      "description": "체계적인 개발 워크플로우를 위한 통합 솔루션 (Skills + Agents)",
-      "source": "./",
-      "skills": [
-        "./analyze-issue",
-        "./plan-builder",
-        "./execute-plan",
-        "./document",
-        "./mr-code-review"
-      ]
+      "name": "workflow-bundle",
+      "description": "이슈 분석 → 계획 → 실행 → 문서화 + MR 리뷰 워크플로우",
+      "skills": ["./analyze-issue", "./plan-builder", "./execute-plan", "./document", "./mr-code-review"],
+      "agents": ["./agents/requirement-validator.md"],
+      "mcpServers": { "sequential-thinking": {...} }
+    },
+    {
+      "name": "terraform",
+      "description": "Terraform 인프라 관리 MCP 서버",
+      "mcpServers": { "terraform": {...} }
+    },
+    {
+      "name": "amplitude",
+      "description": "Amplitude 분석 데이터 MCP 서버",
+      "mcpServers": { "amplitude": {...} }
     }
   ]
 }
@@ -638,12 +575,14 @@ mr-code-review [Branch/MR URL]
    /marketplace list
    ```
 
-3. 원하는 스킬 설치:
+3. 원하는 플러그인 설치:
    ```bash
-   /plugin install workflow-skills:analyze-issue
-   /plugin install workflow-skills:plan-builder
-   # 또는 짧은 형식
-   /plugin install analyze-issue
+   # 워크플로우 전체
+   /plugin install wogus-plugins:workflow-bundle
+
+   # 또는 개별 MCP
+   /plugin install wogus-plugins:terraform
+   /plugin install wogus-plugins:amplitude
    ```
 
 **배포자 입장:**
@@ -684,28 +623,28 @@ mr-code-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.6.0)
+wogus-plugin/  (v3.7.0)
 ├── .claude-plugin/         # Marketplace 설정
-│   ├── marketplace.json    # 플러그인 목록 및 메타데이터
-│   └── plugin.json         # Plugin manifest (Skills + Agents)
+│   ├── marketplace.json    # 플러그인 목록 및 메타데이터 (3개 plugins)
+│   └── plugin.json         # Plugin manifest
 │
-├── agents/                 # Agent 정의 파일 (v3.0.0: 1개만 유지)
-│   └── requirement-validator.md  # AC traceability (유일하게 유지)
+├── agents/                 # Agent 정의 파일
+│   └── requirement-validator.md  # AC traceability
 │
 ├── analyze-issue/          # 이슈 분석 스킬
-│   ├── SKILL.md           # [업데이트] Phase 3D 추가
+│   ├── SKILL.md
 │   └── references/
 │       ├── report_template.md
 │       └── common_bug_patterns.md
 │
-├── mr-code-review/        # MR 코드 리뷰 스킬 (v3.6.0)
+├── mr-code-review/        # MR 코드 리뷰 스킬
 │   ├── SKILL.md           # 7가지 검증, 4-Phase 워크플로우
 │   └── references/
-│       ├── inline_discussion_template.json  # GitLab 자동화용 JSON
-│       ├── summary_comment_template.md      # 요약 리포트 템플릿
+│       ├── inline_discussion_template.json
+│       ├── summary_comment_template.md
 │       └── verification_guides/
 │           ├── architecture_check.md
-│           ├── business_logic_check.md      # NEW: 비즈니스 로직 검증
+│           ├── business_logic_check.md
 │           ├── convention_check.md
 │           ├── known_issues_check.md
 │           ├── jira_validation.md
@@ -721,15 +660,10 @@ wogus-plugin/  (v3.6.0)
 │       └── task_independence_guide.md
 │
 ├── execute-plan/          # 계획 실행 스킬
-│   └── SKILL.md           # [업데이트] 6-Phase → 7-Phase
+│   └── SKILL.md
 │
 ├── document/              # 문서화 스킬
 │   └── SKILL.md
-│
-├── mcp-config/            # MCP 설정 스킬 (NEW v3.1.0)
-│   ├── SKILL.md           # MCP 활성화/비활성화 자동화
-│   └── references/
-│       └── settings_template.json
 │
 ├── .gitignore            # Git 제외 설정
 ├── CHANGELOG.md          # 변경 이력

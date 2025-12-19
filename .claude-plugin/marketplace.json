@@ -5,16 +5,16 @@
     "email": "94wogus@quantit.io"
   },
   "metadata": {
-    "description": "체계적인 개발 워크플로우를 위한 Claude Code 스킬 모음 + Agents - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화, AC 요구사항 추적, MCP 자동 통합 (한국어 기본)",
-    "version": "3.6.1",
+    "description": "체계적인 개발 워크플로우를 위한 Claude Code 플러그인 모음 - 워크플로우 번들, Terraform, Amplitude (한국어 기본)",
+    "version": "3.7.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
   },
   "plugins": [
     {
-      "name": "workflow-skills",
-      "description": "체계적인 개발 워크플로우를 위한 스킬 모음 - 이슈 분석, 계획 수립, MR 리뷰, 실행, 문서화",
+      "name": "workflow-bundle",
+      "description": "이슈 분석 → 계획 → 실행 → 문서화 + MR 리뷰 워크플로우 (5 skills + agent + sequential-thinking)",
       "source": "./",
       "strict": true,
       "skills": [
@@ -22,8 +22,7 @@
         "./plan-builder",
         "./execute-plan",
         "./document",
-        "./mr-code-review",
-        "./mcp-config"
+        "./mr-code-review"
       ],
       "agents": [
         "./agents/requirement-validator.md"
@@ -32,53 +31,14 @@
         "sequential-thinking": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-        },
-        "context7": {
-          "type": "stdio",
-          "command": "npx",
-          "args": ["-y", "@upstash/context7-mcp"],
-          "env": {
-            "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
-          }
-        },
-        "serena": {
-          "type": "stdio",
-          "command": "uvx",
-          "args": [
-            "--from",
-            "git+https://github.com/oraios/serena",
-            "serena",
-            "start-mcp-server",
-            "--context",
-            "ide-assistant",
-            "--enable-web-dashboard",
-            "false"
-          ],
-          "env": {}
-        },
-        "sentry": {
-          "type": "stdio",
-          "command": "npx",
-          "args": ["-y", "@sentry/mcp-server@latest"],
-          "env": {
-            "SENTRY_ACCESS_TOKEN": "${SENTRY_ACCESS_TOKEN}",
-            "SENTRY_HOST": "${SENTRY_HOST}",
-            "OPENAI_API_KEY": "${OPENAI_API_KEY}"
-          }
-        },
-        "atlassian": {
-          "type": "stdio",
-          "command": "uvx",
-          "args": ["mcp-atlassian"],
-          "env": {
-            "JIRA_URL": "${ATLASSIAN_URL}",
-            "JIRA_USERNAME": "${ATLASSIAN_USERNAME}",
-            "JIRA_API_TOKEN": "${ATLASSIAN_API_TOKEN}",
-            "CONFLUENCE_URL": "${ATLASSIAN_URL}/wiki",
-            "CONFLUENCE_USERNAME": "${ATLASSIAN_USERNAME}",
-            "CONFLUENCE_API_TOKEN": "${ATLASSIAN_API_TOKEN}"
-          }
-        },
+        }
+      }
+    },
+    {
+      "name": "terraform",
+      "description": "Terraform 인프라 관리 MCP 서버",
+      "source": "./",
+      "mcpServers": {
         "terraform": {
           "type": "stdio",
           "command": "docker",
@@ -88,7 +48,14 @@
             "--rm",
             "hashicorp/terraform-mcp-server"
           ]
-        },
+        }
+      }
+    },
+    {
+      "name": "amplitude",
+      "description": "Amplitude 분석 데이터 MCP 서버",
+      "source": "./",
+      "mcpServers": {
         "amplitude": {
           "type": "stdio",
           "command": "npx",

@@ -160,7 +160,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 
 - **File**: `.claude-plugin/marketplace.json`
 - **Version**: Semantic versioning (current: v3.6.0)
-- **MCP Servers**: 8개 자동 통합 (sequential-thinking, context7, serena, sentry, atlassian, terraform, amplitude, chrome-devtools)
+- **MCP Servers**: 7개 자동 통합 (sequential-thinking, context7, serena, sentry, atlassian, terraform, amplitude)
 
 ### Publishing Workflow
 
@@ -364,8 +364,8 @@ v3.0.0 ~ v3.2.1, v2.0.0 ~ v2.4.0, v1.6.0 등의 아키텍처 결정사항은 다
 
 ## Notes
 
-- **Current version**: v3.6.0 (Skills + Agents + 브랜치 보호 + mr-code-review 개선)
-- Skills use MCP servers (serena, atlassian, sentry, context7, sequential-thinking, terraform, amplitude, chrome-devtools)
+- **Current version**: v3.6.1 (Skills + Agents + 브랜치 보호 + mr-code-review 개선)
+- Skills use MCP servers (serena, atlassian, sentry, context7, sequential-thinking, terraform, amplitude)
 - Agents use MCP servers (serena, sequential-thinking, context7, atlassian)
 - All skills and agents designed for Korean language output
 - Reference files loaded on-demand to manage context efficiently

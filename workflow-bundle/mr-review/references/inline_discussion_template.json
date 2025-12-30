@@ -1,0 +1,32 @@
+[
+  {
+    "file": "app/services/cognito.py",
+    "line": 116,
+    "severity": "🔴 Critical",
+    "title": "SQL Injection Vulnerability",
+    "description": "User input is directly used in query, making it vulnerable to SQL Injection attacks. Attackers can insert malicious SQL syntax to manipulate the database.",
+    "current_code": "query = f\"SELECT * FROM users WHERE id = {user_id}\"",
+    "suggested_code": "query = \"SELECT * FROM users WHERE id = %s\"\ncursor.execute(query, (user_id,))",
+    "reason": "Using Prepared Statements prevents SQL Injection. User input is passed as parameters instead of being directly included in the query string."
+  },
+  {
+    "file": "src/api/user.ts",
+    "line": 42,
+    "severity": "🟡 High",
+    "title": "Missing Error Handling",
+    "description": "External API is called without try-catch in async function. Network errors may cause unhandled promise rejection.",
+    "current_code": "const response = await externalApi.fetchUser(userId);",
+    "suggested_code": "try {\n  const response = await externalApi.fetchUser(userId);\n  return response;\n} catch (error) {\n  logger.error('Failed to fetch user', { userId, error });\n  throw new UserFetchError(userId, error);\n}",
+    "reason": "External API calls can always fail, so proper error handling is required."
+  },
+  {
+    "file": "src/utils/validation.ts",
+    "line": 78,
+    "severity": "🟢 Medium",
+    "title": "Regex Optimization Possible",
+    "description": "Email validation regex is very complex and may be vulnerable to ReDoS (Regular Expression Denial of Service).",
+    "current_code": "const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;",
+    "suggested_code": "import { isEmail } from 'validator';\n// Or use simple regex\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;",
+    "reason": "It's safer to use a validated library or perform basic validation with simple regex and verify actual email by sending."
+  }
+]

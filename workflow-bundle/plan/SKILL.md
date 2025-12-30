@@ -1,27 +1,9 @@
 ---
-name: plan-builder
-description: Create high-quality, thoroughly reviewed implementation plans through iterative refinement. Automatically cycles through plan creation, critical review, and feedback application until the plan meets all quality standards. Use when creating implementation plans from analysis reports or requirements, especially for complex features or critical bug fixes that need thorough planning. Also use when user requests "구현 계획", "실행 계획", "개발 계획", "플랜 작성", "계획 수립", "작업 계획", "태스크 분해", or needs structured planning before implementation. (plugin:workflow-skills@wogus-plugins)
+name: plan
+description: Create high-quality implementation plans through iterative refinement until all quality standards are met. Use when creating implementation plans from analysis reports or requirements, especially for complex features or critical bug fixes. Generates [FEATURE]_PLAN.md with task breakdown, dependencies, and success criteria. Korean triggers: 구현 계획, 실행 계획, 개발 계획, 플랜 작성, 계획 수립, 작업 계획, 태스크 분해, 계획 세워줘, 플랜 만들어줘, 어떻게 구현할지, 작업 분해해줘.
 ---
 
-# Plan Builder - Iterative Plan Refinement
-
-## ⚠️ CRITICAL LANGUAGE POLICY
-
-**DEFAULT LANGUAGE: KOREAN (한국어)**
-
-ALL outputs, documentation, plans, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
-
-- ✅ **Plan files**: Write in Korean
-- ✅ **Reviews**: Perform in Korean
-- ✅ **Feedback**: Provide in Korean
-- ✅ **Task descriptions**: Write in Korean
-- ✅ **User communication**: Respond in Korean
-
-**Exception**: If the user writes in another language, match that language for responses.
-
-**This is a MANDATORY requirement. Do NOT default to English.**
-
----
+# Plan - Iterative Plan Refinement
 
 ## ⛔ MANDATORY: Feedback Loop Until Perfect
 
@@ -35,6 +17,24 @@ ALL outputs, documentation, plans, and communications MUST be in **KOREAN** unle
 >
 > It is NORMAL to iterate **at least 2-3 times**.
 > If the first review gives "Approve", the review was too lenient.
+
+---
+
+## ⚠️ CRITICAL LANGUAGE POLICY
+
+**DEFAULT LANGUAGE: KOREAN (한국어)**
+
+ALL outputs, plans, review comments, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
+
+- ✅ **Plan documents**: Write in Korean
+- ✅ **Task descriptions**: Write in Korean
+- ✅ **Success criteria**: Write in Korean
+- ✅ **Review comments**: Write in Korean
+- ✅ **User communication**: Respond in Korean
+
+**Exception**: If the user writes in another language, match that language for responses.
+
+**This is a MANDATORY requirement. Do NOT default to English.**
 
 ---
 
@@ -81,40 +81,40 @@ Use this skill when:
 > - Running in main/master may cause merge conflicts later
 > - Branch isolation ensures clean separation of work
 
-**Objective**: Feature 브랜치에서 작업 중인지 확인합니다.
+**Objective**: Verify that you are working on a feature branch.
 
 **Steps**:
 
-**1. 현재 브랜치 확인**
+**1. Check Current Branch**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
-echo "📍 현재 브랜치: $CURRENT_BRANCH"
+echo "📍 Current branch: $CURRENT_BRANCH"
 
-# main, master, staging 브랜치인지 확인
+# Check if on main, master, or staging branch
 if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
-  echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
-  echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
+  echo "⚠️ Warning: Working on $CURRENT_BRANCH branch!"
+  echo "⚠️ Cannot work on main/master/staging branches."
   echo ""
-  echo "🔧 권장 워크플로우:"
-  echo "  1. 먼저 /analyze-issue [JIRA-ID]를 실행하여 feature 브랜치 생성"
-  echo "  2. 그 후 /plan [REPORT]를 실행"
+  echo "🔧 Recommended workflow:"
+  echo "  1. First run analyze [JIRA-ID] to create feature branch"
+  echo "  2. Then run plan [REPORT]"
   echo ""
-  read -p "계속 실행하시겠습니까? [y/N] " -n 1 -r
+  read -p "Continue anyway? [y/N] " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ 중단됨"
+    echo "❌ Aborted"
     exit 1
   fi
 else
-  echo "✅ Feature 브랜치에서 작업 중입니다"
+  echo "✅ Working on feature branch"
 fi
 ```
 
-**2. Phase 1로 진행**
+**2. Proceed to Phase 1**
 
-- 기존 Phase 1-3 실행
-- Phase 3 (Finalization)에서 PLAN 파일 저장
+- Execute existing Phase 1-3
+- Save PLAN file in Phase 3 (Finalization)
 
 ---
 
@@ -333,7 +333,7 @@ Extract from review:
 
 #### Step C: Decision Gate (STRICT)
 
-**Step C-1: Basic Checks (기존 유지)**
+**Step C-1: Basic Checks**
 
 ```
 IF (total_issues == 0 AND
@@ -344,17 +344,17 @@ ELSE:
     → Go to Step D (Apply Feedback)
 ```
 
-**Step C-2: AC Coverage Check (NEW - JIRA 이슈 있을 때만)**
+**Step C-2: AC Coverage Check (When JIRA issue linked)**
 
 ```
-IF (JIRA 이슈 연결됨):
-    1. 🤖 requirement-validator agent 호출 (Mode 2: Pre-validation)
-       Input: [FEATURE]_PLAN.md, JIRA 이슈 키
+IF (JIRA issue linked):
+    1. 🤖 Call requirement-validator agent (Mode 2: Pre-validation)
+       Input: [FEATURE]_PLAN.md, JIRA issue key
 
-    2. AC Completeness 확인:
+    2. Check AC Completeness:
        IF (AC Completeness < 100%):
-           → 리뷰 파일에 Required Change 추가:
-             "AC#X 누락 - Task 추가 필요"
+           → Add Required Change to review file:
+             "AC#X missing - Task addition needed"
            → Recommendation: "Needs Iteration"
            → Go to Step D (Apply Feedback)
        ELSE:
@@ -362,7 +362,7 @@ IF (JIRA 이슈 연결됨):
            → EXIT LOOP → Go to Phase 3
 
 ELSE:
-    → JIRA 이슈 없음, AC Check 생략
+    → No JIRA issue, skip AC Check
     → EXIT LOOP → Go to Phase 3
 ```
 
@@ -371,7 +371,7 @@ ELSE:
 - Recommendation: "Approve"
 - Required Changes: ZERO
 - Suggested Improvements: ZERO or trivial
-- **AC Completeness: 100%** (JIRA 이슈 있을 때만)
+- **AC Completeness: 100%** (when JIRA issue linked)
 
 **If ANY issues remain → Continue to Step D!**
 
@@ -647,7 +647,7 @@ Include review iteration summary in final output:
 - [Improvement 2]
 
 ## Ready for Execution
-Run: `/execute-plan [FEATURE]_PLAN.md`
+Run: `execute [FEATURE]_PLAN.md`
 ```
 
 ## Best Practices
@@ -688,17 +688,17 @@ Run: `/execute-plan [FEATURE]_PLAN.md`
 ## Integration with Workflow
 
 ```
-1. analyze-issue [JIRA]
+1. analyze [JIRA]
    └─> [ISSUE_ID]_REPORT.md
 
-2. plan-builder [uses REPORT]
+2. plan [uses REPORT]
    └─> [FEATURE]_PLAN.md (approved)
    └─> Auto-iterates until high quality
 
-3. /execute-plan [PLAN]
+3. execute [PLAN]
    └─> Implementation
 
-4. /document
+4. record
    └─> Final documentation
 ```
 

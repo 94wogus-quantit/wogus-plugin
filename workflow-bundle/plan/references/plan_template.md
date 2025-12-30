@@ -10,7 +10,7 @@ Use this template when creating `[FEATURE]_PLAN.md` files.
 **Type**: Feature / Bug Fix / Refactoring / Research
 **Priority**: P[0-3]
 **Related**: [JIRA-123], [GitHub Issue #456], [Sentry Issue]
-**Based On**: [REPORT_FILE.md] (if from analyze-issue)
+**Based On**: [REPORT_FILE.md] (if from analyze)
 
 ## Overview
 

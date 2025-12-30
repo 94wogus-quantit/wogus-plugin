@@ -1,6 +1,6 @@
 ---
-name: execute-plan
-description: Systematically execute approved implementation plans by managing task flow, tracking progress with TodoList, running tests, and ensuring all success criteria are met. Focus purely on implementation and testing. Use this skill when you have an approved plan file (e.g., *_PLAN.md) and need to implement it step-by-step with comprehensive tracking and verification. Documentation and cleanup are handled by the 'document' skill. Also use when user requests "계획 실행", "플랜 실행", "구현 시작", "개발 시작", "코딩 시작", "작업 시작", "실행해줘", "구현해줘", "만들어줘", "개발해줘", "코드 작성", "기능 구현", "태스크 실행", or needs to start implementing an approved plan. (plugin:workflow-skills@wogus-plugins)
+name: execute
+description: Execute approved implementation plans with TodoList tracking, test verification, and success criteria validation. Use when you have an approved *_PLAN.md file and need step-by-step implementation with comprehensive tracking. Outputs implemented code, test results, and execution summary. Documentation handled by record skill. Korean triggers: 계획 실행, 플랜 실행, 구현 시작, 개발 시작, 코딩 시작, 작업 시작, 실행해줘, 구현해줘, 만들어줘, 개발해줘, 코드 작성, 기능 구현, 태스크 실행.
 ---
 
 # Execute Plan
@@ -27,36 +27,35 @@ ALL outputs, documentation, code comments, and communications MUST be in **KOREA
 
 Use this skill when:
 - You have an approved implementation plan file (e.g., `USER_AUTH_PLAN.md`)
-- User requests "execute this plan", "implement the plan", "run /execute-plan"
+- User requests "execute this plan", "implement the plan", "run execute"
 - Need to systematically implement multiple related tasks
 - Want automatic progress tracking with TodoList
 - Need to ensure all success criteria and tests are verified
 
 **Typical Workflow Position**:
 ```
-analyze-issue → plan-builder → **execute-plan** → document
+analyze → plan → **execute** → record
 ```
 
 ## Overview
 
-This skill executes approved implementation plans through an 8-phase systematic process:
+This skill executes approved implementation plans through a 7-phase systematic process:
 
-0. **Worktree Validation**: Worktree 내에서 실행 중인지 확인하고 경고 안내
+0. **Branch Validation**: Verify working on a feature branch
 1. **Plan Loading & Validation**: Load plan file, parse tasks, verify prerequisites
 2. **TodoList Setup**: Create comprehensive TodoList from all plan tasks
 3. **Task Execution**: Execute tasks sequentially, respecting dependencies
 4. **Handle Dependencies**: Manage task dependencies and execution order
-5. **Automated Test Generation** (조건부 필수): 테스트 누락 파일 탐지 및 직접 생성
+5. **Automated Test Generation** (Conditional): Detect missing tests and generate them
 6. **Testing & Verification**: Run tests and verify success criteria
-7. **Documentation**: Update code documentation and save learnings
 
 **Note**:
 - Phase 4C (DB Migration Validation) and Phase 5 (Test Generation) are optional
-- Project documentation and file cleanup are handled by the `document` skill, not this skill
+- **Documentation (README, CHANGELOG, Git commit) is handled by `record` skill** - not in execute
 
 ---
 
-## Workflow: 8-Phase Execution Process
+## Workflow: 7-Phase Execution Process
 
 ### Phase 0: Branch Validation
 
@@ -75,42 +74,42 @@ This skill executes approved implementation plans through an 8-phase systematic 
 > - Modifying main/master while working on features is dangerous
 > - Branch isolation prevents accidental commits to production branches
 
-**Objective**: Feature 브랜치에서 작업 중인지 확인합니다.
+**Objective**: Verify that you are working on a feature branch.
 
 **Steps**:
 
-**1. 현재 브랜치 확인**
+**1. Check Current Branch**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
-echo "📍 현재 브랜치: $CURRENT_BRANCH"
+echo "📍 Current branch: $CURRENT_BRANCH"
 
-# main, master, staging 브랜치인지 확인
+# Check if on main, master, or staging branch
 if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
-  echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
-  echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
+  echo "⚠️ Warning: You are working on $CURRENT_BRANCH branch!"
+  echo "⚠️ Cannot work on main/master/staging branches."
   echo ""
-  echo "🔧 권장 워크플로우:"
-  echo "  1. 먼저 /analyze-issue [JIRA-ID]를 실행하여 feature 브랜치 생성"
-  echo "  2. 그 후 /plan 및 /execute-plan을 실행"
+  echo "🔧 Recommended workflow:"
+  echo "  1. First run analyze [JIRA-ID] to create a feature branch"
+  echo "  2. Then run plan and execute"
   echo ""
-  echo "⚠️ 보호된 브랜치에서 코드 수정 시 브랜치 충돌 위험이 있습니다"
+  echo "⚠️ Modifying code on protected branches risks branch conflicts"
   echo ""
-  read -p "계속 실행하시겠습니까? [y/N] " -n 1 -r
+  read -p "Do you want to continue? [y/N] " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ 중단됨"
+    echo "❌ Aborted"
     exit 1
   fi
 else
-  echo "✅ Feature 브랜치에서 작업 중입니다"
+  echo "✅ Working on a feature branch"
 fi
 ```
 
-**2. Phase 1로 진행**
+**2. Proceed to Phase 1**
 
-- 기존 Phase 1-7 실행
-- 코드 수정은 현재 feature 브랜치에서 이루어짐
+- Execute existing Phase 1-7
+- Code modifications happen in the current feature branch
 
 ---
 
@@ -342,38 +341,38 @@ Task A (completed) → Task B (in_progress) → Task D (pending, blocked by B)
 
 ---
 
-### Phase 4C: Database Migration Validation (선택적)
+### Phase 4C: Database Migration Validation (Optional)
 
-**목적**: 위험한 DB 마이그레이션 패턴 자동 탐지 및 차단
+**Objective**: Automatically detect and block dangerous DB migration patterns
 
-**실행 조건**: Plan에 DB migration 관련 작업이 있을 때
+**Execution Condition**: When the plan contains DB migration related tasks
 
 **Steps**:
 
-**1. 마이그레이션 파일 탐지**
+**1. Detect Migration Files**
 
 ```bash
-# migrations/ 또는 db/ 디렉토리에서 SQL/migration 파일 찾기
+# Find SQL/migration files in migrations/ or db/ directories
 find . -path "*/migrations/*.sql" -o -path "*/db/migrate/*.rb" -o -path "*/migrations/*.ts"
 ```
 
-**2. 위험 패턴 분석**
+**2. Analyze Dangerous Patterns**
 
-다음 정규표현식으로 위험 패턴 탐지:
+Detect dangerous patterns using the following regular expressions:
 
 ```typescript
 const dangerousPatterns = {
-  // CRITICAL: 데이터 손실 위험
+  // CRITICAL: Data loss risk
   notNull: /ADD COLUMN .* NOT NULL(?! DEFAULT)/i,
   dropColumn: /DROP COLUMN/i,
   dropTable: /DROP TABLE/i,
 
-  // HIGH: 성능 문제
+  // HIGH: Performance issues
   alterType: /ALTER COLUMN .* TYPE/i,
   addIndex: /CREATE INDEX(?! CONCURRENTLY)/i
 };
 
-// 각 마이그레이션 파일 스캔
+// Scan each migration file
 for (const file of migrationFiles) {
   const content = readFile(file);
 
@@ -391,47 +390,47 @@ for (const file of migrationFiles) {
 }
 ```
 
-**3. 경고 및 승인 요청**
+**3. Warning and Approval Request**
 
-위험 패턴 발견 시 다음 형식으로 경고 메시지 출력:
+When dangerous patterns are found, output warning messages in the following format:
 
 ```markdown
-## ⚠️ Database Migration 위험 탐지
+## ⚠️ Database Migration Risk Detected
 
-### CRITICAL 위험
+### CRITICAL Risk
 - **File**: migrations/20231209_add_user_email.sql
   - **Pattern**: `ADD COLUMN email VARCHAR(255) NOT NULL`
-  - **Problem**: 기존 row에 NULL 값 불가 → Migration 실패
-  - **Solution**: DEFAULT 값 추가 또는 2단계 migration (1. ADD COLUMN with DEFAULT, 2. ALTER COLUMN DROP DEFAULT)
+  - **Problem**: Existing rows cannot have NULL → Migration fails
+  - **Solution**: Add DEFAULT or 2-step migration (1. ADD COLUMN with DEFAULT, 2. ALTER COLUMN DROP DEFAULT)
 
-### HIGH 위험
+### HIGH Risk
 - **File**: migrations/20231209_alter_user_type.sql
   - **Pattern**: `ALTER COLUMN user_type TYPE VARCHAR(50)`
-  - **Problem**: Table lock 발생, 대용량 테이블에서 장시간 소요
-  - **Solution**: 새 컬럼 추가 → 데이터 복사 → 기존 컬럼 삭제 (Zero-downtime migration)
+  - **Problem**: Table lock occurs, long duration on large tables
+  - **Solution**: Add new column → Copy data → Drop old column (Zero-downtime migration)
 
 **Action Required**:
-- CRITICAL 위험이 있으면 실행 중단
-- HIGH 위험은 사용자 승인 후 진행
+- Stop execution on CRITICAL risk
+- Proceed with user approval for HIGH risk
 ```
 
-**4. 실행 중단 로직**
+**4. Execution Stop Logic**
 
 ```typescript
 if (warnings.some(w => w.severity === 'CRITICAL')) {
-  console.log('❌ CRITICAL migration 위험 발견 - 실행 중단');
-  console.log('마이그레이션 파일 수정 후 다시 시도하세요.');
-  // Phase 3 Task Execution으로 돌아가지 않고 종료
+  console.log('❌ CRITICAL migration risk detected - execution stopped');
+  console.log('Please fix migration files and try again.');
+  // Exit without returning to Phase 3 Task Execution
   process.exit(1);
 }
 
 if (warnings.some(w => w.severity === 'HIGH')) {
-  console.log('⚠️ HIGH migration 위험 발견 - 사용자 승인 필요');
-  // 사용자에게 승인 요청
+  console.log('⚠️ HIGH migration risk detected - user approval required');
+  // Request user approval
 }
 ```
 
-**5. Grep으로 위험 패턴 탐지 (실제 구현 예시)**
+**5. Detect Dangerous Patterns with Grep (Implementation Example)**
 
 ```bash
 # NOT NULL without DEFAULT
@@ -448,133 +447,133 @@ grep -rE 'CREATE INDEX(?! CONCURRENTLY)' migrations/
 ```
 
 **Best Practices**:
-- Phase 4C는 Phase 4 직후, Phase 5 (Test Generation) 이전에 실행
-- 마이그레이션 파일이 없으면 이 Phase는 skip
-- CRITICAL 위험 발견 시 즉시 중단 (사용자 안전 우선)
-- HIGH 위험은 warning만 출력하고 진행 (사용자 판단)
+- Run Phase 4C right after Phase 4, before Phase 5 (Test Generation)
+- Skip this Phase if no migration files exist
+- Stop immediately on CRITICAL risk (user safety first)
+- For HIGH risk, output warning only and proceed (user judgment)
 
 ---
 
-### Phase 5: Automated Test Generation (조건부 필수)
+### Phase 5: Automated Test Generation (Conditional)
 
-**목적**: 테스트 누락된 파일 탐지 및 직접 생성
+**Objective**: Detect files missing tests and generate them
 
-**실행 조건**:
-- Phase 3 (Task Execution) 완료 후, Phase 6 (Testing) 이전
-- **조건부 필수**: 변경된 파일에 대한 테스트 파일이 없을 때
+**Execution Condition**:
+- After Phase 3 (Task Execution) completion, before Phase 6 (Testing)
+- **Conditional**: When test files don't exist for changed files
 
 **Steps**:
 
-**1. 변경된 파일 확인**
+**1. Check Changed Files**
 
 ```bash
-# Git으로 수정된 파일 목록 가져오기
+# Get list of modified files via Git
 git diff --name-only HEAD
-# 또는 최근 커밋과 비교
+# Or compare with recent commit
 git diff --name-only HEAD~1..HEAD
 ```
 
-**2. 테스트 파일 존재 확인**
+**2. Check Test File Existence**
 
 ```bash
-# 변경된 파일 목록 중 테스트 파일 없는 것 찾기
+# Find changed files without corresponding test files
 for file in $(git diff --name-only HEAD | grep -E 'src/.*\.(ts|js)$'); do
   testfile=$(echo $file | sed 's/\.ts$/.test.ts/' | sed 's/\.js$/.test.js/')
   if [ ! -f "$testfile" ]; then
-    echo "⚠️ 테스트 누락: $file"
+    echo "⚠️ Missing test: $file"
   fi
 done
 ```
 
-**3. Sequential Thinking으로 테스트 케이스 설계**
+**3. Design Test Cases with Sequential Thinking**
 
-테스트가 누락된 파일이 발견되면 Sequential Thinking으로 체계적으로 분석:
+When files missing tests are found, systematically analyze with Sequential Thinking:
 
 ```typescript
-// Step 1: 함수 시그니처 분석
+// Step 1: Analyze function signature
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "processPayment 함수 분석: 입력은 amount (number), 출력은 Promise<PaymentResult>",
+  thought: "Analyzing processPayment function: input is amount (number), output is Promise<PaymentResult>",
   thoughtNumber: 1,
   totalThoughts: 6,
   nextThoughtNeeded: true
 })
 
-// Step 2: 입력 제약 조건 분석
+// Step 2: Analyze input constraints
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "입력 제약: amount는 0 이상이어야 함, 1,000,000 이하여야 함",
+  thought: "Input constraints: amount must be >= 0 and <= 1,000,000",
   thoughtNumber: 2,
   totalThoughts: 6,
   nextThoughtNeeded: true
 })
 
-// Step 3: 의존성 분석
+// Step 3: Analyze dependencies
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "의존성: PaymentAPI.process() 호출 → 모킹 필요",
+  thought: "Dependencies: calls PaymentAPI.process() → needs mocking",
   thoughtNumber: 3,
   totalThoughts: 6,
   nextThoughtNeeded: true
 })
 
-// Step 4: Edge Cases 식별
+// Step 4: Identify Edge Cases
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "Edge cases: 1) amount = 0 (경계값), 2) amount = 1000000 (최대값), 3) amount = -1 (음수), 4) amount = 1000001 (초과)",
+  thought: "Edge cases: 1) amount = 0 (boundary), 2) amount = 1000000 (max), 3) amount = -1 (negative), 4) amount = 1000001 (overflow)",
   thoughtNumber: 4,
   totalThoughts: 6,
   nextThoughtNeeded: true
 })
 
-// Step 5: Error Cases 식별
+// Step 5: Identify Error Cases
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "Error cases: 1) API 호출 실패, 2) 네트워크 타임아웃, 3) 잘못된 응답 형식",
+  thought: "Error cases: 1) API call failure, 2) network timeout, 3) invalid response format",
   thoughtNumber: 5,
   totalThoughts: 6,
   nextThoughtNeeded: true
 })
 
-// Step 6: 테스트 케이스 설계 완료
+// Step 6: Complete test case design
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "테스트 케이스 설계 완료: Happy path (2개), Edge cases (4개), Error cases (2개) 총 8개",
+  thought: "Test case design complete: Happy path (2), Edge cases (4), Error cases (2) - Total 8 cases",
   thoughtNumber: 6,
   totalThoughts: 6,
   nextThoughtNeeded: false
 })
 ```
 
-**4. 테스트 케이스 분류**
+**4. Test Case Classification**
 
-| 카테고리 | 테스트 케이스 | 설명 |
+| Category | Test Case | Description |
 |----------|--------------|------|
-| **Happy path** | 정상 금액 처리 | 유효한 입력으로 기대 결과 반환 |
-| **Happy path** | 최소 금액 처리 | 최소 유효 값으로 성공 |
-| **Edge cases** | 경계값 (0) | 최소 경계값 테스트 |
-| **Edge cases** | 최대값 (1000000) | 최대 허용값 테스트 |
-| **Edge cases** | 음수 (-1) | 음수 입력 거부 테스트 |
-| **Edge cases** | 초과 (1000001) | 최대값 초과 거부 테스트 |
-| **Error handling** | API 실패 | 외부 API 실패 시 에러 처리 |
-| **Error handling** | 타임아웃 | 네트워크 타임아웃 처리 |
+| **Happy path** | Normal amount | Returns expected result with valid input |
+| **Happy path** | Minimum amount | Success with minimum valid value |
+| **Edge cases** | Boundary (0) | Test minimum boundary value |
+| **Edge cases** | Maximum (1000000) | Test maximum allowed value |
+| **Edge cases** | Negative (-1) | Test negative input rejection |
+| **Edge cases** | Overflow (1000001) | Test max value exceeded rejection |
+| **Error handling** | API failure | Handle external API failure |
+| **Error handling** | Timeout | Handle network timeout |
 
-**5. AAA 패턴으로 테스트 코드 작성**
+**5. Write Test Code with AAA Pattern**
 
-**AAA 패턴 (Arrange-Act-Assert)**:
-- **Arrange**: 테스트에 필요한 객체와 데이터 준비
-- **Act**: 테스트 대상 함수/메서드 실행
-- **Assert**: 결과가 기대값과 일치하는지 확인
+**AAA Pattern (Arrange-Act-Assert)**:
+- **Arrange**: Prepare objects and data needed for test
+- **Act**: Execute the function/method under test
+- **Assert**: Verify result matches expected value
 
 ```typescript
-// 테스트 코드 예시 (Jest)
+// Test code example (Jest)
 describe('processPayment', () => {
   // ========== Happy Path ==========
   describe('정상 처리', () => {
     it('정상 금액(100)으로 결제 성공', async () => {
-      // Arrange: 테스트 데이터 준비
+      // Arrange: Prepare test data
       const amount = 100;
       const expectedResult = { success: true, transactionId: 'TX123' };
       (PaymentAPI.process as jest.Mock).mockResolvedValue(expectedResult);
 
-      // Act: 함수 실행
+      // Act: Execute function
       const result = await processPayment(amount);
 
-      // Assert: 결과 검증
+      // Assert: Verify result
       expect(result).toEqual(expectedResult);
       expect(PaymentAPI.process).toHaveBeenCalledWith(expect.objectContaining({
         amount: 100
@@ -612,142 +611,142 @@ describe('processPayment', () => {
 });
 ```
 
-**6. Given/When/Then 형식 (대안)**
+**6. Given/When/Then Format (Alternative)**
 
 ```typescript
-// BDD 스타일 테스트
+// BDD style test
 describe('processPayment', () => {
   it('정상 금액으로 결제 성공', async () => {
-    // Given: 정상적인 금액이 주어지면
+    // Given: Valid amount is provided
     const amount = 100;
     const expectedResult = { success: true };
     mockPaymentAPI(expectedResult);
 
-    // When: 결제 처리를 실행하면
+    // When: Payment processing is executed
     const result = await processPayment(amount);
 
-    // Then: 성공 결과가 반환된다
+    // Then: Success result is returned
     expect(result).toEqual(expectedResult);
   });
 });
 ```
 
-**7. 생성된 테스트 검증**
+**7. Verify Generated Tests**
 
 ```bash
-# 생성된 테스트 파일 실행
+# Run generated test file
 npm test -- payment.test.ts
 
-# 커버리지 확인
+# Check coverage
 npm test -- payment.test.ts --coverage
 ```
 
-**8. 보고서 업데이트**
+**8. Update Report**
 
-생성된 테스트 결과를 실행 보고서에 추가:
+Add generated test results to execution report:
 
 ```markdown
-## 📝 자동 생성된 테스트
+## 📝 Auto-Generated Tests
 
 ### src/api/payment.test.ts (NEW)
-- **테스트 케이스**: 8개 생성
-- **커버리지**: Line 92%, Branch 88%
-- **실행 결과**: ✅ 8/8 통과
-- **생성 시간**: 45초
+- **Test Cases**: 8 generated
+- **Coverage**: Line 92%, Branch 88%
+- **Result**: ✅ 8/8 passed
+- **Generation Time**: 45s
 
 ### src/utils/validator.test.ts (NEW)
-- **테스트 케이스**: 12개 생성
-- **커버리지**: Line 95%, Branch 90%
-- **실행 결과**: ✅ 12/12 통과
-- **생성 시간**: 30초
+- **Test Cases**: 12 generated
+- **Coverage**: Line 95%, Branch 90%
+- **Result**: ✅ 12/12 passed
+- **Generation Time**: 30s
 
-**총 테스트 추가**: 20개
-**평균 커버리지**: 93.5%
+**Total Tests Added**: 20
+**Average Coverage**: 93.5%
 ```
 
 **Best Practices**:
-- Phase 5는 Phase 3 (Implementation) 직후, Phase 6 (Testing) 이전에 실행
-- 테스트 누락이 없으면 이 Phase는 skip
-- 테스트 생성이 실패하면 warning만 출력하고 진행 (blocking하지 않음)
-- 생성된 테스트는 반드시 실행하여 검증
+- Run Phase 5 right after Phase 3 (Implementation), before Phase 6 (Testing)
+- Skip this Phase if no missing tests
+- If test generation fails, output warning only and proceed (non-blocking)
+- Always run generated tests to verify
 
 ---
 
-### Phase 6: AC Achievement Report (필수)
+### Phase 6: AC Achievement Report (Required)
 
-**목적**: 구현 완료 후 AC 달성 여부 자동 검증 및 보고
+**Objective**: Automatically verify and report AC achievement after implementation
 
-**실행 조건**:
-- Phase 5 (Test Generation) 완료 후
-- JIRA 이슈와 연결된 경우
+**Execution Condition**:
+- After Phase 5 (Test Generation) completion
+- When linked to a JIRA issue
 
 **Steps**:
 
-**1. requirement-validator Agent 호출 (Mode 3)**
+**1. Call requirement-validator Agent (Mode 3)**
 
 ```typescript
-// 사용자에게 알림
-"🤖 requirement-validator agent로 AC 달성 여부 검증 중..."
+// Notify user
+"🤖 Verifying AC achievement with requirement-validator agent..."
 
-// Git diff로 변경된 파일 수집
+// Collect changed files via Git diff
 Bash({ command: "git diff --name-only HEAD" })
 
-// Agent 호출
+// Call Agent
 // Mode 3: Post-validation
-// Input: JIRA 이슈 키, git diff 결과
-// Output: AC별 구현 여부 리포트
+// Input: JIRA issue key, git diff result
+// Output: AC implementation status report
 ```
 
-**2. 결과 분석 및 TodoList 업데이트**
+**2. Analyze Results and Update TodoList**
 
 ```typescript
-// 미구현 AC가 있으면 TodoList에 추가
-IF (미구현 AC 존재):
+// Add unimplemented AC to TodoList
+IF (unimplemented AC exists):
     TodoWrite({
       todos: [
         ...existing_todos,
         {
-          content: "미구현 AC 처리: AC#2 '5회 실패 시 계정 잠금' 구현",
+          content: "Handle unimplemented AC: Implement AC#2 'Account lock after 5 failures'",
           status: "pending",
-          activeForm: "미구현 AC 처리 중"
+          activeForm: "Handling unimplemented AC"
         }
       ]
     })
 ```
 
-**3. AC 달성 보고서 출력**
+**3. Output AC Achievement Report**
 
 ```markdown
-## 📊 AC 구현 현황
+## 📊 AC Implementation Status
 
-| AC | 구현 위치 | 구현 상태 | 테스트 | 커버리지 |
-|----|----------|----------|--------|----------|
-| AC#1 | [UserService.ts:42](src/auth/UserService.ts#L42) | ✅ 완료 | ✅ 있음 | 85% |
-| AC#2 | ❌ 미구현 | 미구현 | ❌ 없음 | - |
-| AC#3 | [TokenService.ts:15](src/auth/TokenService.ts#L15) | ✅ 완료 | ✅ 있음 | 90% |
+| AC | Location | Status | Test | Coverage |
+|----|----------|--------|------|----------|
+| AC#1 | [UserService.ts:42](src/auth/UserService.ts#L42) | ✅ Done | ✅ Yes | 85% |
+| AC#2 | ❌ Not implemented | Not implemented | ❌ No | - |
+| AC#3 | [TokenService.ts:15](src/auth/TokenService.ts#L15) | ✅ Done | ✅ Yes | 90% |
 
-**총 AC 달성률**: 66% (2/3)
+**Total AC Achievement**: 66% (2/3)
 
-### 다음 조치
+### Next Actions
 
-🔴 **CRITICAL**: AC#2 "5회 실패 시 계정 잠금"이 미구현입니다!
+🔴 **CRITICAL**: AC#2 "Account lock after 5 failures" is not implemented!
 
-**권장 사항**:
-1. LoginAttemptService 추가 구현
-2. 실패 카운터 Redis 저장 로직
-3. 5회 초과 시 계정 잠금 API
-4. 테스트 작성 (Happy path + Edge cases)
-5. Phase 6 재실행하여 재검증
+**Recommendations**:
+1. Implement LoginAttemptService
+2. Add failure counter Redis storage logic
+3. Implement account lock API after 5 failures
+4. Write tests (Happy path + Edge cases)
+5. Re-run Phase 6 to re-verify
 
-**TodoList에 추가됨** ✅
+**Added to TodoList** ✅
 ```
 
-**4. JIRA 이슈 없을 때 graceful degradation**
+**4. Graceful Degradation When No JIRA Issue**
 
 ```typescript
-IF (JIRA 이슈 없음):
-    "ℹ️ JIRA 이슈가 연결되지 않아 AC 검증을 건너뜁니다."
-    → Phase 6 생략, Phase 7로 진행
+IF (no JIRA issue):
+    "ℹ️ Skipping AC verification - no JIRA issue linked."
+    → Skip Phase 6, proceed to Phase 7
 ```
 
 ---
@@ -803,84 +802,24 @@ IF (JIRA 이슈 없음):
 
 ---
 
-### Phase 7: Documentation Updates
+## ✅ Execution Complete - Next: Run `record` Skill
 
-**Objective**: Update code documentation and capture learnings.
+**After execute skill completion, you MUST run `record` skill**:
 
-**Note**: Project-level documentation (README, CHANGELOG) is handled by the 'document' skill.
-
-#### 7A. Code Documentation
-- Add/update inline comments
-- Update function/class documentation
-- Add README sections if new modules created
-
-#### 7B. Capture Learnings
-
-```typescript
-// Save key insights to Serena memory
-mcp__plugin_workflow-skills_serena__write_memory({
-  memory_file_name: "auth_implementation_learnings.md",
-  content: `
-# Authentication Implementation Learnings
-
-## Key Decisions
-- Chose Passport.js for OAuth integration due to [reasons]
-- Implemented JWT with 24h expiry based on security requirements
-
-## Challenges Encountered
-- [Challenge 1]: Resolved by [solution]
-- [Challenge 2]: Resolved by [solution]
-
-## Best Practices Applied
-- [Practice 1]
-- [Practice 2]
-
-## Future Considerations
-- [Consideration 1]
-- [Consideration 2]
-`
-})
+```
+Run record skill
 ```
 
-#### 7C. Update Project Management
+Tasks handled by `record` skill:
+- ✅ Update README
+- ✅ Write CHANGELOG
+- ✅ Add architectural decisions to CLAUDE.md
+- ✅ Save learnings to Serena memory
+- ✅ Clean up workflow artifacts (*_PLAN.md, *_REPORT.md)
+- ✅ Git commit/push
+- ✅ Update JIRA issue
 
-```typescript
-// Update JIRA issue
-mcp__plugin_workflow-skills_atlassian__jira_update_issue({
-  issue_key: "PROJ-123",
-  fields: {
-    status: {name: "Done"}
-  }
-})
-
-// Add implementation notes
-mcp__plugin_workflow-skills_atlassian__jira_add_comment({
-  issue_key: "PROJ-123",
-  comment: `
-## Implementation Summary
-- [Summary of what was implemented]
-- All success criteria met
-- Tests: ✅ Passing
-- Documentation: ✅ Updated
-`
-})
-```
-
-#### 7D. Final Review
-
-```typescript
-// Verify everything is done
-mcp__plugin_workflow-skills_serena__think_about_whether_you_are_done()
-```
-
-**Checklist**:
-- All plan objectives achieved ✅
-- All tasks completed ✅
-- All tests passing ✅
-- Documentation updated ✅
-- Learnings captured ✅
-
-**Next Step**: Run the `document` skill to update project documentation (README, CHANGELOG, CLAUDE.md) and clean up workflow artifact files.
+**⚠️ IMPORTANT**: Do not perform documentation in execute. Documentation is handled centrally in record.
 
 ---
 
@@ -986,10 +925,8 @@ mcp__plugin_workflow-skills_serena__think_about_whether_you_are_done()
 3. **One Task at a Time**: Exactly ONE task "in_progress" at any moment
 4. **Verify Thoroughly**: Check ALL success criteria before marking complete
 5. **Communicate Issues**: Report problems immediately, don't guess solutions
-6. **Document Learnings**: Use memory tools to capture insights for future
-7. **Test Continuously**: Verify each task doesn't break existing functionality
-8. **Update README**: Always update project documentation with changes
-9. **Clean Up Files**: Always verify and delete plan/report files after execution
+6. **Test Continuously**: Verify each task doesn't break existing functionality
+7. **Run `record` After Completion**: Documentation and cleanup handled by record skill
 
 ---
 
@@ -1073,30 +1010,16 @@ mcp__plugin_workflow-skills_serena__think_about_whether_you_are_done()
 
 ---
 
-## 📚 Documentation Updates
+## 🔄 Next Step: Run `record` Skill
 
-### Code Documentation
-- ✅ Inline comments added
-- ✅ Function/class documentation updated
-- ✅ Module documentation updated (if applicable)
+**⚠️ IMPORTANT**: Run `record` skill after execute completion!
 
-### Serena Memory
-- ✅ Key learnings saved to: [memory file name]
-- ✅ Best practices documented
-- ✅ Challenges and solutions captured
-
-**Note**: Project-level documentation (README, CHANGELOG) and file cleanup are handled by the 'document' skill
-
----
-
-## 🔄 Next: Run Document Skill
-
-**IMPORTANT**: After execute-plan completes, run the `document` skill to:
-- ✅ Update README with new features
-- ✅ Add CHANGELOG entries
-- ✅ Update CLAUDE.md with architectural decisions
-- ✅ Clean up workflow artifacts (*_PLAN.md, *_REPORT.md)
-- ✅ Update JIRA issues (if applicable)
+Handled by `record` skill:
+- ✅ Update README, CHANGELOG, CLAUDE.md
+- ✅ Save learnings to Serena memory
+- ✅ Clean up workflow artifacts
+- ✅ Git commit/push
+- ✅ Update JIRA issue
 
 ---
 
@@ -1196,12 +1119,8 @@ All plan objectives achieved. Project documentation updated. Temporary files cle
 
 ### After Execution
 - ✓ Verify ALL tests pass
-- ✓ Update project README (CRITICAL - don't skip)
-- ✓ Verify README has all plan information
-- ✓ Clean up plan and report files after verification
-- ✓ Capture learnings in Serena memory
-- ✓ Update JIRA/project management tools
 - ✓ Present comprehensive execution summary
+- ✓ **Run `record` skill** for documentation and cleanup
 
 ---
 
@@ -1214,9 +1133,7 @@ This skill does not require additional resource directories (scripts/, reference
 3. Use Atlassian MCP tools for project management
 4. Use Sentry MCP tools for error tracking
 5. Use Context7 MCP tools for documentation
-6. Follow the 8-phase systematic execution process
+6. Follow the 7-phase systematic execution process
 7. Maintain comprehensive progress tracking
-8. Update project documentation automatically
-9. Verify and clean up temporary files
 
-The skill is self-contained and ready for use without external dependencies.
+**Note**: Documentation and file cleanup are handled by `record` skill.

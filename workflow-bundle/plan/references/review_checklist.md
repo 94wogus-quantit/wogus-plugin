@@ -494,11 +494,11 @@ When plan references a GitHub repository:
 
 ## Approval Criteria
 
-⚠️ **IMPORTANT**: plan-builder skill uses STRICT binary approval!
+⚠️ **IMPORTANT**: plan skill uses STRICT binary approval!
 
-이 체크리스트는 **iterative loop** 내에서 사용됩니다.
-"Approve with Changes" 같은 모호한 옵션은 없습니다.
-계획이 준비되었거나(Approve), 또 다른 반복이 필요하거나(Needs Iteration) 둘 중 하나입니다.
+This checklist is used within an **iterative loop**.
+There is no ambiguous option like "Approve with Changes".
+Either the plan is ready (Approve), or another iteration is needed (Needs Iteration).
 
 ### ✅ Approve (Ready for Execution)
 
@@ -526,17 +526,17 @@ When plan references a GitHub repository:
 
 ### ⛔ REMOVED: "Approve with Changes"
 
-**이 옵션은 제거되었습니다.**
+**This option has been removed.**
 
-**이유**:
-- 모호한 기준으로 인해 피드백 루프가 조기 종료되는 문제 발생
-- "minor changes"의 정의가 불명확하여 일관성 없는 적용
-- 변경사항이 있다면 적용하고 다시 리뷰해야 함 (루프 원칙 위반 방지)
+**Reason**:
+- Ambiguous criteria caused premature termination of feedback loops
+- The definition of "minor changes" was unclear, leading to inconsistent application
+- If there are changes, they should be applied and reviewed again (prevents loop principle violation)
 
-**대체 방법**:
-- 변경사항이 있으면 → "🔄 Needs Iteration" 선택
-- 변경사항을 적용한 후 → 다시 리뷰 (새로운 iteration)
-- ZERO 이슈가 될 때까지 반복 → 그때 "✅ Approve"
+**Alternative approach**:
+- If there are changes → Select "🔄 Needs Iteration"
+- After applying changes → Review again (new iteration)
+- Repeat until ZERO issues → Then "✅ Approve"
 
 ---
 

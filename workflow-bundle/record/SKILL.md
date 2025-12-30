@@ -1,9 +1,9 @@
 ---
-name: document
-description: 워크플로우 아티팩트(분석 리포트, 계획서, 구현 결과)를 수집하여 프로젝트 문서를 체계적으로 업데이트합니다. README, CHANGELOG, CLAUDE 문서를 갱신하고 Serena 메모리에 기술 인사이트를 저장합니다. Use this skill after completing implementation to consolidate all workflow artifacts into comprehensive project documentation. Also use when user requests "문서화", "문서 작성", "문서 업데이트", "README 작성", "CHANGELOG 작성", "변경사항 기록", "릴리즈 노트", "정리해줘", "문서 정리", "커밋해줘", "푸시해줘", "마무리해줘", "완료 처리", or needs to finalize and document completed work. (plugin:workflow-skills@wogus-plugins)
+name: record
+description: Consolidate workflow artifacts (analysis reports, plans, implementation results) into comprehensive project documentation. Updates README, CHANGELOG, CLAUDE docs and stores technical insights in Serena memory. Use after completing implementation to finalize and document completed work with optional git commit/push. Korean triggers: 문서화, 문서 작성, 문서 업데이트, README 작성, CHANGELOG 작성, 변경사항 기록, 릴리즈 노트, 정리해줘, 문서 정리, 커밋해줘, 푸시해줘, 마무리해줘, 완료 처리.
 ---
 
-# Document
+# Record
 
 ## ⚠️ CRITICAL LANGUAGE POLICY
 
@@ -29,7 +29,7 @@ ALL outputs, documentation, CHANGELOG entries, and communications MUST be in **K
 Use this skill when:
 - Implementation work is complete and needs documentation
 - User requests "문서화해줘", "document this", "update documentation"
-- **After `execute-plan` completes** (mandatory for README/CHANGELOG updates)
+- **After `execute` completes** (mandatory for README/CHANGELOG updates)
 - Need to update project README with new features
 - Need to add CHANGELOG entries
 - Multiple workflow artifacts need consolidation
@@ -38,27 +38,27 @@ Use this skill when:
 
 **Typical Workflow Position**:
 ```
-analyze-issue → plan-builder → execute-plan → **document**
+analyze → plan → execute → **record**
 ```
 
 **⚠️ Important Note**:
-`execute-plan` 스킬은 코드 구현과 테스트만 수행합니다. 이 스킬은 **프로젝트 문서화 (README, CHANGELOG 등)를 담당**합니다. `execute-plan` 완료 후 이 스킬을 실행하여 모든 문서를 업데이트하세요.
+The `execute` skill only handles code implementation and testing. This skill is **responsible for project documentation (README, CHANGELOG, etc.)**. Run this skill after `execute` completion to update all documentation.
 
 ---
 
 ## Overview
 
-이 스킬은 워크플로우에서 생성된 모든 아티팩트를 수집하여 프로젝트 문서를 체계적으로 업데이트하는 9단계 프로세스를 제공합니다:
+This skill provides a 9-phase process to collect all artifacts generated from the workflow and systematically update project documentation:
 
-1. **Discovery & Collection**: 워크플로우 아티팩트 찾기 및 수집
-2. **README Update**: 기능, API, 설정 등 프로젝트 README 업데이트
-3. **CHANGELOG Update**: Keep a Changelog 형식으로 변경 이력 추가
-4. **CLAUDE Documentation**: 아키텍처 결정사항 및 문제해결 가이드 업데이트
-5. **Serena Memory**: 기술 인사이트를 메모리에 저장
-6. **JIRA Issue Update**: JIRA 이슈에 구현 완료 사항 정리 및 코멘트 추가
-7. **Additional Docs**: 필요시 마이그레이션 가이드, API 문서 등 생성
-8. **Verification**: 문서 품질 및 완성도 검증
-9. **Cleanup**: 워크플로우 아티팩트 정리 (아카이브 또는 삭제)
+1. **Discovery & Collection**: Find and collect workflow artifacts
+2. **README Update**: Update project README with features, API, settings, etc.
+3. **CHANGELOG Update**: Add change history in Keep a Changelog format
+4. **CLAUDE Documentation**: Update architecture decisions and troubleshooting guides
+5. **Serena Memory**: Save technical insights to memory
+6. **JIRA Issue Update**: Summarize implementation completion and add comments to JIRA issue
+7. **Additional Docs**: Create migration guides, API docs, etc. as needed
+8. **Verification**: Verify documentation quality and completeness
+9. **Cleanup**: Clean up workflow artifacts (archive or delete)
 
 ---
 
@@ -66,17 +66,17 @@ analyze-issue → plan-builder → execute-plan → **document**
 
 ### Documentation Purpose and Audience
 
-| 문서 | 목적 | 대상 독자 | 업데이트 시점 |
+| Document | Purpose | Target Audience | Update Timing |
 |------|------|-----------|---------------|
-| **README.md** | 프로젝트 개요 및 온보딩 | 신규 개발자 | 주요 아키텍처 변경 시 |
-| **CLAUDE.md** | AI 작업 가이드라인 | Claude Code | 워크플로우/컨벤션 변경 시 |
-| **CHANGELOG.md** | 상세 변경 히스토리 | 모든 개발자, PM | 모든 기능 구현/버그 수정 후 |
-| **Serena Memory** | 복잡한 기술 패턴 | Claude Code | 50줄 이상 코드 변경 시 |
+| **README.md** | Project overview and onboarding | New developers | On major architecture changes |
+| **CLAUDE.md** | AI work guidelines | Claude Code | On workflow/convention changes |
+| **CHANGELOG.md** | Detailed change history | All developers, PM | After all feature implementation/bug fixes |
+| **Serena Memory** | Complex technical patterns | Claude Code | On 50+ line code changes |
 
 **Key Principles**:
-- 각 문서는 명확한 목적과 대상 독자를 가짐
-- 중복을 피하고 적절한 문서에 정보 배치
-- 유지보수 가능한 문서 구조 유지
+- Each document has a clear purpose and target audience
+- Avoid duplication and place information in appropriate documents
+- Maintain a maintainable document structure
 
 ---
 
@@ -99,42 +99,42 @@ analyze-issue → plan-builder → execute-plan → **document**
 > - Ensures documentation updates are in feature branches
 > - Prevents accidental commits to protected branches
 
-**Objective**: Feature 브랜치에서 작업 중인지 확인합니다.
+**Objective**: Verify that you are working on a feature branch.
 
 **Steps**:
 
-**1. 현재 브랜치 확인**
+**1. Check Current Branch**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
-echo "📍 현재 브랜치: $CURRENT_BRANCH"
+echo "📍 Current branch: $CURRENT_BRANCH"
 
-# main, master, staging 브랜치인지 확인
+# Check if on main, master, or staging branch
 if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
-  echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
-  echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
+  echo "⚠️ Warning: You are working on $CURRENT_BRANCH branch!"
+  echo "⚠️ Cannot work on main/master/staging branches."
   echo ""
-  read -p "계속 실행하시겠습니까? [y/N] " -n 1 -r
+  read -p "Do you want to continue? [y/N] " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ 중단됨"
+    echo "❌ Aborted"
     exit 1
   fi
 else
-  echo "✅ Feature 브랜치에서 작업 중입니다"
+  echo "✅ Working on a feature branch"
 fi
 ```
 
-**2. Phase 1로 진행**
+**2. Proceed to Phase 1**
 
-- 기존 Phase 1-8 실행
-- README.md, CHANGELOG.md 등 문서 업데이트는 현재 feature 브랜치에서 수정됨
+- Execute existing Phase 1-8
+- Documentation updates (README.md, CHANGELOG.md, etc.) happen in the current feature branch
 
 ---
 
 ### Phase 1: Discovery and Collection
 
-**Objective**: 모든 워크플로우 아티팩트를 찾아서 읽고 내용을 파악합니다.
+**Objective**: Find, read, and understand all workflow artifacts.
 
 #### 1A. Find Workflow Artifacts
 
@@ -186,7 +186,7 @@ mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
 
 ### Phase 2: README Update
 
-**Objective**: README에 새 기능, API, 설정 등을 추가합니다.
+**Objective**: Add new features, API, settings, etc. to README.
 
 #### 2A. Find and Read Current README
 
@@ -208,7 +208,7 @@ Read({file_path: "README.md"})
 
 #### 2B. Prepare Updates
 
-워크플로우 아티팩트에서 추출한 내용을 기반으로 업데이트 준비:
+Prepare updates based on content extracted from workflow artifacts:
 
 **Features Section**:
 ```markdown
@@ -277,7 +277,7 @@ Edit({
 
 ### Phase 3: CHANGELOG Update
 
-**Objective**: CHANGELOG에 변경 이력을 Keep a Changelog 형식으로 추가합니다.
+**Objective**: Add change history to CHANGELOG in Keep a Changelog format.
 
 #### 3A. Find or Create CHANGELOG
 
@@ -332,7 +332,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/ko/).
 
 ### Phase 4: CLAUDE Documentation Update
 
-**Objective**: CLAUDE 문서에 아키텍처 결정사항, 문제해결 가이드를 추가합니다.
+**Objective**: Add architecture decisions and troubleshooting guides to CLAUDE documentation.
 
 #### 4A. Find CLAUDE Documentation
 
@@ -378,7 +378,7 @@ mcp__plugin_workflow-skills_serena__find_file({file_mask: "CLAUDE*", relative_pa
 
 ### Phase 5: Serena Memory Update
 
-**Objective**: 기술 인사이트를 Serena 메모리에 저장합니다.
+**Objective**: Save technical insights to Serena memory.
 
 #### 5A. Store Technical Context
 
@@ -489,9 +489,9 @@ mcp__plugin_workflow-skills_serena__write_memory({
 
 ### Phase 6: JIRA Issue Update
 
-**Objective**: JIRA 이슈에 구현 완료 사항을 정리하고 코멘트를 추가합니다.
+**Objective**: Summarize implementation completion and add comments to JIRA issue.
 
-⚠️ **Important**: 워크플로우 아티팩트에서 JIRA 이슈 ID를 찾을 수 있는 경우에만 실행합니다.
+⚠️ **Important**: Execute only when JIRA issue ID can be found in workflow artifacts.
 
 #### 6A. Extract JIRA Issue ID
 
@@ -523,7 +523,7 @@ mcp__plugin_workflow-skills_atlassian__jira_get_issue({
 
 #### 6C. Prepare Implementation Summary
 
-워크플로우 아티팩트를 기반으로 구현 요약 작성:
+Write implementation summary based on workflow artifacts:
 
 ```markdown
 ## 구현 완료 요약
@@ -639,15 +639,15 @@ mcp__plugin_workflow-skills_atlassian__jira_transition_issue({
 ```
 
 **⚠️ Important Notes**:
-- JIRA 이슈 ID를 찾을 수 없으면 이 단계를 건너뜁니다
-- 이슈 상태 전환은 팀 워크플로우에 따라 선택적으로 수행
-- 민감한 정보(비밀번호, 키 등)는 코멘트에 포함하지 않기
+- Skip this step if JIRA issue ID cannot be found
+- Issue status transition is optional depending on team workflow
+- Do not include sensitive information (passwords, keys, etc.) in comments
 
 ---
 
 ### Phase 7: Additional Documentation
 
-**Objective**: 필요시 추가 문서를 생성합니다.
+**Objective**: Create additional documentation as needed.
 
 #### 6A. Migration Guide (if breaking changes)
 
@@ -692,7 +692,7 @@ mcp__plugin_workflow-skills_atlassian__jira_transition_issue({
 
 ### Phase 8: Verification and Quality Check
 
-**Objective**: 문서화 품질을 검증합니다.
+**Objective**: Verify documentation quality.
 
 #### 8A. Completeness Check
 
@@ -733,9 +733,9 @@ mcp__plugin_workflow-skills_atlassian__jira_transition_issue({
 
 ### Phase 9: Cleanup Workflow Artifacts
 
-**Objective**: 워크플로우 아티팩트를 정리합니다.
+**Objective**: Clean up workflow artifacts.
 
-⚠️ **Note**: `execute-plan` 스킬은 파일 정리를 하지 않습니다. 이 스킬에서 모든 워크플로우 아티팩트를 정리합니다.
+⚠️ **Note**: The `execute` skill does not clean up files. This skill cleans up all workflow artifacts.
 
 #### 9A. Identify Remaining Files
 
@@ -792,46 +792,46 @@ mv [files] .claude/archives/$(date +%Y-%m)/
 After all documentation updates are complete:
 
 ```bash
-echo "🔍 변경사항 확인 중..."
+echo "🔍 Checking changes..."
 
-# 커밋 안 된 변경사항 확인
+# Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
-  echo "⚠️ 커밋되지 않은 변경사항이 있습니다:"
+  echo "⚠️ There are uncommitted changes:"
   git status --short
   echo ""
-  read -p "모든 변경사항을 커밋하시겠습니까? [y/N] " -n 1 -r
+  read -p "Do you want to commit all changes? [y/N] " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     git add .
     git commit -m "docs: update documentation for $(git branch --show-current)
 
-Generated by document skill"
-    echo "✅ 변경사항 커밋 완료"
+Generated by record skill"
+    echo "✅ Changes committed"
   else
-    echo "ℹ️ 커밋되지 않은 변경사항이 남아있습니다"
-    echo "나중에 수동으로 커밋하세요: git add . && git commit"
+    echo "ℹ️ Uncommitted changes remain"
+    echo "Commit manually later: git add . && git commit"
   fi
 fi
 
-# 푸시 확인
+# Check for unpushed commits
 UNPUSHED=$(git rev-list @{u}..HEAD --count 2>/dev/null || echo "0")
 if [ "$UNPUSHED" -gt 0 ]; then
-  echo "⚠️ 푸시되지 않은 커밋이 $UNPUSHED개 있습니다"
+  echo "⚠️ There are $UNPUSHED unpushed commits"
   echo ""
-  read -p "지금 푸시하시겠습니까? [y/N] " -n 1 -r
+  read -p "Do you want to push now? [y/N] " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     git push origin $(git branch --show-current)
-    echo "✅ 푸시 완료"
+    echo "✅ Push completed"
   else
-    echo "ℹ️ 나중에 수동으로 푸시하세요: git push"
+    echo "ℹ️ Push manually later: git push"
   fi
 else
-  echo "✅ 모든 변경사항이 푸시되었습니다"
+  echo "✅ All changes have been pushed"
 fi
 ```
 
-**When to run**: After all documentation updates are complete (Phase 1-8 완료 후).
+**When to run**: After all documentation updates are complete (after Phase 1-8).
 
 ---
 
@@ -923,14 +923,14 @@ Present comprehensive summary **in Korean**:
 
 ## Important Guidelines
 
-- **Be thorough**: 중요한 변경사항을 놓치지 않기
-- **Be accurate**: 모든 기술 세부사항 검증
-- **Be organized**: 문서 구조를 깨끗하게 유지
-- **Be consistent**: 동일한 용어와 형식 사용
-- **Be user-focused**: 나중에 읽을 개발자를 위해 작성
-- **Use Korean**: 코드/기술 용어 외에는 한국어 사용
-- **Preserve history**: 가능하면 삭제 대신 아카이브
-- **Think sequentially**: Sequential thinking으로 정보를 논리적으로 구성
+- **Be thorough**: Don't miss important changes
+- **Be accurate**: Verify all technical details
+- **Be organized**: Keep documentation structure clean
+- **Be consistent**: Use same terminology and formatting
+- **Be user-focused**: Write for developers who will read this later
+- **Use Korean**: Use Korean for non-code/technical terms (per language policy)
+- **Preserve history**: Archive instead of delete when possible
+- **Think sequentially**: Use Sequential Thinking to organize information logically
 
 ---
 
@@ -938,18 +938,18 @@ Present comprehensive summary **in Korean**:
 
 **Typical Usage**:
 ```
-analyze-issue
-  → plan-builder
-  → execute-plan (already updates README & cleans up)
-  → document (optional, for additional documentation)
+analyze
+  → plan
+  → execute (code implementation + tests)
+  → record (documentation + Git commit/push)
 ```
 
 **When to Use**:
-- `execute-plan`이 문서화를 자동으로 수행하므로, 이 스킬은 **추가 문서화가 필요한 경우**에만 사용
-- CHANGELOG 업데이트가 필요한 경우
-- CLAUDE 문서에 아키텍처 결정사항 추가가 필요한 경우
-- Serena 메모리에 상세한 기술 인사이트 저장이 필요한 경우
-- 마이그레이션 가이드나 추가 API 문서 생성이 필요한 경우
+- After `execute` completes, when **documentation and Git operations are needed**
+- When CHANGELOG update is required
+- When architecture decisions need to be added to CLAUDE docs
+- When detailed technical insights need to be saved to Serena memory
+- When migration guide or additional API documentation is needed
 
 ---
 

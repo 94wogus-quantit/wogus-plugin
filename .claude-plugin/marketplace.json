@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "체계적인 개발 워크플로우를 위한 Claude Code 플러그인 모음 - 워크플로우 번들, Terraform, Amplitude (한국어 기본)",
-    "version": "3.7.0",
+    "version": "3.8.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
@@ -15,14 +15,14 @@
     {
       "name": "workflow-bundle",
       "description": "이슈 분석 → 계획 → 실행 → 문서화 + MR 리뷰 워크플로우 (5 skills + agent + sequential-thinking)",
-      "source": "./",
+      "source": "./workflow-bundle",
       "strict": true,
       "skills": [
-        "./analyze-issue",
-        "./plan-builder",
-        "./execute-plan",
-        "./document",
-        "./mr-code-review"
+        "./analyze",
+        "./plan",
+        "./execute",
+        "./record",
+        "./mr-review"
       ],
       "agents": [
         "./agents/requirement-validator.md"

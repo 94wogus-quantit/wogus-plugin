@@ -1,6 +1,6 @@
 ---
-name: analyze-issue
-description: Systematically analyze the root cause of bugs and issues using multi-perspective investigation. Use this skill when analyzing JIRA issues, Sentry errors, or investigating bug reports to identify root causes and provide actionable remediation recommendations. Generates detailed analysis reports with code locations, reproduction steps, and fix recommendations. Also use when user requests "이슈 분석", "버그 분석", "원인 분석", "근본 원인", "문제 분석", "에러 분석", "장애 분석", "오류 조사", "디버깅", "분석 리포트", "분석 보고서", "조사해줘", "왜 안되지", "왜 이런거야", "뭐가 문제야", "원인 찾아줘", "버그 찾아줘", or needs pre-implementation analysis before planning. (plugin:workflow-skills@wogus-plugins)
+name: analyze
+description: Systematically analyze the root cause of bugs and issues using multi-perspective investigation. Use when analyzing JIRA issues, Sentry errors, or investigating bug reports. Generates [ISSUE_ID]_REPORT.md with root cause analysis, code locations, reproduction steps, and fix recommendations.
 ---
 
 # Analyze Issue Root Cause
@@ -9,12 +9,12 @@ description: Systematically analyze the root cause of bugs and issues using mult
 
 **DEFAULT LANGUAGE: KOREAN (한국어)**
 
-ALL outputs, documentation, reports, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
+ALL outputs, reports, analysis, and communications MUST be in **KOREAN** unless explicitly requested otherwise by the user.
 
-- ✅ **Report files**: Write in Korean
-- ✅ **Analysis**: Perform in Korean
-- ✅ **Comments**: Write in Korean
-- ✅ **Explanations**: Provide in Korean
+- ✅ **Analysis reports**: Write in Korean
+- ✅ **Root cause explanations**: Write in Korean
+- ✅ **Reproduction steps**: Write in Korean
+- ✅ **Recommendations**: Write in Korean
 - ✅ **User communication**: Respond in Korean
 
 **Exception**: If the user writes in another language, match that language for responses.
@@ -57,70 +57,70 @@ Use this skill when:
 > - Ensures work is isolated in a feature branch
 > - Maintains clean git history
 
-**Objective**: Feature 브랜치에서 작업 중인지 확인하고, 필요시 브랜치를 생성합니다.
+**Objective**: Verify that you are working on a feature branch, and create one if needed.
 
 **Steps**:
 
-**1. 현재 브랜치 확인**
+**1. Check Current Branch**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
-echo "📍 현재 브랜치: $CURRENT_BRANCH"
+echo "📍 Current branch: $CURRENT_BRANCH"
 
-# main, master, staging 브랜치인지 확인
+# Check if on main, master, or staging branch
 if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]] || [[ "$CURRENT_BRANCH" == "staging" ]]; then
-  echo "⚠️ 경고: $CURRENT_BRANCH 브랜치에서 작업 중입니다!"
-  echo "⚠️ main/master/staging 브랜치에서는 작업할 수 없습니다."
+  echo "⚠️ Warning: Working on $CURRENT_BRANCH branch!"
+  echo "⚠️ Cannot work on main/master/staging branches."
   NEEDS_NEW_BRANCH="true"
 else
-  echo "✅ Feature 브랜치에서 작업 중입니다"
+  echo "✅ Working on feature branch"
   NEEDS_NEW_BRANCH="false"
 fi
 ```
 
-**2. 브랜치명 생성 (필요시)**
+**2. Create Branch Name (If Needed)**
 
-main/master 브랜치인 경우 새 feature 브랜치 생성:
+Create a new feature branch if on main/master:
 
 ```bash
 if [ "$NEEDS_NEW_BRANCH" = "true" ]; then
-  # JIRA ID 추출: 사용자 입력에서 `JIRA-123` 또는 `PROJ-456` 형식 파싱
+  # Extract JIRA ID from user input: parse `JIRA-123` or `PROJ-456` format
   JIRA_ID=$(echo "$USER_INPUT" | grep -oE '[A-Z]+-[0-9]+' | head -1)
 
   if [ -z "$JIRA_ID" ]; then
-    echo "⚠️ JIRA ID를 찾을 수 없습니다."
-    echo "브랜치명을 직접 입력하세요 (예: feature/JIRA-123):"
+    echo "⚠️ JIRA ID not found."
+    echo "Please enter branch name (e.g., feature/JIRA-123):"
     read BRANCH_NAME
   else
     BRANCH_NAME="feature/$JIRA_ID"
-    echo "📌 브랜치명: $BRANCH_NAME"
+    echo "📌 Branch name: $BRANCH_NAME"
   fi
 
-  # 브랜치 생성 및 체크아웃
+  # Create and checkout branch
   if git checkout -b "$BRANCH_NAME" 2>/dev/null; then
-    echo "✅ 브랜치 생성 완료: $BRANCH_NAME"
+    echo "✅ Branch created: $BRANCH_NAME"
   else
-    # 브랜치가 이미 존재하는 경우
-    echo "⚠️ 브랜치 '$BRANCH_NAME'이 이미 존재합니다."
-    read -p "해당 브랜치로 전환하시겠습니까? [Y/n] " -n 1 -r
+    # Branch already exists
+    echo "⚠️ Branch '$BRANCH_NAME' already exists."
+    read -p "Switch to this branch? [Y/n] " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Nn]$ ]]; then
       git checkout "$BRANCH_NAME"
-      echo "✅ 브랜치 전환 완료: $BRANCH_NAME"
+      echo "✅ Switched to branch: $BRANCH_NAME"
     else
-      echo "다른 브랜치명을 입력하세요:"
+      echo "Please enter a different branch name:"
       read NEW_BRANCH_NAME
       git checkout -b "$NEW_BRANCH_NAME"
-      echo "✅ 브랜치 생성 완료: $NEW_BRANCH_NAME"
+      echo "✅ Branch created: $NEW_BRANCH_NAME"
     fi
   fi
 fi
 ```
 
-**3. Phase 1로 진행**
+**3. Proceed to Phase 1**
 
-- 기존 Phase 1-6 실행
-- Phase 6에서 REPORT 파일 저장
+- Execute existing Phase 1-6
+- Save REPORT file in Phase 6
 
 ---
 
@@ -206,13 +206,13 @@ mcp__plugin_workflow-skills_sentry__search_events({
 **E. Extract Key Information**
 
 From Sentry results, extract:
-- **Stack traces**: 정확한 에러 발생 위치 (파일명, 라인 번호)
-- **Error messages**: 에러 메시지 및 타입
-- **Breadcrumbs**: 에러 발생 전 사용자 행동 추적
-- **Context**: 요청 정보, 환경 변수, 사용자 데이터
-- **Frequency**: 에러 발생 빈도 및 영향받는 사용자 수
-- **Trends**: 시간대별 에러 증감 패턴
-- **Related events**: 같은 사용자/세션의 다른 에러
+- **Stack traces**: Exact error location (filename, line number)
+- **Error messages**: Error message and type
+- **Breadcrumbs**: User behavior tracking before error
+- **Context**: Request info, environment variables, user data
+- **Frequency**: Error frequency and affected user count
+- **Trends**: Error increase/decrease patterns over time
+- **Related events**: Other errors from same user/session
 
 **F. Common Search Patterns**
 
@@ -293,20 +293,20 @@ Use Serena tools efficiently for targeted code exploration:
 - Correlate timing with issue occurrence
 - Review related code modifications
 
-### Phase 3D: Code Complexity Assessment (조건부 필수)
+### Phase 3D: Code Complexity Assessment (Conditional)
 
-**목적**: 복잡한 코드를 탐지하여 리팩토링 제안 생성
+**Objective**: Detect complex code and generate refactoring suggestions
 
-**실행 조건**:
-- Phase 3에서 affected files 확인 완료 후
-- **조건부 필수**: Cyclomatic complexity > 10 OR 함수 길이 > 50줄인 코드 발견 시
+**Execution Condition**:
+- After confirming affected files in Phase 3
+- **Conditional**: When code with Cyclomatic complexity > 10 OR function length > 50 lines is found
 
 **Steps**:
 
-**1. Serena로 복잡도 분석**
+**1. Analyze Complexity with Serena**
 
 ```typescript
-// 영향받는 파일의 심볼 정보 가져오기
+// Get symbol info for affected files
 mcp__plugin_workflow-skills_serena__find_symbol({
   name_path_pattern: "UserService/login",
   relative_path: "src/services/UserService.ts",
@@ -314,155 +314,155 @@ mcp__plugin_workflow-skills_serena__find_symbol({
 })
 ```
 
-**2. Sequential Thinking으로 복잡도 측정 및 리팩토링 전략 수립**
+**2. Measure Complexity and Establish Refactoring Strategy with Sequential Thinking**
 
 ```typescript
-// Step 1: 복잡도 측정
+// Step 1: Measure complexity
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "UserService/login 함수의 Cyclomatic complexity 측정: if문 8개, for문 2개, switch문 1개 → complexity = 11 (임계값 10 초과)",
+  thought: "Measuring cyclomatic complexity of UserService/login function: 8 if statements, 2 for loops, 1 switch statement → complexity = 11 (exceeds threshold of 10)",
   thoughtNumber: 1,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-// Step 2: 함수 길이 분석
+// Step 2: Analyze function length
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "함수 길이 측정: 총 85줄 → 임계값(50줄) 초과. 가독성 저하, 여러 책임 담당 가능성",
+  thought: "Measuring function length: 85 lines total → exceeds threshold (50 lines). Reduced readability, possibly multiple responsibilities",
   thoughtNumber: 2,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-// Step 3: 책임 분석 (SRP)
+// Step 3: Responsibility analysis (SRP)
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "책임 분석: 1) 사용자 인증, 2) 세션 관리, 3) 로깅, 4) 에러 처리 → 4개 책임 (SRP 위반)",
+  thought: "Responsibility analysis: 1) User authentication, 2) Session management, 3) Logging, 4) Error handling → 4 responsibilities (SRP violation)",
   thoughtNumber: 3,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-// Step 4: Code Smells 탐지
+// Step 4: Code Smells detection
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "Code Smells 탐지: 중복 코드 3회 발견 (validateUser 로직), Magic Number 2개 (3.14, 0.05)",
+  thought: "Code Smells detected: Duplicate code found 3 times (validateUser logic), Magic Numbers 2 instances (3.14, 0.05)",
   thoughtNumber: 4,
   totalThoughts: 5,
   nextThoughtNeeded: true
 })
 
-// Step 5: 리팩토링 전략 결정
+// Step 5: Determine refactoring strategy
 mcp__plugin_workflow-skills_sequential-thinking__sequentialthinking({
-  thought: "리팩토링 전략: 1) Extract Method로 validateUser() 분리, 2) Extract Class로 SessionManager 분리, 3) Replace Magic Number with Named Constant",
+  thought: "Refactoring strategy: 1) Extract Method for validateUser(), 2) Extract Class for SessionManager, 3) Replace Magic Number with Named Constant",
   thoughtNumber: 5,
   totalThoughts: 5,
   nextThoughtNeeded: false
 })
 ```
 
-**3. 리팩토링 필요 판단 기준**
+**3. Refactoring Decision Criteria**
 
-| 지표 | 임계값 | 설명 |
+| Metric | Threshold | Description |
 |------|--------|------|
-| **Cyclomatic complexity** | > 10 | 조건문/반복문이 너무 많아 테스트 복잡도 증가 |
-| **함수 길이** | > 50줄 | 가독성 저하, 여러 책임 담당 가능성 |
-| **SRP 위반** | > 2책임 | 하나의 함수/클래스가 여러 책임 수행 |
-| **중복 코드** | > 2회 | 동일 로직 반복 → Extract Method 필요 |
-| **Magic Numbers** | > 0개 | 하드코딩된 상수 → Named Constant 필요 |
+| **Cyclomatic complexity** | > 10 | Too many conditionals/loops, increases test complexity |
+| **Function length** | > 50 lines | Reduced readability, possibly multiple responsibilities |
+| **SRP violation** | > 2 responsibilities | Single function/class handling multiple responsibilities |
+| **Duplicate code** | > 2 occurrences | Same logic repeated → Extract Method needed |
+| **Magic Numbers** | > 0 | Hardcoded constants → Named Constant needed |
 
-**4. 리팩토링 기법 선택 가이드**
+**4. Refactoring Technique Selection Guide**
 
-| 문제 | 기법 | 적용 조건 |
+| Problem | Technique | Application Condition |
 |------|------|----------|
-| 긴 함수 | **Extract Method** | 함수 > 50줄 또는 논리적 블록 분리 가능 |
-| 여러 책임 | **Extract Class** | 클래스가 2개 이상 책임 담당 |
-| 중복 코드 | **Extract Method** | 동일 로직 2회 이상 반복 |
-| Magic Numbers | **Replace with Constant** | 하드코딩된 숫자/문자열 |
-| 복잡한 조건문 | **Decompose Conditional** | 복잡한 if/else 체인 |
+| Long function | **Extract Method** | Function > 50 lines or logical blocks can be separated |
+| Multiple responsibilities | **Extract Class** | Class handles 2+ responsibilities |
+| Duplicate code | **Extract Method** | Same logic repeated 2+ times |
+| Magic Numbers | **Replace with Constant** | Hardcoded numbers/strings |
+| Complex conditionals | **Decompose Conditional** | Complex if/else chains |
 
-**5. 보고서에 리팩토링 제안 추가**
+**5. Add Refactoring Suggestions to Report**
 
-복잡도가 높은 파일이 발견되면 보고서의 "Recommendations" 섹션에 다음 형식으로 추가:
+When high complexity files are found, add to the "Recommendations" section in the following format:
 
 ```markdown
-## 🔧 리팩토링 제안
+## 🔧 Refactoring Suggestions
 
-### 복잡도 분석 결과
+### Complexity Analysis Results
 
-#### `src/services/UserService.ts:15-110` - `login()` 함수
+#### `src/services/UserService.ts:15-110` - `login()` function
 
-**메트릭**:
-| 지표 | 현재 | 임계값 | 상태 |
+**Metrics**:
+| Metric | Current | Threshold | Status |
 |------|------|--------|------|
-| Cyclomatic Complexity | 12 | 10 | ⚠️ 초과 |
-| 함수 길이 | 95줄 | 50줄 | ⚠️ 초과 |
-| 책임 수 (SRP) | 4개 | 2개 | ⚠️ 위반 |
+| Cyclomatic Complexity | 12 | 10 | ⚠️ Exceeded |
+| Function Length | 95 lines | 50 lines | ⚠️ Exceeded |
+| Responsibilities (SRP) | 4 | 2 | ⚠️ Violated |
 
-**탐지된 Code Smells**:
-- 중복 코드: `validateUser` 로직 3회 반복
-- Magic Numbers: `3.14`, `0.05` 하드코딩
+**Detected Code Smells**:
+- Duplicate code: `validateUser` logic repeated 3 times
+- Magic Numbers: `3.14`, `0.05` hardcoded
 
-**권장 리팩토링**:
+**Recommended Refactoring**:
 
 1. **Extract Method: `validateUser()`**
-   - 중복된 검증 로직을 별도 함수로 추출
-   - 예상 효과: 중복 제거, 테스트 가능성 향상
+   - Extract duplicate validation logic to separate function
+   - Expected effect: Remove duplication, improve testability
 
 2. **Extract Class: `SessionManager`**
-   - 세션 관리 로직을 별도 클래스로 분리
-   - 예상 효과: SRP 준수, 응집도 향상
+   - Separate session management logic to separate class
+   - Expected effect: SRP compliance, improved cohesion
 
 3. **Replace Magic Numbers**
    - `3.14` → `SESSION_TIMEOUT_HOURS`
    - `0.05` → `RETRY_INTERVAL_SECONDS`
 
-**예상 개선 효과**:
+**Expected Improvement**:
 - Complexity: 12 → 5 (-58%)
-- 함수 길이: 95줄 → 40줄 (-58%)
-- 테스트 가능성: 향상 (작은 단위로 분리)
+- Function length: 95 lines → 40 lines (-58%)
+- Testability: Improved (smaller units)
 ```
 
-### Phase 3E: Requirement Reverse Tracing (선택적)
+### Phase 3E: Requirement Reverse Tracing (Optional)
 
-**목적**: 버그와 연관된 JIRA AC 역추적
+**Objective**: Reverse trace JIRA AC related to the bug
 
-**실행 조건**:
-- JIRA 이슈와 연결된 경우
-- Phase 3 (Codebase Investigation)에서 버그 발생 위치 확인 완료
+**Execution Condition**:
+- When linked to a JIRA issue
+- After confirming bug location in Phase 3 (Codebase Investigation)
 
 **Steps**:
 
-**1. requirement-validator Agent 호출 (Mode 1)**
+**1. Call requirement-validator Agent (Mode 1)**
 
 ```typescript
-// 사용자에게 알림
-"🤖 requirement-validator agent로 AC 역추적 중..."
+// Notify user
+"🤖 Running requirement-validator agent for AC reverse tracing..."
 
-// Agent 호출 (Claude Code에서 자동)
+// Agent invocation (automatic in Claude Code)
 // Mode 1: Reverse Tracing
-// Input: 버그 발생 파일 경로, 함수명
-// Output: 연관 AC 목록
+// Input: Bug file path, function name
+// Output: Related AC list
 ```
 
-**2. 결과를 보고서에 추가**
+**2. Add Results to Report**
 
-보고서 `[ISSUE_ID]_REPORT.md`의 Phase 4 (Root Cause Analysis) 섹션에 추가:
+Add to Phase 4 (Root Cause Analysis) section of `[ISSUE_ID]_REPORT.md` report:
 
 ```markdown
-## 🎯 요구사항 추적
+## 🎯 Requirement Tracing
 
-### 연관 AC
-- **AC#2**: "비밀번호 5회 실패 시 계정 잠금"
-  - **관련 코드**: [LoginAttemptService.ts:15-45](src/auth/LoginAttemptService.ts#L15-L45)
-  - **버그 원인**: 실패 카운터 로직 오류 (Redis 키 만료 시간 미설정)
-  - **AC 충족 여부**: ❌ 미충족 - 계정 잠금 안 됨
+### Related AC
+- **AC#2**: "Lock account after 5 failed attempts"
+  - **Related code**: [LoginAttemptService.ts:15-45](src/auth/LoginAttemptService.ts#L15-L45)
+  - **Bug cause**: Counter logic error (Redis key TTL not set)
+  - **AC fulfillment**: ❌ Not fulfilled - Account not locked
 
-### 영향
-- 이 버그로 인해 AC#2가 충족되지 않습니다
-- 보안 요구사항 위반 (무차별 대입 공격 방어 실패)
+### Impact
+- This bug prevents AC#2 from being fulfilled
+- Security requirement violation (Brute force attack defense failure)
 
-### 권장 조치
-1. LoginAttemptService의 카운터 TTL 설정 (5분)
-2. AC#2 테스트 케이스 추가 (현재 누락)
-3. MR 리뷰 시 requirement-validator로 재검증
+### Recommended Actions
+1. Set counter TTL in LoginAttemptService (5 minutes)
+2. Add test case for AC#2 (currently missing)
+3. Re-verify with requirement-validator during MR review
 ```
 
 ### Phase 4: Root Cause Determination
@@ -594,14 +594,14 @@ Save in current working directory or `docs/` folder if it exists.
 This skill is typically the first step in a larger workflow:
 
 ```
-/analyze-issue [JIRA]
+analyze [JIRA]
   → Creates: [ISSUE_ID]_REPORT.md
-  → Next: /plan [REPORT]
-  → Next: /execute-plan [PLAN]
-  → Next: /document
+  → Next: plan [REPORT]
+  → Next: execute [PLAN]
+  → Next: record
 ```
 
-The generated report becomes input for the `/plan` command to create an implementation plan.
+The generated report becomes input for the `plan` skill to create an implementation plan.
 
 ## Resources
 

@@ -338,4 +338,4 @@ describe('User Flow', () => {
 
 **Report Generated**: [Timestamp]
 **Tools Used**: Serena, Sentry, JIRA, Sequential Thinking
-**Next Steps**: Create implementation plan with `/plan` command using this report
+**Next Steps**: Create implementation plan with `plan` skill using this report

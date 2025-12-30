@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.7.0):**
+**Key Artifacts (v3.8.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,19 +15,18 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.7.0)
+wogus-plugin/  (v3.8.0)
 ├── .claude-plugin/         # Plugin configuration
-│   ├── marketplace.json    # Marketplace metadata
-│   └── plugin.json         # Plugin manifest (Skills + Agents)
+│   └── marketplace.json    # Marketplace metadata (3 plugins)
 │
-├── agents/                 # Agent definitions (v3.0.0: 1개만 유지)
-│   └── requirement-validator.md  # AC traceability
-│
-├── <skill-name>/          # Each skill is a directory
-│   ├── SKILL.md          # Required: Metadata + instructions
-│   ├── references/       # Optional: Reference documentation
-│   ├── scripts/          # Optional: Executable code
-│   └── assets/           # Optional: Templates and assets
+├── workflow-bundle/        # Main workflow plugin
+│   ├── analyze/           # 이슈 분석 스킬
+│   ├── plan/              # 계획 수립 스킬
+│   ├── execute/           # 계획 실행 스킬
+│   ├── record/            # 문서화 스킬
+│   ├── mr-review/         # MR 코드 리뷰 스킬
+│   └── agents/            # Agent definitions
+│       └── requirement-validator.md
 │
 ├── docs/architecture/decisions/  # Architecture Decision Records
 ├── CLAUDE.md            # This file
@@ -37,32 +36,32 @@ wogus-plugin/  (v3.7.0)
 
 ## Available Skills
 
-### analyze-issue (v3.5.0)
+### analyze (v3.8.0)
 Systematic root cause analysis with branch validation.
 - **브랜치 자동 생성** (main/master/staging 감지 시)
 - **Output**: `[ISSUE_ID]_REPORT.md`
 - **Integration**: First step in workflow
 
-### plan-builder (v3.5.0)
+### plan (v3.8.0)
 Create high-quality, thoroughly reviewed implementation plans.
 - **Iterative review loop** (ZERO 이슈까지 반복)
 - **브랜치 검증** (feature 브랜치 확인)
 - **Output**: `[FEATURE]_PLAN.md`
 - **Integration**: Second step in workflow
 
-### execute-plan (v3.5.0)
+### execute (v3.8.0)
 Execute approved implementation plans with TodoList tracking.
 - **브랜치 검증** (보호된 브랜치 경고)
 - **Output**: Code implementation + test results
 - **Integration**: Third step in workflow
 
-### document (v3.5.0)
+### record (v3.8.0)
 Consolidate workflow artifacts and update project documentation.
 - **브랜치 검증** + Git commit/push
 - **Output**: Updated README, CHANGELOG, CLAUDE docs
 - **Integration**: Final step in workflow
 
-### mr-code-review (v3.6.0)
+### mr-review (v3.8.0)
 GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰 수행.
 - **7가지 검증**: 아키텍처, 비즈니스 로직, 컨벤션, 이슈 패턴, JIRA, 보안, 테스트
 - **2개 파일 출력**: `INLINE_DISCUSSION.json` + `SUMMARY_COMMENT.md`
@@ -75,10 +74,10 @@ GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰 수
 JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 여부 검증.
 
 **4가지 실행 모드**:
-- **Mode 1 (Reverse)**: 코드 → AC 역매핑 (analyze-issue)
-- **Mode 2 (Pre)**: 계획 → AC coverage (plan-builder)
-- **Mode 3 (Post)**: git diff → AC 구현 확인 (execute-plan)
-- **Mode 4 (Final)**: MR → AC 최종 게이트 (mr-code-review)
+- **Mode 1 (Reverse)**: 코드 → AC 역매핑 (analyze)
+- **Mode 2 (Pre)**: 계획 → AC coverage (plan)
+- **Mode 3 (Post)**: git diff → AC 구현 확인 (execute)
+- **Mode 4 (Final)**: MR → AC 최종 게이트 (mr-review)
 
 **Integration**: 4개 Skills에서 자동 호출
 
@@ -100,10 +99,10 @@ JIRA-123: "사용자 이메일 로그인"
 ├─ AC#2: 5회 실패 시 계정 잠금
 └─ AC#3: JWT 토큰 발급
 
-1. analyze-issue → Mode 1: "이 버그는 AC#2 미충족"
-2. plan-builder → Mode 2: "계획이 AC#1,2,3 모두 커버 ✅"
-3. execute-plan → Mode 3: "AC#1 ✅, AC#2 ❌ 미구현"
-4. mr-code-review → Mode 4: "AC#2 미구현 → MR BLOCKED"
+1. analyze → Mode 1: "이 버그는 AC#2 미충족"
+2. plan → Mode 2: "계획이 AC#1,2,3 모두 커버 ✅"
+3. execute → Mode 3: "AC#1 ✅, AC#2 ❌ 미구현"
+4. mr-review → Mode 4: "AC#2 미구현 → MR BLOCKED"
 ```
 
 ## Skill Development
@@ -145,7 +144,7 @@ For detailed guidelines, see historical ADRs.
 
 ## Integration with Custom Commands
 
-**Workflow**: `/analyze-issue [JIRA] → /plan → /execute-plan → /document`
+**Workflow**: `analyze → plan → execute → record`
 
 Skills work alongside custom commands in `~/.claude/commands/` for seamless workflow automation.
 
@@ -156,7 +155,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### Configuration
 
 - **File**: `.claude-plugin/marketplace.json`
-- **Version**: Semantic versioning (current: v3.7.0)
+- **Version**: Semantic versioning (current: v3.8.0)
 - **Plugins**: 3개 독립 플러그인 (workflow-bundle, terraform, amplitude)
 - **MCP Servers**: workflow-bundle에 sequential-thinking만 포함 (외부 MCP는 별도 설치)
 

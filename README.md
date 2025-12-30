@@ -40,10 +40,10 @@ workflow-skills는 보호된 브랜치(main, master, staging)에서 직접 작�
 
 | Skill | 보호된 브랜치 감지 시 |
 |-------|---------------------|
-| **analyze-issue** | 새 feature 브랜치 자동 생성 |
-| **plan-builder** | 경고 + 권장 워크플로우 안내 |
-| **execute-plan** | 경고 (코드 수정 위험 강조) |
-| **document** | 경고 (문서 커밋 위험) |
+| **analyze** | 새 feature 브랜치 자동 생성 |
+| **plan** | 경고 + 권장 워크플로우 안내 |
+| **execute** | 경고 (코드 수정 위험 강조) |
+| **record** | 경고 (문서 커밋 위험) |
 
 ### 권장 워크플로우
 
@@ -51,11 +51,11 @@ workflow-skills는 보호된 브랜치(main, master, staging)에서 직접 작�
 # 1. Feature 브랜치 생성 후 작업
 git checkout -b feature/JIRA-123
 
-# 2. 워크플로우 실행
-/analyze-issue JIRA-123
-/plan JIRA-123_REPORT.md
-/execute-plan JIRA-123_PLAN.md
-/document
+# 2. 워크플로우 실행 (Skills 사용)
+analyze JIRA-123
+plan JIRA-123_REPORT.md
+execute JIRA-123_PLAN.md
+record
 
 # 3. MR 생성 및 리뷰
 glab mr create --title "feat: JIRA-123 구현"
@@ -233,17 +233,17 @@ glab mr create --title "feat: JIRA-123 구현"
 
 1. 스킬을 패키징하여 `.zip` 파일 생성:
    ```bash
-   python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scripts/package_skill.py analyze-issue
+   python3 ~/.claude/plugins/marketplaces/anthropic-agent-skills/skill-creator/scripts/package_skill.py analyze
    ```
 
 2. Claude Code에서 설치:
    ```bash
-   /plugin install analyze-issue.zip
+   /plugin install analyze.zip
    ```
 
 ## 📦 Available Skills
 
-### analyze-issue (v3.5.0 Updated)
+### analyze (v3.8.0 Updated)
 
 버그와 이슈의 근본 원인을 체계적으로 분석하는 스킬입니다.
 
@@ -265,10 +265,10 @@ glab mr create --title "feat: JIRA-123 구현"
 **설치:**
 ```bash
 # Claude Code에 스킬 설치
-/plugin install analyze-issue.zip
+/plugin install analyze.zip
 ```
 
-### mr-code-review (v3.6.0 Updated)
+### mr-review (v3.6.0 Updated)
 
 GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 수행하는 스킬입니다.
 
@@ -288,19 +288,19 @@ GitLab MR의 코드 변경사항을 분석하여 맥락 기반 종합 리뷰를 
 **사용 방법:**
 ```bash
 # 로컬에서 직접 실행
-claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/user-auth"
+claude-code exec "Use mr-review skill to review this MR. Branch: feature/user-auth"
 
 # 또는 대화형으로
-# "mr-code-review skill로 이 MR 리뷰해줘"
+# "mr-review skill로 이 MR 리뷰해줘"
 ```
 
 **설치:**
 ```bash
 # Claude Code에 스킬 설치
-/plugin install mr-code-review.zip
+/plugin install mr-review.zip
 ```
 
-### plan-builder (v3.5.0 Updated)
+### plan (v3.5.0 Updated)
 
 자동 반복 검토를 통해 고품질 구현 계획을 생성하는 스킬입니다.
 
@@ -344,10 +344,10 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 **설치:**
 ```bash
 # Claude Code에 스킬 설치
-/plugin install plan-builder.zip
+/plugin install plan.zip
 ```
 
-### execute-plan (v3.5.0 Updated)
+### execute (v3.5.0 Updated)
 
 승인된 구현 계획을 체계적으로 실행하는 스킬입니다.
 
@@ -368,12 +368,12 @@ claude-code exec "Use mr-code-review skill to review this MR. Branch: feature/us
 - 모든 성공 기준 검증이 필요할 때
 - 코드 구현에만 집중하고 싶을 때
 
-**Note**: 문서 업데이트와 파일 정리는 `document` 스킬에서 처리합니다.
+**Note**: 문서 업데이트와 파일 정리는 `record` 스킬에서 처리합니다.
 
 **설치:**
 ```bash
 # Claude Code에 스킬 설치
-/plugin install execute-plan.zip
+/plugin install execute.zip
 ```
 
 ## 🔧 Available Agents (v3.0.0)
@@ -393,10 +393,10 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 **사용 시나리오:**
 ```bash
 # 1. 자동 호출 (Skills 통합)
-# - analyze-issue에서 자동 호출 (AC 역추적)
-# - plan-builder에서 자동 호출 (AC coverage 체크)
-# - execute-plan에서 자동 호출 (AC 달성 보고)
-# - mr-code-review에서 자동 호출 (AC 최종 게이트)
+# - analyze에서 자동 호출 (AC 역추적)
+# - plan에서 자동 호출 (AC coverage 체크)
+# - execute에서 자동 호출 (AC 달성 보고)
+# - mr-review에서 자동 호출 (AC 최종 게이트)
 
 # 2. 수동 호출 (Agent 직접 실행)
 # Mode 1: 특정 코드가 어떤 AC와 관련되었는지 역추적
@@ -412,11 +412,11 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 "requirement-validator agent Mode 4로 이 MR이 JIRA-123 AC를 모두 달성했는지 확인해줘"
 ```
 
-**통합 Skills**: analyze-issue, plan-builder, execute-plan, mr-code-review
+**통합 Skills**: analyze, plan, execute, mr-review
 
 ---
 
-### document (v3.5.0 Updated)
+### record (v3.8.0 Updated)
 
 워크플로우 아티팩트를 수집하여 프로젝트 문서를 종합적으로 업데이트하는 스킬입니다.
 
@@ -434,7 +434,7 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 - 💾 **Git 커밋/푸시**: 옵션으로 유지 (Phase 9)
 
 **사용 시점:**
-- **`execute-plan` 완료 후 반드시 실행** (README/CHANGELOG 업데이트)
+- **`execute` 완료 후 반드시 실행** (README/CHANGELOG 업데이트)
 - 프로젝트 문서화가 필요한 경우
 - 아키텍처 결정사항 문서화 시
 - 마이그레이션 가이드 생성 시
@@ -443,18 +443,18 @@ JIRA Acceptance Criteria와 코드를 자동 매핑하여 요구사항 달성 �
 **설치:**
 ```bash
 # Claude Code에 스킬 설치
-/plugin install document.zip
+/plugin install record.zip
 ```
 
 **워크플로우 통합:**
 ```
-analyze-issue
+analyze
   → *_REPORT.md 생성
-  → plan-builder (자동 반복 검토)
+  → plan (자동 반복 검토)
     └─> *_PLAN.md (승인된 계획)
-  → execute-plan (코드 구현 및 테스트)
+  → execute (코드 구현 및 테스트)
     └─> 구현 완료, 코드 문서화, 파일 정리
-  → document (필수: 프로젝트 문서화)
+  → record (필수: 프로젝트 문서화)
     └─> README, CHANGELOG, CLAUDE 문서, Serena 메모리
 ```
 
@@ -463,17 +463,17 @@ analyze-issue
 ### 표준 워크플로우 (v3.0.0)
 
 ```
-1. analyze-issue [JIRA/버그 리포트]
+1. analyze [JIRA/버그 리포트]
    └─> *_REPORT.md 생성
    └─> [Phase 3D] 복잡도 분석 및 리팩토링 가이드 직접 제공 (조건부 필수)
    └─> [Phase 3E] requirement-validator (AC 역추적)
 
-2. plan-builder [REPORT 참조]
+2. plan [REPORT 참조]
    └─> 자동 반복 검토 (계획 → 검토 → 개선 → 재검토...)
    └─> [Step C-2] requirement-validator (AC coverage 검증)
    └─> *_PLAN.md (승인된 고품질 계획)
 
-3. execute-plan [PLAN]
+3. execute [PLAN]
    └─> TodoList 생성 및 실행
    └─> [Phase 4] 코드 구현
    └─> [Phase 4C] DB Migration 검증 (마이그레이션 작업 시)
@@ -481,7 +481,7 @@ analyze-issue
    └─> [Phase 6] requirement-validator (AC 달성 보고)
    └─> [Phase 7] 테스트 실행 및 검증
 
-4. document (필수)
+4. record (필수)
    └─> README 업데이트 (기능, API, 설정 등)
    └─> CHANGELOG 업데이트 (변경 이력)
    └─> CLAUDE 문서 업데이트 (아키텍처 결정사항)
@@ -498,15 +498,15 @@ analyze-issue
 - ✅ **Dead Code 제거**: 72% → 0%
 
 **중요**:
-- `plan-builder`는 자동으로 피드백 루프를 반복하여 고품질 계획을 보장합니다
-- `execute-plan`은 7-Phase 구조로 체계적입니다
-- `execute-plan`은 코드 구현에, `document`는 문서화에 집중하도록 역할이 분리되어 있습니다
+- `plan`는 자동으로 피드백 루프를 반복하여 고품질 계획을 보장합니다
+- `execute`은 7-Phase 구조로 체계적입니다
+- `execute`은 코드 구현에, `record`는 문서화에 집중하도록 역할이 분리되어 있습니다
 - 완전한 워크플로우를 위해서는 두 단계를 모두 실행해야 합니다
 
 ### MR 리뷰 워크플로우 (v3.6.0)
 
 ```
-mr-code-review [Branch/MR URL]
+mr-review [Branch/MR URL]
 ├─> Phase 1: 맥락 수집 → .mr-review/1_CONTEXT.md
 ├─> Phase 2: 코드 분석 → .mr-review/2_CODE_ANALYSIS.md
 ├─> Phase 3: 보안 분석 (Trivy) → .mr-review/3_SECURITY_ANALYSIS.md
@@ -543,7 +543,7 @@ mr-code-review [Branch/MR URL]
     {
       "name": "workflow-bundle",
       "description": "이슈 분석 → 계획 → 실행 → 문서화 + MR 리뷰 워크플로우",
-      "skills": ["./analyze-issue", "./plan-builder", "./execute-plan", "./document", "./mr-code-review"],
+      "skills": ["./analyze", "./plan", "./execute", "./record", "./mr-review"],
       "agents": ["./agents/requirement-validator.md"],
       "mcpServers": { "sequential-thinking": {...} }
     },
@@ -623,52 +623,23 @@ mr-code-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.7.0)
-├── .claude-plugin/         # Marketplace 설정
-│   ├── marketplace.json    # 플러그인 목록 및 메타데이터 (3개 plugins)
-│   └── plugin.json         # Plugin manifest
+wogus-plugin/  (v3.8.0)
+├── .claude-plugin/           # Marketplace 설정
+│   └── marketplace.json      # 플러그인 목록 (3개 plugins)
 │
-├── agents/                 # Agent 정의 파일
-│   └── requirement-validator.md  # AC traceability
+├── workflow-bundle/          # 메인 워크플로우 플러그인
+│   ├── analyze/              # 이슈 분석 스킬
+│   ├── plan/                 # 계획 생성 스킬
+│   ├── execute/              # 계획 실행 스킬
+│   ├── record/               # 문서화 스킬
+│   ├── mr-review/            # MR 코드 리뷰 스킬
+│   └── agents/               # Agent 정의
+│       └── requirement-validator.md
 │
-├── analyze-issue/          # 이슈 분석 스킬
-│   ├── SKILL.md
-│   └── references/
-│       ├── report_template.md
-│       └── common_bug_patterns.md
-│
-├── mr-code-review/        # MR 코드 리뷰 스킬
-│   ├── SKILL.md           # 7가지 검증, 4-Phase 워크플로우
-│   └── references/
-│       ├── inline_discussion_template.json
-│       ├── summary_comment_template.md
-│       └── verification_guides/
-│           ├── architecture_check.md
-│           ├── business_logic_check.md
-│           ├── convention_check.md
-│           ├── known_issues_check.md
-│           ├── jira_validation.md
-│           ├── security_review.md
-│           └── test_coverage.md
-│
-├── plan-builder/          # 계획 생성 스킬
-│   ├── SKILL.md
-│   └── references/
-│       ├── plan_template.md
-│       ├── review_checklist.md
-│       ├── testing_strategy_guide.md
-│       └── task_independence_guide.md
-│
-├── execute-plan/          # 계획 실행 스킬
-│   └── SKILL.md
-│
-├── document/              # 문서화 스킬
-│   └── SKILL.md
-│
-├── .gitignore            # Git 제외 설정
-├── CHANGELOG.md          # 변경 이력
-├── CLAUDE.md             # Claude Code 가이드
-└── README.md             # 이 파일
+├── docs/architecture/decisions/  # ADR
+├── CHANGELOG.md              # 변경 이력
+├── CLAUDE.md                 # Claude Code 가이드
+└── README.md                 # 이 파일
 ```
 
 ## 🛠 Development
@@ -698,7 +669,7 @@ skill-name/
 ### Git 워크플로우
 
 **버전 관리 대상:**
-- ✅ 스킬 소스 디렉토리 (`analyze-issue/`, `plan-builder/` 등)
+- ✅ 스킬 소스 디렉토리 (`analyze/`, `plan/` 등)
 - ✅ 문서 파일 (`CLAUDE.md`, `README.md`)
 - ✅ `.gitignore`
 
@@ -710,12 +681,12 @@ skill-name/
 **워크플로우:**
 ```bash
 # 소스만 커밋
-git add analyze-issue/ plan-builder/
+git add analyze/ plan/
 git commit -m "feat: add new skill"
 
 # 배포는 로컬에서 패키징
-python3 ~/.claude/.../package_skill.py analyze-issue
-/plugin install analyze-issue.zip
+python3 ~/.claude/.../package_skill.py analyze
+/plugin install analyze.zip
 ```
 
 ## 📝 License

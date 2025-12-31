@@ -37,6 +37,7 @@
     {
       "name": "terraform",
       "description": "Terraform 인프라 관리 MCP 서버",
+      "source": "./",
       "mcpServers": {
         "terraform": {
           "type": "stdio",
@@ -53,6 +54,7 @@
     {
       "name": "amplitude",
       "description": "Amplitude 분석 데이터 MCP 서버",
+      "source": "./",
       "mcpServers": {
         "amplitude": {
           "type": "stdio",
@@ -69,6 +71,7 @@
     {
       "name": "slack",
       "description": "Slack 메시지 검색, 히스토리, 스레드 조회 MCP 서버",
+      "source": "./",
       "mcpServers": {
         "slack": {
           "command": "npx",

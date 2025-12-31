@@ -78,6 +78,7 @@ glab mr create --title "feat: JIRA-123 구현"
    # 또는 개별 MCP만
    /plugin install wogus-plugins:terraform
    /plugin install wogus-plugins:amplitude
+   /plugin install wogus-plugins:slack
    ```
 
 3. 설치 확인:
@@ -110,6 +111,9 @@ glab mr create --title "feat: JIRA-123 구현"
    # Amplitude API 키 (사용자 행동 분석용) - v3.2.0 NEW
    export AMPLITUDE_API_KEY="your-amplitude-api-key-here"
 
+   # Slack Bot 토큰 (Slack 메시지 검색/히스토리 조회용) - v3.9.0 NEW
+   export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
+
    # Claude Code 재시작
    ```
 
@@ -122,6 +126,7 @@ glab mr create --title "feat: JIRA-123 구현"
      - Docker가 설치되어 있어야 함 (`docker --version`으로 확인)
    - **terraform**: HashiCorp Terraform IaC 자동화 (별도 설정 불필요, Docker 필요)
    - **amplitude**: [Amplitude](https://amplitude.com)에서 API 키 발급 필요
+   - **slack**: [Slack API](https://api.slack.com/apps)에서 Bot 토큰 발급 필요
 
 5. **MCP 서버 비활성화** (선택사항):
 
@@ -204,6 +209,15 @@ glab mr create --title "feat: JIRA-123 구현"
      "deniedMcpServers": [
        {
          "serverCommand": ["npx", "-y", "amplitude-mcp-server"]
+       }
+     ]
+   }
+
+   // slack 비활성화
+   {
+     "deniedMcpServers": [
+       {
+         "serverCommand": ["npx", "-y", "slack-mcp-server@latest", "--transport", "stdio"]
        }
      ]
    }
@@ -537,7 +551,7 @@ mr-review [Branch/MR URL]
 {
   "name": "wogus-plugins",
   "metadata": {
-    "version": "3.7.0"
+    "version": "3.9.0"
   },
   "plugins": [
     {
@@ -556,6 +570,11 @@ mr-review [Branch/MR URL]
       "name": "amplitude",
       "description": "Amplitude 분석 데이터 MCP 서버",
       "mcpServers": { "amplitude": {...} }
+    },
+    {
+      "name": "slack",
+      "description": "Slack 메시지 검색, 히스토리, 스레드 조회 MCP 서버",
+      "mcpServers": { "slack": {...} }
     }
   ]
 }
@@ -623,9 +642,9 @@ mr-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.8.0)
+wogus-plugin/  (v3.9.0)
 ├── .claude-plugin/           # Marketplace 설정
-│   └── marketplace.json      # 플러그인 목록 (3개 plugins)
+│   └── marketplace.json      # 플러그인 목록 (4개 plugins)
 │
 ├── workflow-bundle/          # 메인 워크플로우 플러그인
 │   ├── analyze/              # 이슈 분석 스킬

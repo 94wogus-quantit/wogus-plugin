@@ -14,6 +14,40 @@
 
 ---
 
+## [3.9.0] - 2025-12-31
+
+### Added
+
+- **slack 플러그인**: Slack 메시지 검색, 히스토리, 스레드 조회 MCP 서버
+  - 패키지: `slack-mcp-server` (korotovsky)
+  - 환경변수: `SLACK_BOT_TOKEN`
+  - 기능: conversations_history, conversations_replies, conversations_search_messages, channels_list
+  - 실행: `npx -y slack-mcp-server@latest --transport stdio`
+
+### Technical Details
+
+- **새로운 플러그인**:
+  ```json
+  {
+    "name": "slack",
+    "description": "Slack 메시지 검색, 히스토리, 스레드 조회 MCP 서버",
+    "mcpServers": {
+      "slack": {
+        "command": "npx",
+        "args": ["-y", "slack-mcp-server@latest", "--transport", "stdio"],
+        "env": { "SLACK_MCP_XOXB_TOKEN": "${SLACK_BOT_TOKEN:-}" }
+      }
+    }
+  }
+  ```
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: slack 플러그인 추가, version 3.8.0 → 3.9.0
+  - `README.md`: 설치 방법, 환경변수 문서 업데이트
+  - `CLAUDE.md`: 플러그인 수 업데이트 (3개 → 4개)
+
+---
+
 ## [3.7.0] - 2025-12-19
 
 ### Changed

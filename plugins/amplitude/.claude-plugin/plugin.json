@@ -1,0 +1,7 @@
+{
+  "name": "amplitude",
+  "description": "Amplitude 분석 데이터 MCP 서버",
+  "author": {
+    "name": "Amplitude"
+  }
+}

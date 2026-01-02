@@ -1,0 +1,12 @@
+{
+  "terraform": {
+    "type": "stdio",
+    "command": "docker",
+    "args": [
+      "run",
+      "-i",
+      "--rm",
+      "hashicorp/terraform-mcp-server"
+    ]
+  }
+}

@@ -13,15 +13,14 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 
 이 저장소는 **Skills + Agents (v3.7.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
 
-**v3.10.0 주요 변경**:
-- 📦 **Plugins 모듈화**: 단일 플러그인 → 5개 독립 플러그인으로 분리
+**v3.11.0 주요 변경**:
+- 📁 **저장소 구조 개편**: 공식 플러그인 구조 채택
+  - `plugins/` 폴더에 모든 플러그인 이동
+  - `skills/` 폴더로 스킬 자동 인식
+  - 각 플러그인에 `.mcp.json` 분리
+- 📦 **5개 독립 플러그인**:
   - `workflow-bundle`: 5 skills + 1 agent + sequential-thinking
-  - `terraform`: Terraform MCP 서버
-  - `amplitude`: Amplitude MCP 서버
-  - `slack`: Slack MCP 서버
-  - `atlassian`: Jira/Confluence MCP 서버
-- 🗑️ **mcp-config 스킬 제거**: 플러그인 분리로 개별 설치/제거 가능해짐
-- 🔌 **외부 MCP 분리**: serena, context7, sentry는 별도 플러그인으로 설치
+  - `terraform`, `amplitude`, `slack`, `atlassian`: 개별 MCP 서버
 
 ## 🌐 언어 정책
 
@@ -554,7 +553,7 @@ mr-review [Branch/MR URL]
 {
   "name": "wogus-plugins",
   "metadata": {
-    "version": "3.10.0"
+    "version": "3.11.0"
   },
   "plugins": [
     {
@@ -652,23 +651,31 @@ mr-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.10.0)
-├── .claude-plugin/           # Marketplace 설정
-│   └── marketplace.json      # 플러그인 목록 (5개 plugins)
+wogus-plugin/  (v3.11.0)
+├── .claude-plugin/
+│   └── marketplace.json       # 카탈로그 (5 plugins)
 │
-├── workflow-bundle/          # 메인 워크플로우 플러그인
-│   ├── analyze/              # 이슈 분석 스킬
-│   ├── plan/                 # 계획 생성 스킬
-│   ├── execute/              # 계획 실행 스킬
-│   ├── record/               # 문서화 스킬
-│   ├── mr-review/            # MR 코드 리뷰 스킬
-│   └── agents/               # Agent 정의
-│       └── requirement-validator.md
+├── plugins/                   # 모든 플러그인
+│   ├── workflow-bundle/       # 메인 워크플로우 플러그인
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── .mcp.json          # sequential-thinking
+│   │   ├── skills/            # 자동 인식
+│   │   │   ├── analyze/
+│   │   │   ├── plan/
+│   │   │   ├── execute/
+│   │   │   ├── record/
+│   │   │   └── mr-review/
+│   │   └── agents/
+│   │       └── requirement-validator.md
+│   ├── terraform/
+│   ├── amplitude/
+│   ├── slack/
+│   └── atlassian/
 │
-├── docs/architecture/decisions/  # ADR
-├── CHANGELOG.md              # 변경 이력
-├── CLAUDE.md                 # Claude Code 가이드
-└── README.md                 # 이 파일
+├── changelogs/              # 버전별 변경 이력
+├── CHANGELOG.md             # 버전 카탈로그
+├── CLAUDE.md                # Claude Code 가이드
+└── README.md                # 이 파일
 ```
 
 ## 🛠 Development

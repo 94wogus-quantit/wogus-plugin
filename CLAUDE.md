@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.10.0):**
+**Key Artifacts (v3.11.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,20 +15,27 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.10.0)
-├── .claude-plugin/         # Plugin configuration
-│   └── marketplace.json    # Marketplace metadata (5 plugins)
+wogus-plugin/  (v3.11.0)
+├── .claude-plugin/
+│   └── marketplace.json       # 카탈로그 (5 plugins)
 │
-├── workflow-bundle/        # Main workflow plugin
-│   ├── analyze/           # 이슈 분석 스킬
-│   ├── plan/              # 계획 수립 스킬
-│   ├── execute/           # 계획 실행 스킬
-│   ├── record/            # 문서화 스킬
-│   ├── mr-review/         # MR 코드 리뷰 스킬
-│   └── agents/            # Agent definitions
-│       └── requirement-validator.md
+├── plugins/                   # 모든 플러그인
+│   ├── workflow-bundle/       # 메인 워크플로우 플러그인
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── .mcp.json          # sequential-thinking
+│   │   ├── skills/            # 자동 인식
+│   │   │   ├── analyze/
+│   │   │   ├── plan/
+│   │   │   ├── execute/
+│   │   │   ├── record/
+│   │   │   └── mr-review/
+│   │   └── agents/
+│   │       └── requirement-validator.md
+│   ├── terraform/
+│   ├── amplitude/
+│   ├── slack/
+│   └── atlassian/
 │
-├── docs/architecture/decisions/  # Architecture Decision Records
 ├── CLAUDE.md            # This file
 ├── README.md            # User-facing documentation
 └── CHANGELOG.md         # Version history
@@ -155,7 +162,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### Configuration
 
 - **File**: `.claude-plugin/marketplace.json`
-- **Version**: Semantic versioning (current: v3.10.0)
+- **Version**: Semantic versioning (current: v3.11.0)
 - **Plugins**: 5개 독립 플러그인 (workflow-bundle, terraform, amplitude, slack, atlassian)
 - **MCP Servers**: workflow-bundle에 sequential-thinking만 포함 (외부 MCP는 별도 설치)
 
@@ -192,7 +199,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 **For This Repository:**
 - One skill per directory, one agent per `.md` file
 - Document integrations with other skills/commands/agents
-- Architecture decisions → `docs/architecture/decisions/`
+- Architecture decisions → Serena 메모리에 저장
 
 ---
 
@@ -201,7 +208,44 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### 최신 결정사항 (Latest ADRs)
 
 이 섹션에는 최신 3개의 아키텍처 결정사항만 포함합니다.
-이전 버전의 ADR은 **[docs/architecture/decisions/](docs/architecture/decisions/)** 디렉토리를 참조하세요.
+이전 버전의 ADR은 Serena 메모리 또는 CHANGELOG.md를 참조하세요.
+
+---
+
+### v3.11.0 - 저장소 구조 개편 (2026-01-02)
+
+**컨텍스트**:
+공식 Claude 플러그인 구조와 일치시키고, 불필요한 폴더를 정리하여 저장소를 단순화할 필요가 있었음.
+
+**문제점**:
+- **비표준 구조**: 스킬들이 루트에 직접 배치되어 공식 구조와 불일치
+- **MCP 설정 중복**: marketplace.json과 각 플러그인에 MCP 설정이 분산
+- **불필요한 폴더**: docs/, .archive/ 폴더가 실제로 사용되지 않음
+
+**결정**: 4가지 주요 변경
+
+1. **plugins/ 폴더 도입**:
+   - 모든 플러그인을 `plugins/` 하위로 이동
+   - 저장소 루트 정리
+
+2. **skills/ 폴더 구조**:
+   - workflow-bundle의 스킬들을 `skills/` 폴더로 이동
+   - 자동 인식 (plugin.json에서 명시적 선언 불필요)
+
+3. **MCP 설정 분리**:
+   - marketplace.json에서 `mcpServers` 제거
+   - 각 플러그인에 `.mcp.json` 파일로 분리
+
+4. **불필요한 폴더 제거**:
+   - `docs/` 폴더 삭제 (ADR은 Serena 메모리로 대체)
+   - `.archive/` 폴더 삭제
+
+**영향**:
+- 공식 Claude 플러그인 구조와 일치
+- marketplace.json이 순수 카탈로그 역할만 수행
+- 저장소 구조 단순화
+
+**버전**: v3.10.0 → v3.11.0
 
 ---
 

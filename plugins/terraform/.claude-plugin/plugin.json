@@ -1,0 +1,7 @@
+{
+  "name": "terraform",
+  "description": "Terraform 인프라 관리 MCP 서버",
+  "author": {
+    "name": "HashiCorp"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "amplitude": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "amplitude-mcp-server",
+      "--api-key",
+      "${AMPLITUDE_API_KEY:-}"
+    ]
+  }
+}

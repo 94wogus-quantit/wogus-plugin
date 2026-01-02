@@ -1,0 +1,7 @@
+{
+  "name": "workflow-bundle",
+  "description": "이슈 분석 → 계획 → 실행 → 문서화 + MR 리뷰 워크플로우 (5 skills + agent + sequential-thinking)",
+  "author": {
+    "name": "94wogus"
+  }
+}

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal plugin collection repository containing Claude Code Skills, Agents, and custom commands for systematic software development workflows.
 
-**Key Artifacts (v3.9.0):**
+**Key Artifacts (v3.10.0):**
 - **Skills**: Workflow orchestrators for multi-step processes (분석, 계획, 실행, 문서화)
 - **Agents**: AC (Acceptance Criteria) traceability (requirement-validator만 유지)
 - **Custom Commands**: Workflow automation commands (별도 설치)
@@ -15,9 +15,9 @@ Personal plugin collection repository containing Claude Code Skills, Agents, and
 ## Repository Structure
 
 ```
-wogus-plugin/  (v3.9.0)
+wogus-plugin/  (v3.10.0)
 ├── .claude-plugin/         # Plugin configuration
-│   └── marketplace.json    # Marketplace metadata (4 plugins)
+│   └── marketplace.json    # Marketplace metadata (5 plugins)
 │
 ├── workflow-bundle/        # Main workflow plugin
 │   ├── analyze/           # 이슈 분석 스킬
@@ -155,8 +155,8 @@ This repository is distributed as a **Claude Code Marketplace**.
 ### Configuration
 
 - **File**: `.claude-plugin/marketplace.json`
-- **Version**: Semantic versioning (current: v3.9.0)
-- **Plugins**: 4개 독립 플러그인 (workflow-bundle, terraform, amplitude, slack)
+- **Version**: Semantic versioning (current: v3.10.0)
+- **Plugins**: 5개 독립 플러그인 (workflow-bundle, terraform, amplitude, slack, atlassian)
 - **MCP Servers**: workflow-bundle에 sequential-thinking만 포함 (외부 MCP는 별도 설치)
 
 ### Publishing Workflow
@@ -174,6 +174,7 @@ This repository is distributed as a **Claude Code Marketplace**.
 /plugin install wogus-plugins:terraform        # Terraform MCP만
 /plugin install wogus-plugins:amplitude        # Amplitude MCP만
 /plugin install wogus-plugins:slack            # Slack MCP만
+/plugin install wogus-plugins:atlassian        # Atlassian MCP만
 ```
 
 ## Development Best Practices
@@ -369,10 +370,10 @@ v3.0.0 ~ v3.2.1, v2.0.0 ~ v2.4.0, v1.6.0 등의 아키텍처 결정사항은 다
 
 ## Notes
 
-- **Current version**: v3.9.0 (Slack MCP 플러그인 추가 - 4개 독립 플러그인)
+- **Current version**: v3.10.0 (Atlassian MCP 플러그인 추가 - 5개 독립 플러그인)
 - **workflow-bundle**: sequential-thinking MCP 포함
-- **terraform/amplitude/slack**: 독립 MCP 플러그인
-- 외부 MCP (serena, context7, sentry, atlassian)는 별도 플러그인으로 설치
+- **terraform/amplitude/slack/atlassian**: 독립 MCP 플러그인
+- 외부 MCP (serena, context7, sentry)는 별도 플러그인으로 설치
 - All skills and agents designed for Korean language output
 - Reference files loaded on-demand to manage context efficiently
 - Marketplace distribution requires GitHub public repository

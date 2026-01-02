@@ -5,8 +5,8 @@
     "email": "94wogus@quantit.io"
   },
   "metadata": {
-    "description": "체계적인 개발 워크플로우를 위한 Claude Code 플러그인 모음 - 워크플로우 번들, Terraform, Amplitude, Slack (한국어 기본)",
-    "version": "3.9.1",
+    "description": "체계적인 개발 워크플로우를 위한 Claude Code 플러그인 모음 - 워크플로우 번들, Terraform, Amplitude, Slack, Atlassian (한국어 기본)",
+    "version": "3.10.0",
     "repository": "https://github.com/94wogus-quantit/wogus-plugin",
     "homepage": "https://github.com/94wogus-quantit/wogus-plugin#readme",
     "license": "Private"
@@ -75,7 +75,30 @@
       "mcpServers": {
         "slack": {
           "command": "npx",
-          "args": ["-y", "slack-mcp-server@latest", "--transport", "stdio"]
+          "args": ["-y", "slack-mcp-server@latest", "--transport", "stdio"],
+          "env": {
+            "SLACK_MCP_XOXB_TOKEN": "${SLACK_BOT_TOKEN:-}",
+            "SLACK_MCP_ADD_MESSAGE_TOOL": "true"
+          }
+        }
+      }
+    },
+    {
+      "name": "atlassian",
+      "description": "Jira 이슈 관리 및 Confluence 문서 연동 MCP 서버(Self-hosted 지원)",
+      "source": "./atlassian",
+      "mcpServers": {
+        "atlassian": {
+          "command": "uvx",
+          "args": ["mcp-atlassian"],
+          "env": {
+            "JIRA_URL": "${ATLASSIAN_URL:-}",
+            "JIRA_USERNAME": "${ATLASSIAN_USERNAME:-}",
+            "JIRA_API_TOKEN": "${ATLASSIAN_API_TOKEN:-}",
+            "CONFLUENCE_URL": "${ATLASSIAN_URL:-}/wiki",
+            "CONFLUENCE_USERNAME": "${ATLASSIAN_USERNAME:-}",
+            "CONFLUENCE_API_TOKEN": "${ATLASSIAN_API_TOKEN:-}"
+          }
         }
       }
     }

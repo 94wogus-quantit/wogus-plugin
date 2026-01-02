@@ -13,13 +13,15 @@ Claude Code의 확장 기능(Plugins)을 모아둔 저장소입니다. Skills를
 
 이 저장소는 **Skills + Agents (v3.7.0)**를 제공하며, Custom Commands와 MCP Servers는 별도로 설치/설정해야 합니다.
 
-**v3.7.0 주요 변경**:
-- 📦 **Plugins 모듈화**: 단일 플러그인 → 3개 독립 플러그인으로 분리
+**v3.10.0 주요 변경**:
+- 📦 **Plugins 모듈화**: 단일 플러그인 → 5개 독립 플러그인으로 분리
   - `workflow-bundle`: 5 skills + 1 agent + sequential-thinking
   - `terraform`: Terraform MCP 서버
   - `amplitude`: Amplitude MCP 서버
+  - `slack`: Slack MCP 서버
+  - `atlassian`: Jira/Confluence MCP 서버
 - 🗑️ **mcp-config 스킬 제거**: 플러그인 분리로 개별 설치/제거 가능해짐
-- 🔌 **외부 MCP 분리**: serena, context7, sentry, atlassian은 별도 플러그인으로 설치
+- 🔌 **외부 MCP 분리**: serena, context7, sentry는 별도 플러그인으로 설치
 
 ## 🌐 언어 정책
 
@@ -79,6 +81,7 @@ glab mr create --title "feat: JIRA-123 구현"
    /plugin install wogus-plugins:terraform
    /plugin install wogus-plugins:amplitude
    /plugin install wogus-plugins:slack
+   /plugin install wogus-plugins:atlassian
    ```
 
 3. 설치 확인:
@@ -103,7 +106,7 @@ glab mr create --title "feat: JIRA-123 구현"
    # OpenAI API 키 (Sentry MCP 내부 AI 분석용)
    export OPENAI_API_KEY="your-openai-api-key-here"
 
-   # Atlassian API 토큰 (JIRA/Confluence 연동용)
+   # Atlassian API 토큰 (JIRA/Confluence 연동용) - v3.10.0 Updated
    export ATLASSIAN_URL="https://your-company.atlassian.net"
    export ATLASSIAN_USERNAME="your.email@company.com"
    export ATLASSIAN_API_TOKEN="your-api-token-here"
@@ -121,9 +124,9 @@ glab mr create --title "feat: JIRA-123 구현"
    - **context7**: [Context7](https://context7.com)에서 API 키 발급 필요
    - **serena**: 코드 심볼 분석 및 검색 (별도 설정 불필요, uvx 자동 설치)
    - **sentry**: [Sentry](https://sentry.io)에서 액세스 토큰 발급 필요 (+ OpenAI API 키)
-   - **atlassian**: Docker 기반 API 토큰 인증
+   - **atlassian**: uvx 기반 API 토큰 인증 (mcp-atlassian by sooperset)
      - [Atlassian API 토큰 생성](https://id.atlassian.com/manage-profile/security/api-tokens)에서 토큰 발급
-     - Docker가 설치되어 있어야 함 (`docker --version`으로 확인)
+     - 3개 환경변수로 간단 설정: `ATLASSIAN_URL`, `ATLASSIAN_USERNAME`, `ATLASSIAN_API_TOKEN`
    - **terraform**: HashiCorp Terraform IaC 자동화 (별도 설정 불필요, Docker 필요)
    - **amplitude**: [Amplitude](https://amplitude.com)에서 API 키 발급 필요
    - **slack**: [Slack API](https://api.slack.com/apps)에서 Bot 토큰 발급 필요
@@ -190,7 +193,7 @@ glab mr create --title "feat: JIRA-123 구현"
    {
      "deniedMcpServers": [
        {
-         "serverCommand": ["docker", "run", "-i", "--rm", "-e", "JIRA_URL", "-e", "JIRA_USERNAME", "-e", "JIRA_API_TOKEN", "-e", "CONFLUENCE_URL", "-e", "CONFLUENCE_USERNAME", "-e", "CONFLUENCE_API_TOKEN", "ghcr.io/sooperset/mcp-atlassian:latest"]
+         "serverCommand": ["uvx", "mcp-atlassian"]
        }
      ]
    }
@@ -551,7 +554,7 @@ mr-review [Branch/MR URL]
 {
   "name": "wogus-plugins",
   "metadata": {
-    "version": "3.9.0"
+    "version": "3.10.0"
   },
   "plugins": [
     {
@@ -575,6 +578,11 @@ mr-review [Branch/MR URL]
       "name": "slack",
       "description": "Slack 메시지 검색, 히스토리, 스레드 조회 MCP 서버",
       "mcpServers": { "slack": {...} }
+    },
+    {
+      "name": "atlassian",
+      "description": "Jira 이슈 관리 및 Confluence 문서 연동 MCP 서버",
+      "mcpServers": { "atlassian": {...} }
     }
   ]
 }
@@ -602,6 +610,8 @@ mr-review [Branch/MR URL]
    # 또는 개별 MCP
    /plugin install wogus-plugins:terraform
    /plugin install wogus-plugins:amplitude
+   /plugin install wogus-plugins:slack
+   /plugin install wogus-plugins:atlassian
    ```
 
 **배포자 입장:**
@@ -642,9 +652,9 @@ mr-review [Branch/MR URL]
 ## 📁 Repository Structure
 
 ```
-wogus-plugin/  (v3.9.0)
+wogus-plugin/  (v3.10.0)
 ├── .claude-plugin/           # Marketplace 설정
-│   └── marketplace.json      # 플러그인 목록 (4개 plugins)
+│   └── marketplace.json      # 플러그인 목록 (5개 plugins)
 │
 ├── workflow-bundle/          # 메인 워크플로우 플러그인
 │   ├── analyze/              # 이슈 분석 스킬

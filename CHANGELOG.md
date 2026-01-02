@@ -14,6 +14,47 @@
 
 ---
 
+## [3.10.0] - 2026-01-02
+
+### Added
+
+- **atlassian 플러그인**: Jira 이슈 관리 및 Confluence 문서 연동 MCP 서버
+  - 패키지: `mcp-atlassian` (sooperset)
+  - 환경변수: `ATLASSIAN_URL`, `ATLASSIAN_USERNAME`, `ATLASSIAN_API_TOKEN`
+  - 기능: Jira 이슈 CRUD, Confluence 페이지 조회/생성, JQL 검색
+  - 실행: `uvx mcp-atlassian`
+
+### Technical Details
+
+- **새로운 플러그인**:
+  ```json
+  {
+    "name": "atlassian",
+    "description": "Jira 이슈 관리 및 Confluence 문서 연동 MCP 서버",
+    "mcpServers": {
+      "atlassian": {
+        "command": "uvx",
+        "args": ["mcp-atlassian"],
+        "env": {
+          "JIRA_URL": "${ATLASSIAN_URL:-}",
+          "JIRA_USERNAME": "${ATLASSIAN_USERNAME:-}",
+          "JIRA_API_TOKEN": "${ATLASSIAN_API_TOKEN:-}",
+          "CONFLUENCE_URL": "${ATLASSIAN_URL:-}/wiki",
+          "CONFLUENCE_USERNAME": "${ATLASSIAN_USERNAME:-}",
+          "CONFLUENCE_API_TOKEN": "${ATLASSIAN_API_TOKEN:-}"
+        }
+      }
+    }
+  }
+  ```
+
+- **수정된 파일**:
+  - `.claude-plugin/marketplace.json`: atlassian 플러그인 추가, version 3.9.1 → 3.10.0
+  - `README.md`: 설치 방법, 환경변수 문서 업데이트
+  - `CLAUDE.md`: 플러그인 수 업데이트 (4개 → 5개)
+
+---
+
 ## [3.9.0] - 2025-12-31
 
 ### Added
